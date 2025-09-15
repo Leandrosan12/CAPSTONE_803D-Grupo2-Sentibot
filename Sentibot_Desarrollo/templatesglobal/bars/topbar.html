@@ -1,0 +1,79 @@
+
+<style>
+body {
+    margin: 0;
+}
+.top-bar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    
+    background: #344767;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between; 
+    align-items: flex-start; 
+    padding: 1.2% 2%; 
+    box-sizing: border-box;
+    flex-wrap: wrap;
+}
+
+/* Izquierda */
+.top-left {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem; /* espacio entre h1 y h2 */
+    margin-left: 22.5%;
+}
+.h1-top-bar {
+    font-size: 1.2rem;
+    color: #7B8BA4;
+    margin: 0;
+}
+.h2-top-bar {
+    font-size: 1.2rem;
+    color: #ffffff;
+    margin: 0;
+}
+
+/* Derecha */
+.top-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.search-box {
+    padding: 5px 10px;
+    border-radius: 6px;
+    border: none;
+    outline: none;
+}
+.icon {
+    color: #fff;
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+.btn-login {
+    color: #fff;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+
+</style>
+
+<div class="top-bar">
+    <div class="top-left">
+        <h1 class="h1-top-bar">Prueba</h1>
+        <h2 class="h2-top-bar">/ Dashboard</h2>
+    </div>
+    <div class="top-right">
+        <input type="text" placeholder="busca aqui" class="search-box">
+        <a href="#" class="btn-login">Ingresar</a>
+        <span class="icon">⚙️</span>
+        <span class="icon">🔔</span>
+    </div>
+</div>
+
+
+
