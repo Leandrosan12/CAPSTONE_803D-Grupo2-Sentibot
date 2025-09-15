@@ -1,4 +1,10 @@
-<style>
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Sidebar</title>
+  <style>
     body {
       margin: 0;
       font-family: Arial, sans-serif;
@@ -29,10 +35,13 @@
       margin-top: 0;
       margin-bottom: 30px;
       font-weight: normal;
+      color: #757880;
     }
 
-    .sidebar a {
-      display: block;
+    .sidebar a  {
+      display: flex;
+      align-items: center;
+      gap: 10px;
       color: rgb(1, 1, 1);
       text-decoration: none;
       margin-bottom: 15px;
@@ -43,21 +52,28 @@
 
     .sidebar a:hover {
       background-color: #34495e;
+      color: #fff;
     }
 
+    .sidebar a img {
+      width: 20px;
+      height: 20px;
+    }
   </style>
 </head>
 <body>
 
   <nav class="sidebar">
     <h2>Mi Sidebar</h2>
-    <a href="#">Inicio</a>
+    <a href="{% url 'home' %}">
+      <img src="{% static 'Icon/casa.png' %}" alt="Inicio">
+      Inicio
+    </a>
     <a href="#">Dashboard</a>
     <a href="#">Perfil</a>
     <a href="#">Configuración</a>
     <a href="#">Cerrar sesión</a>
   </nav>
-
 
 </body>
 </html>
