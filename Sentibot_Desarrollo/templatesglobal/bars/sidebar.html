@@ -56,23 +56,61 @@
     }
 
     .sidebar a img {
-      width: 20px;
-      height: 20px;
+      width: 43px;
+      height: 43px;
+    }
+
+    .titulo-sidebar {
+      display: flex;          /* Alinea ícono + texto en una fila */
+      align-items: center;    /* Centra verticalmente */
+      font-size: 24px;
+      color: #333;            /* Color del texto */
+    }
+
+    .titulo-sidebar .icono {
+      width: 60px;            /* Tamaño del icono */
+      height: 60px;
+      margin-right: 10px;     /* Espacio entre icono y texto */
+      border-radius: 6px;     /* Opcional: bordes redondeados */
     }
   </style>
 </head>
 <body>
 
   <nav class="sidebar">
-    <h2>Mi Sidebar</h2>
+    <h2 class="titulo-sidebar">
+      <img src="{% static 'Icon/sentibot.jpg' %}" alt="icono Sentibot" class="icono">
+      Sentibot
+    </h2>
+
     <a href="{% url 'home' %}">
-      <img src="{% static 'Icon/casa.png' %}" alt="Inicio">
+      <img src="{% static 'Icon/casa.gif' %}" alt="Inicio">
       Inicio
     </a>
-    <a href="#">Dashboard</a>
-    <a href="#">Perfil</a>
-    <a href="#">Configuración</a>
-    <a href="#">Cerrar sesión</a>
+    <a href="{% url 'perfil' %}">
+  <img src="{% static 'Icon/gente.gif' %}" alt="Perfil">
+  Perfil
+</a>
+    <a href="{% url 'home' %}">
+      <img src="{% static 'Icon/exito.gif' %}" alt="Actividades">
+      Actividades 
+    </a>
+    <a href="{% url 'home' %}">
+      <img src="{% static 'Icon/lista.gif' %}" alt="Seguimiento">
+      Seguimiento 
+    </a>
+    <a href="{% url 'home' %}">
+      <img src="{% static 'Icon/reserva.gif' %}" alt="Reserva">
+      Reserva 
+    </a>
+    <a href="{% url 'home' %}">
+      <img src="{% static 'Icon/contento.gif' %}" alt="Extras">
+      Extras
+    </a>
+    <a href="{% url 'home' %}">
+      <img src="{% static 'Icon/cerrar-sesion.gif' %}" alt="Cerrar sesión">
+      Cerrar sesión
+    </a>
   </nav>
 
 </body>
