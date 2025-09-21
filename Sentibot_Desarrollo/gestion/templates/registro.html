@@ -1,0 +1,27 @@
+
+{% load static %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/flatly/bootstrap.min.css">
+
+<link rel="stylesheet" href="{% static 'css/inicio.css' %}">
+<body>
+
+<div class="cuadro">
+    <h2>Crear Cuenta</h2>
+    <form>
+      <div class="mb-3">
+        <label for="correo" class="form-label">Correo electrónico</label>
+        <input type="email" class="form-control" id="correo" aria-describedby="ayudaCorreo">
+      </div>
+
+      <div class="mb-3">
+        <label for="contrasena" class="form-label">Contraseña</label>
+        <input type="password" class="form-control" id="contrasena">
+      </div>
+
+
+      <button type="submit" class="btn btn-gradiente w-100">Enviar</button>
+      <a href="{% url 'login' %}">¿Ya tienes cuenta?</a>
+    </form>
+</div>
+
+</body>
