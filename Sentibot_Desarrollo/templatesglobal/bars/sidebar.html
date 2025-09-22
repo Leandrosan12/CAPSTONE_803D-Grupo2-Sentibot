@@ -1,63 +1,82 @@
+{% load static %}
 <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      display: flex;
-      min-height: 100vh;
-      background-color: #F0F1F2;
-    }
+.sidebar {
+    margin-top: 1%;
+    margin-left: 2%;
+    margin-bottom: 100%;
+    border-radius: 1.8vh;
+    width: 18.5%;
+    background-color: #ffffff;
+    color: rgb(3, 3, 3);
+    padding: 20px;
+    box-sizing: border-box;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 96vh;
+    z-index: 21;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+.sidebar.collapsed {
+    transform: translateX(-120%); /* se mueve completamente a la izquierda */
+    opacity: 0; /* desaparece */
+    pointer-events: none; /* no se puede clickear */
+}
 
-    /* Sidebar */
-    .sidebar {
-      margin-top: 1%;
-      margin-left: 2%;
-      margin-bottom: 100%;
-      border-radius: 1.8vh;
-      width: 18.5%;
-      background-color: #ffffff;
-      color: rgb(3, 3, 3);
-      padding: 20px;
-      box-sizing: border-box;
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 96vh;
-      z-index: 10; 
-    }
+.sidebar h2 {
+    margin-top: 0;
+    margin-bottom: 30px;
+    font-weight: normal;
+    color: #757880;
+}
 
-    .sidebar h2 {
-      margin-top: 0;
-      margin-bottom: 30px;
-      font-weight: normal;
-    }
+.sidebar a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: rgb(1, 1, 1);
+    text-decoration: none;
+    margin-bottom: 15px;
+    padding: 10px 15px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+.sidebar a:hover {
+    background-color: #34495e;
+    color: #fff;
+}
 
-    .sidebar a {
-      display: block;
-      color: rgb(1, 1, 1);
-      text-decoration: none;
-      margin-bottom: 15px;
-      padding: 10px 15px;
-      border-radius: 4px;
-      transition: background-color 0.2s ease;
-    }
+.sidebar a img {
+    width: 43px;
+    height: 43px;
+}
 
-    .sidebar a:hover {
-      background-color: #34495e;
-    }
+.titulo-sidebar {
+    display: flex;
+    align-items: center;
+    font-size: 24px;
+    color: #333;
+}
 
-  </style>
-</head>
-<body>
+.titulo-sidebar .icono {
+    width: 60px;
+    height: 60px;
+    margin-right: 10px;
+    border-radius: 6px;
+}
+</style>
 
-  <nav class="sidebar">
-    <h2>Mi Sidebar</h2>
-    <a href="#">Inicio</a>
-    <a href="#">Dashboard</a>
-    <a href="#">Perfil</a>
-    <a href="#">Configuración</a>
-    <a href="#">Cerrar sesión</a>
-  </nav>
+<nav class="sidebar" id="sidebar">
+    <h2 class="titulo-sidebar">
+        <img src="{% static 'Icon/sentibot.jpg' %}" alt="icono Sentibot" class="icono">
+        Sentibot
+    </h2>
 
-
-</body>
-</html>
+    <a href="{% url 'home' %}"><img src="{% static 'Icon/casa.gif' %}" alt="Inicio"> Inicio</a>
+    <a href="{% url 'perfil' %}"><img src="{% static 'Icon/gente.gif' %}" alt="Perfil"> Perfil</a>
+    <a href="{% url 'home' %}"><img src="{% static 'Icon/exito.gif' %}" alt="Actividades"> Actividades</a>
+    <a href="{% url 'home' %}"><img src="{% static 'Icon/lista.gif' %}" alt="Seguimiento"> Seguimiento</a>
+    <a href="{% url 'home' %}"><img src="{% static 'Icon/reserva.gif' %}" alt="Reserva"> Reserva</a>
+    <a href="{% url 'home' %}"><img src="{% static 'Icon/contento.gif' %}" alt="Extras"> Extras</a>
+    <a href="{% url 'home' %}"><img src="{% static 'Icon/cerrar-sesion.gif' %}" alt="Cerrar sesión"> Cerrar sesión</a>
+</nav>
