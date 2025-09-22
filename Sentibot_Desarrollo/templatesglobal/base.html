@@ -3,52 +3,135 @@
 <head>
     <meta charset="UTF-8" />
     <title>{% block title %}Sentibot{% endblock %}</title>
-    <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/flatly/bootstrap.min.css">
-
-
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     {% block head %}{% endblock %}
-</head>
-<body>
+
     <style>
         .content {
-            margin-left: 19.5%;        /* espacio para el sidebar */
-            margin-top: 1%;           /* deja espacio para el top-bar */
-            padding: 1%;
-            min-height: 100vh;          /* ocupa toda la altura restante */
+            margin-left: 19.5%;
+            margin-top: 2.6%;
+            padding: 2%;
+            min-height: 100vh;
             box-sizing: border-box;
-            flex: 1;                     
-            position: relative;          /* para z-index si es necesario */
-            background: linear-gradient(to bottom, #344767 41.2%, #ecf0f1 0);          
-            padding-top: calc(1% + 1.2% * 2);
+            position: relative;
+            background: linear-gradient(to bottom, #344767 41.2%, #ecf0f1 0);
+            transition: margin-left 0.3s ease, width 0.3s ease;
         }
-        /* Fondo azul detrás del contenido */
-       
-        .fondo_sidebar{
-           position: absolute;
-           top: 0;
-           left: 0;
-           width: 100%;
-           height: 43.4%;              /* altura del fondo azul */
-           background-color: #344767;
-           z-index: 0;    
+        .content.expanded {
+            margin-left: 0;
+            width: 100%;
+        }
+
+        .fondo_sidebar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 43.4%;
+            background-color: #344767;
+            z-index: 0;    
+        }
+        .side{
+            background: linear-gradient(to bottom, #344767 41.2%, #ecf0f1 0);
+        }
+        .contenedor{
+            margin-left: 1%;
         }
     </style>
-    <!-- Sidebar global -->
-    <aside><div class="fondo_sidebar">
-        </div>
-        {% include "bars/sidebar.html" %}
-    </aside>
-    {% include "bars/topbar.html" %}
-    <!-- Contenido que cambia según la página -->
-    <main class="content">       
-        {% block content %}
-        <!-- Aquí se insertará el contenido de cada vista -->
-        {% endblock %}
-    </main>
-     <!-- Bootstrap JS (necesario para modales, dropdowns, etc.) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
 
-    {% block scripts %}{% endblock %}
+<aside class="side">
+    <div class="fondo_sidebar"></div>
+    {% include "bars/sidebar.html" %}
+
+{% include "bars/topbar.html" %}
+
+<main class="content" id="content">
+    <div class="contenedor">
+    {% block content %}{% endblock %}
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const btn = document.getElementById('btn-toggle-sidebar');
+const sidebar = document.getElementById('sidebar');
+const content = document.getElementById('content');
+const topbar = document.getElementById('topbar');
+
+// Función para abrir/cerrar sidebar en mobile
+function toggleSidebarMobile() {
+    if (window.innerWidth < 1501) { // Mobile
+        const isCollapsed = sidebar.classList.contains('collapsed');
+
+        if (isCollapsed) {
+            // Abrir sidebar al 50%
+            sidebar.classList.remove('collapsed');
+            sidebar.style.width = '50%';
+            content.style.marginLeft = '50%';
+            content.style.width = '50%';
+            topbar.style.marginLeft = '50%';
+            topbar.style.width = '50%';
+        } else {
+            // Cerrar sidebar
+            sidebar.classList.add('collapsed');
+            sidebar.style.width = '';
+            content.style.marginLeft = '0';
+            content.style.width = '100%';
+            topbar.style.marginLeft = '0';
+            topbar.style.width = '100%';
+        }
+    } else {
+        // Desktop toggle normal
+        sidebar.classList.toggle('collapsed');
+        content.classList.toggle('expanded');
+        topbar.classList.toggle('expanded');
+    }
+}
+
+// Evento para botón hamburguesa
+btn.addEventListener('click', toggleSidebarMobile);
+
+// Evento para cerrar sidebar al hacer click en el contenido derecho (mobile)
+content.addEventListener('click', () => {
+    if (window.innerWidth < 1501 && !sidebar.classList.contains('collapsed')) {
+        toggleSidebarMobile();
+    }
+});
+
+// Detectar tamaño de pantalla al cargar
+function handleResponsiveSidebar() {
+    if (window.innerWidth < 1501) { // Mobile
+        sidebar.classList.add('collapsed');
+        content.classList.add('expanded');
+        topbar.classList.add('expanded');
+        sidebar.style.width = '';
+        content.style.marginLeft = '';
+        content.style.width = '';
+        topbar.style.marginLeft = '';
+        topbar.style.width = '';
+    } else {
+        sidebar.classList.remove('collapsed');
+        content.classList.remove('expanded');
+        topbar.classList.remove('expanded');
+        sidebar.style.width = '';
+        content.style.marginLeft = '';
+        content.style.width = '';
+        topbar.style.marginLeft = '';
+        topbar.style.width = '';
+    }
+}
+
+// Ejecutar al cargar
+window.addEventListener('load', handleResponsiveSidebar);
+
+// Ejecutar al cambiar tamaño
+window.addEventListener('resize', handleResponsiveSidebar);
+</script>
+
+
+{% block scripts %}{% endblock %}
 </body>
 </html>
