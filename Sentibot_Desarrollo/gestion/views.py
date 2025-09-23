@@ -2,7 +2,9 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-
+from django.template.loader import get_template
+from django.http import HttpResponse
+from weasyprint import HTML
 
 
 
@@ -55,3 +57,38 @@ def login(request):
     
 def perfil(request):
     return render(request, 'perfil.html')
+
+def reporte(request):
+    return render(request, 'reporte.html')
+def generar_pdf(request):
+    template = get_template("reporte.html")
+    html = template.render({
+        "nombre": "Usuario de Prueba"
+    })
+    pdf_file = HTML(string=html).write_pdf()
+
+    response = HttpResponse(pdf_file, content_type="application/pdf")
+    response['Content-Disposition'] = 'attachment; filename="reporte.pdf"'
+    return response
+
+def formulario(request):
+    if request.method == "POST":
+        data = {
+            "nombre": request.POST.get("nombre"),
+            "motivo": request.POST.get("motivo"),
+            "historia": request.POST.get("historia"),
+            "evaluacion": request.POST.get("evaluacion"),
+            "analisis": request.POST.get("analisis"),
+            "conclusiones": request.POST.get("conclusiones"),
+            "recomendaciones": request.POST.get("recomendaciones"),
+            "actividades": request.POST.getlist("actividades"),
+        }
+        template = get_template("reporte.html")
+        html = template.render(data)
+        pdf = HTML(string=html).write_pdf()
+
+        response = HttpResponse(pdf, content_type="application/pdf")
+        response['Content-Disposition'] = 'attachment; filename="reporte.pdf"'
+        return response
+
+    return render(request, "formulario.html")
