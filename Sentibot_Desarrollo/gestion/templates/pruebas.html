@@ -1,128 +1,80 @@
-{% extends "base.html" %}
-
-{% block title %}{% endblock %}
-
-{% block content %}
-<title>Reconocimiento de Voz con Barra</title>
+{% load static %}
+<title>Prueba Emociones</title>
 <style>
-body { 
-  font-family: Arial, sans-serif; 
-  margin: 50px; 
-}
-
-#texto { 
-  border: 1px solid #ccc; 
-  padding: 10px; 
-  width: 100%; 
-  min-height: 100px; 
-}
-
-#barra { 
-  width: 100%; 
-  height: 20px; 
-  background: #eee; 
-  margin-top: 10px; 
-  border-radius: 5px; 
-  position: relative; /* necesario para colocar la línea roja */
-}
-
-#nivel { 
-  height: 100%; 
-  width: 0; 
-  background: #4caf50; 
-  transition: width 0.05s;
-}
-
-#limite { 
-  position: absolute; 
-  left: 40%;      /* posición del límite de voz */
-  top: 0; 
-  height: 100%; 
-  width: 2px;     /* grosor de la línea roja */
-  background: red; 
-}
-
-button { 
-  padding: 10px 20px; 
-  margin-top: 10px; 
-  margin-right: 10px; 
-}
+  body { font-family: Arial; text-align:center; margin:20px; }
+  video { width: 400px; border: 2px solid #333; border-radius:8px; }
+  button { padding:10px 20px; font-size:16px; margin-top:10px; cursor:pointer; }
+  #estado { margin-top:15px; font-size:18px; font-weight:bold; }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
 </head>
 <body>
 
-<h2>Reconocimiento de Voz a Texto con Barra</h2>
-<div id="texto" contenteditable="true">Aquí aparecerá lo que digas...</div>
+<h2>Prueba Emociones</h2>
 
-
-<div id="barra">
-  <div id="nivel"></div>
-  <div id="limite"></div> 
-</div>
-
-
-<button id="startBtn">Iniciar</button>
-<button id="stopBtn">Detener</button>
-
+<video id="videoCamara" autoplay playsinline></video>
+<br>
+<button id="startBtn">Iniciar cámara</button>
+<p id="estado">Estado: ---</p>
 
 <script>
-  // Verificar compatibilidad
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognition || !navigator.mediaDevices) {
-    alert("Tu navegador no soporta reconocimiento de voz o micrófono.");
-  } else {
-    const recognition = new SpeechRecognition();
-    recognition.lang = 'es-ES';
-    recognition.interimResults = true;
-    recognition.continuous = true;
+document.addEventListener("DOMContentLoaded", () => {
+  const video = document.getElementById('videoCamara');
+  const btn = document.getElementById('startBtn');
+  const estadoEl = document.getElementById('estado');
 
-    const textoDiv = document.getElementById('texto');
-    let audioContext, analyser, microphone, dataArray;
+  let camOn = false;
+  let stream;
+  let detectarInterval;
 
-    recognition.addEventListener('result', (event) => {
-      let transcript = '';
-      for (const result of event.results) {
-        transcript += result[0].transcript;
-      }
-      textoDiv.textContent = transcript;
-    });
+  // Cargar modelos
+  async function cargarModelos() {
+    await faceapi.nets.tinyFaceDetector.loadFromUri("{% static 'models/face-api.js-master' %}");
+    await faceapi.nets.faceExpressionNet.loadFromUri("{% static 'models/face-api.js-master' %}");
 
-    recognition.addEventListener('end', () => {
-      console.log("Reconocimiento detenido");
-    });
 
-    document.getElementById('startBtn').addEventListener('click', async () => {
-      recognition.start();
-
-      // Configurar barra de voz
-      audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      microphone = audioContext.createMediaStreamSource(stream);
-      analyser = audioContext.createAnalyser();
-      analyser.fftSize = 256;
-      const bufferLength = analyser.frequencyBinCount;
-      dataArray = new Uint8Array(bufferLength);
-      microphone.connect(analyser);
-
-      // Animación barra
-      function animate() {
-        requestAnimationFrame(animate);
-        analyser.getByteFrequencyData(dataArray);
-        let sum = dataArray.reduce((a,b) => a+b, 0);
-        let average = sum / dataArray.length;
-        document.getElementById('nivel').style.width = Math.min(100, average) + '%';
-      }
-      animate();
-    });
-
-    document.getElementById('stopBtn').addEventListener('click', () => {
-      recognition.stop();
-      if (microphone) microphone.disconnect();
-      if (audioContext) audioContext.close();
-      document.getElementById('nivel').style.width = '0%';
-    });
+    console.log("Modelos cargados");
   }
+
+  async function detectarEmociones() {
+    if(!video.videoWidth) return;
+
+    const det = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
+                               .withFaceExpressions();
+    if(det){
+      const exp = det.expressions;
+      const principales = ['happy','sad','angry','surprised','neutral'];
+      let maxE = 'neutral';
+      let maxV = 0;
+      principales.forEach(e => { if(exp[e] > maxV){ maxV = exp[e]; maxE = e; } });
+      estadoEl.textContent = `Estado: ${maxE} (${Math.round(maxV*100)}%)`;
+    } else estadoEl.textContent = "Estado: No detectado";
+  }
+
+  btn.addEventListener('click', async () => {
+    if(!camOn){
+      await cargarModelos(); // espera a que los modelos carguen
+      try{
+        stream = await navigator.mediaDevices.getUserMedia({ video:true });
+        video.srcObject = stream;
+        camOn = true;
+        btn.textContent = "Apagar cámara";
+        detectarInterval = setInterval(detectarEmociones, 1000);
+      } catch(e){
+        alert("No se pudo acceder a la cámara. Usa localhost o HTTPS.");
+        console.error(e);
+      }
+    } else {
+      stream.getTracks().forEach(t => t.stop());
+      video.srcObject = null;
+      camOn = false;
+      btn.textContent = "Iniciar cámara";
+      clearInterval(detectarInterval);
+      estadoEl.textContent = "Estado: ---";
+    }
+  });
+});
 </script>
 
 </body>
-{% endblock %}
+

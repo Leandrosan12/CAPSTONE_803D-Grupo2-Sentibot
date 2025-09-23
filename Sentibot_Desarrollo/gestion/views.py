@@ -93,11 +93,13 @@ def formulario(request):
 
     return render(request, "formulario.html")
 
-def pruebas(request):
-    return render(request, 'pruebas.html')
+def voz(request):
+    return render(request, 'voz.html')
 def escuelas(request):
     return render(request, 'escuelas.html')
 def actividades(request):
     return render(request, 'actividades.html')
 def camara(request):
     return render(request, 'camara.html')
+def pruebas(request):
+    return render(request, 'pruebas.html')
