@@ -105,71 +105,139 @@
 <div id="usuario">Hombre Completo</div>
 
 <div class="report-container" id="reportContainer">
-  <div class="report-box">
-    <h3>Reporte actual</h3>
-    <p>Feliz: 5 seg</p>
-    <p>Triste: 1 seg</p>
-    <p>Neutral: 1 min</p>
-    <p>Null: 3 seg</p>
+ 
+
+</div>
+
+
+
+</body>
+
+ <div class="row g-4"> 
+  <!-- Reporte actual -->
+  <div class="col-12 col-md-6 col-lg-4">
+    <div class="report-box p-3 border rounded">
+      <h3>Reporte actual</h3>
+      <p id="feliz">Feliz: 0 seg</p>
+      <p id="triste">Triste: 0 seg</p>
+      <p id="neutral">Neutral: 0 seg</p>
+      <p id="null">Null: 0 seg</p>
+    </div>
   </div>
-  <div class="foto-box">
-    <img src="{% static 'img/prueba.jpg' %}" alt="icono Sentibot" class="icono" id="fotoCapturada">
+  
+  <!-- Imagen -->
+  <div class="col-12 col-md-6 col-lg-4">
+    <div class="foto-box text-center p-3 border rounded">
+      <img src="{% static 'img/prueba.jpg' %}" 
+           alt="icono Sentibot" 
+           class="icono img-fluid" 
+           id="fotoCapturada">
+    </div>
   </div>
-  <div class="report-box">
-    <h3>Informe básico</h3>
-    <p>Estado: Neutral</p>
-    <p>Porcentaje: 76%</p>
-    <p>Estado del rostro: Detectado</p>
-    <p>Id: 001</p>
+
+
+  
+  <!-- Informe básico -->
+  <div class="col-12 col-md-6 col-lg-4">
+    <div class="report-box p-3 border rounded">
+      <h3>Informe básico</h3>
+      <p id="estado">Estado: Neutral</p>
+      <p id="porcentaje">Porcentaje: 0%</p>
+      <p id="rostro">Estado del rostro: No detectado</p>
+      <p id="sujeto">Id: ---</p>
+    </div>
   </div>
 </div>
 
 <script>
-  const startBtn = document.getElementById('startBtn');
-  const videoCamara = document.getElementById('videoCamara');
-  const reportContainer = document.getElementById('reportContainer');
-  const estado = document.querySelector('.estado');
-  const fotoCapturada = document.getElementById('fotoCapturada');
+  document.addEventListener("DOMContentLoaded", () => {
+    const startBtn = document.getElementById('startBtn');
+    const videoCamara = document.getElementById('videoCamara');
+    const estadoCamara = document.querySelector('.estado');
+    const fotoCapturada = document.getElementById('fotoCapturada');
 
-  let stream = null;
-  let fotoInterval = null;
-  let camaraEncendida = false;
+    // Referencias a las tarjetas
+    const felizEl = document.getElementById('feliz');
+    const tristeEl = document.getElementById('triste');
+    const neutralEl = document.getElementById('neutral');
+    const nullEl = document.getElementById('null');
 
-  startBtn.addEventListener('click', async () => {
-    if (!camaraEncendida) {
-      try {
-        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-        videoCamara.srcObject = stream;
-        estado.textContent = 'Cámara activa';
-        reportContainer.style.display = 'flex';
-        camaraEncendida = true;
-        startBtn.textContent = 'Apagar';
+    const estadoEl = document.getElementById('estado');
+    const porcentajeEl = document.getElementById('porcentaje');
+    const rostroEl = document.getElementById('rostro');
+    const sujetoEl = document.getElementById('sujeto');
 
-        // Tomar foto cada 10 segundos
-        fotoInterval = setInterval(() => {
-          const canvas = document.createElement('canvas');
-          canvas.width = videoCamara.videoWidth;
-          canvas.height = videoCamara.videoHeight;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(videoCamara, 0, 0, canvas.width, canvas.height);
-          fotoCapturada.src = canvas.toDataURL('image/png');
-        }, 10000);
+    let stream = null;
+    let fotoInterval = null;
+    let camaraEncendida = false;
 
-      } catch (err) {
-        console.error("Error al acceder a la cámara: ", err);
-        estado.textContent = 'Error al iniciar cámara';
+    // Simulador de segundos para emociones
+    let segundosFeliz = 0;
+    let segundosTriste = 0;
+    let segundosNeutral = 0;
+    let segundosNull = 0;
+
+    startBtn.addEventListener('click', async () => {
+      if (!camaraEncendida) {
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+          videoCamara.srcObject = stream;
+          estadoCamara.textContent = 'Cámara activa';
+          camaraEncendida = true;
+          startBtn.textContent = 'Apagar';
+
+          // Tomar foto cada 10 segundos
+          fotoInterval = setInterval(() => {
+            const canvas = document.createElement('canvas');
+            canvas.width = videoCamara.videoWidth;
+            canvas.height = videoCamara.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(videoCamara, 0, 0, canvas.width, canvas.height);
+            const fotoBase64 = canvas.toDataURL('image/png');
+            fotoCapturada.src = fotoBase64;
+
+            // Simular valores de prueba
+            const emociones = ["Feliz", "Triste", "Neutral", "Null"];
+            const emocionRandom = emociones[Math.floor(Math.random() * emociones.length)];
+            const porcentajeRandom = Math.floor(Math.random() * 100) + 1;
+
+            // Aumentar contadores de ejemplo
+            if (emocionRandom === "Feliz") segundosFeliz += 10;
+            if (emocionRandom === "Triste") segundosTriste += 10;
+            if (emocionRandom === "Neutral") segundosNeutral += 10;
+            if (emocionRandom === "Null") segundosNull += 10;
+
+            // Actualizar tarjeta Reporte actual
+            felizEl.textContent = `Feliz: ${segundosFeliz} seg`;
+            tristeEl.textContent = `Triste: ${segundosTriste} seg`;
+            neutralEl.textContent = `Neutral: ${segundosNeutral} seg`;
+            nullEl.textContent = `Null: ${segundosNull} seg`;
+
+            // Actualizar tarjeta Informe básico
+            estadoEl.textContent = `Estado: ${emocionRandom}`;
+            porcentajeEl.textContent = `Porcentaje: ${porcentajeRandom}%`;
+            rostroEl.textContent = `Estado del rostro: Detectado`;
+            sujetoEl.textContent = `Id: 001`;
+
+          }, 5000);
+
+        } catch (err) {
+          console.error("Error al acceder a la cámara: ", err);
+          estadoCamara.textContent = 'Error al iniciar cámara';
+        }
+      } else {
+        // Apagar cámara
+        stream.getTracks().forEach(track => track.stop());
+        videoCamara.srcObject = null;
+        clearInterval(fotoInterval);
+        estadoCamara.textContent = 'Apagado';
+        camaraEncendida = false;
+        startBtn.textContent = 'Iniciar';
       }
-    } else {
-      // Apagar cámara
-      stream.getTracks().forEach(track => track.stop());
-      videoCamara.srcObject = null;
-      clearInterval(fotoInterval);
-      estado.textContent = 'Apagado';
-      camaraEncendida = false;
-      startBtn.textContent = 'Iniciar';
-    }
+    });
   });
 </script>
+    
+ 
 
-</body>
 {% endblock %}
