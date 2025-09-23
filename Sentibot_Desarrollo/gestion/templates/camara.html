@@ -1,4 +1,8 @@
+{% extends "base.html" %}
+{% block title %}{% endblock %}
+{% block content %}
 {% load static %}
+
 <title>Dashboard Emociones</title>
 <style>
   body {
@@ -18,7 +22,8 @@
     box-shadow: 0 6px 12px rgba(0,0,0,0.2);
   }
 
-  .camara-container img {
+  .camara-container img,
+  .camara-container video {
     width: 100%;
     display: block;
   }
@@ -46,7 +51,7 @@
   }
 
   button#startBtn:hover {
-    background-color: #66c10c;
+    background-color: #52a003;
   }
 
   #usuario {
@@ -91,7 +96,7 @@
 <h2>Inicio</h2>
 
 <div class="camara-container">
-  <img src="{% static 'img/prueba.jpg' %}" alt="" class="">
+  <video id="videoCamara" autoplay playsinline></video>
   <div class="estado">Apagado</div>
 </div>
 
@@ -108,7 +113,7 @@
     <p>Null: 3 seg</p>
   </div>
   <div class="foto-box">
-    <img src="{% static 'img/prueba.jpg' %}" alt="icono Sentibot" class="icono">
+    <img src="{% static 'img/prueba.jpg' %}" alt="icono Sentibot" class="icono" id="fotoCapturada">
   </div>
   <div class="report-box">
     <h3>Informe básico</h3>
@@ -121,15 +126,50 @@
 
 <script>
   const startBtn = document.getElementById('startBtn');
+  const videoCamara = document.getElementById('videoCamara');
   const reportContainer = document.getElementById('reportContainer');
   const estado = document.querySelector('.estado');
+  const fotoCapturada = document.getElementById('fotoCapturada');
 
-  startBtn.addEventListener('click', () => {
-    // Mostrar sección de reportes
-    reportContainer.style.display = 'flex';
-    estado.textContent = 'Iniciado';
+  let stream = null;
+  let fotoInterval = null;
+  let camaraEncendida = false;
+
+  startBtn.addEventListener('click', async () => {
+    if (!camaraEncendida) {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+        videoCamara.srcObject = stream;
+        estado.textContent = 'Cámara activa';
+        reportContainer.style.display = 'flex';
+        camaraEncendida = true;
+        startBtn.textContent = 'Apagar';
+
+        // Tomar foto cada 10 segundos
+        fotoInterval = setInterval(() => {
+          const canvas = document.createElement('canvas');
+          canvas.width = videoCamara.videoWidth;
+          canvas.height = videoCamara.videoHeight;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(videoCamara, 0, 0, canvas.width, canvas.height);
+          fotoCapturada.src = canvas.toDataURL('image/png');
+        }, 10000);
+
+      } catch (err) {
+        console.error("Error al acceder a la cámara: ", err);
+        estado.textContent = 'Error al iniciar cámara';
+      }
+    } else {
+      // Apagar cámara
+      stream.getTracks().forEach(track => track.stop());
+      videoCamara.srcObject = null;
+      clearInterval(fotoInterval);
+      estado.textContent = 'Apagado';
+      camaraEncendida = false;
+      startBtn.textContent = 'Iniciar';
+    }
   });
 </script>
 
 </body>
-</html>
+{% endblock %}
