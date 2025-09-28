@@ -7,5 +7,6 @@ urlpatterns = [
     path('home/', home, name='home'),
     path('perfil/', views.perfil, name='perfil'),
     path('registro/', views.registro, name='registro'),
-    path('actividades/', views.actividades, name='actividades'),  # 👈 nueva ruta
+    path('actividades/', views.actividades, name='actividades'), 
+    path('seguimiento/', views.seguimiento, name='seguimiento'),  
 ]

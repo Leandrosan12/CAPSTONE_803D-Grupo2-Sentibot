@@ -57,3 +57,6 @@ def perfil(request):
 # 👇 Nueva vista
 def actividades(request):
     return render(request, 'actividades.html')
+    
+def seguimiento(request):
+    return render(request, 'seguimiento.html')
