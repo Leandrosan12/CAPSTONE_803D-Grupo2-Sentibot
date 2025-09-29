@@ -109,3 +109,5 @@ class DocenteArea(models.Model):
         return self.nombre_area
     
 
+    
+

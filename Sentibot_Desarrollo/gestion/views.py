@@ -5,57 +5,61 @@ from django.contrib import messages
 from django.template.loader import get_template
 from django.http import HttpResponse
 from weasyprint import HTML
-import hashlib
+from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 
 
 
 
 
-def home(request):
-    return render(request, 'index.html')    
 def registro(request):
     if request.method == "POST":
-        correo = request.POST.get("correo")
-        contrasena = request.POST.get("contrasena")
+        email = request.POST.get('correo')
+        password = request.POST.get('contrasena')
 
-        if User.objects.filter(username=correo).exists():
-            messages.error(request, "El correo ya está registrado.")
-            return redirect("registro")
-        
+        if User.objects.filter(email=email).exists():
+            return render(request, 'registro.html', {'error': 'El email ya está registrado'})
 
-        user = User.objects.create_user(username=correo, email=correo, password=contrasena)
-        user.save()
-        messages.success(request, "Cuenta creada con éxito. Ahora inicia sesión.")
-        return redirect("login")
+        # Crear usuario
+        User.objects.create_user(
+            username=email,  # usamos email como username
+            email=email,
+            password=password
+        )
+        return redirect('login')  # redirige al login
 
-    return render(request, "registro.html")
-
+    return render(request, 'registro.html')
 
 USUARIO_PRUEBA = {
     "correo": "test@correo.com",
     "contrasena": "1234"
 }
 
+
+# Login
 def login(request):
     if request.method == "POST":
-        correo = request.POST.get("correo")
-        contrasena = request.POST.get("contrasena")
-        
-               # Opción 1: usuario fijo ESTO ES SOLO TEMPORAL BASTA QUE SE CREE LA BD
-        if correo == USUARIO_PRUEBA["correo"] and contrasena == USUARIO_PRUEBA["contrasena"]:
-            return redirect("camara")
-        # Opción 2: usuario registrado en la base de datos
-        user = authenticate(request, username=correo, password=contrasena)
+        email = request.POST.get('correo')
+        password = request.POST.get('contrasena')
+
+        user = authenticate(request, username=email, password=password)
         if user is not None:
-            login(request, user)
-            return redirect("camara")
+            auth_login(request, user)
+            return redirect('camara')
         else:
-            messages.error(request, "Correo o contraseña incorrectos")
-            return redirect("login")
+            return render(request, 'login.html', {'error': 'Correo o contraseña incorrectos'})
 
-    return render(request, "login.html")
+    return render(request, 'login.html')
 
+# Logout
+def logout_view(request):
+    auth_logout(request)
+    return redirect('login')
 
+# Home
+def home(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    return render(request, 'home.html', {'user': request.user})
 
     
 def perfil(request):
