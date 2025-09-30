@@ -99,3 +99,29 @@ def generar_pdf(request):
     return response
 def reporte(request):
     return render(request, 'reporte.html')
+def seguimiento(request):
+    return render(request, 'seguimiento.html')
+def dashboard(request):
+    return render(request, 'dashboard.html')
+
+
+
+
+from django.http import JsonResponse
+from django.db import connection
+
+def emociones_data(request):
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT nombre_emocion, COUNT(*) as total 
+            FROM gestion_emocion 
+            GROUP BY nombre_emocion;
+        """)
+        rows = cursor.fetchall()
+    
+    data = {
+        "labels": [row[0] for row in rows],
+        "values": [row[1] for row in rows]
+    }
+    return JsonResponse(data)
+

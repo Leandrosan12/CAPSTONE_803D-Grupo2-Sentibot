@@ -11,4 +11,7 @@ urlpatterns = [
     path('camara/', views.camara, name='camara'),
     path('reporte/', views.reporte, name='reporte'),
     path('formulario/', views.formulario, name='formulario'),
+    path('seguimiento/', views.seguimiento, name='seguimiento'),
+    path("emociones-data/", views.emociones_data, name="emociones_data"),
+    path("dashboard/", views.dashboard, name="dashboard"),
 ]
