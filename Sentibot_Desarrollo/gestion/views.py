@@ -1,14 +1,14 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth.models import User
-from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.template.loader import get_template
 from django.http import HttpResponse
 from weasyprint import HTML
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
+from gestion.models import Usuario  
+from django.shortcuts import render, redirect
+from django.contrib.auth import get_user_model
 
-
-
+User = get_user_model()
 
 
 def registro(request):
@@ -19,36 +19,34 @@ def registro(request):
         if User.objects.filter(email=email).exists():
             return render(request, 'registro.html', {'error': 'El email ya está registrado'})
 
-        # Crear usuario
         User.objects.create_user(
-            username=email,  # usamos email como username
+            username=email, 
             email=email,
             password=password
         )
-        return redirect('login')  # redirige al login
+        return redirect('login') 
 
     return render(request, 'registro.html')
 
-USUARIO_PRUEBA = {
-    "correo": "test@correo.com",
-    "contrasena": "1234"
-}
 
-
-# Login
 def login(request):
     if request.method == "POST":
-        email = request.POST.get('correo')
+        email = request.POST.get('correo')      # coincide con tu formulario
         password = request.POST.get('contrasena')
 
-        user = authenticate(request, username=email, password=password)
-        if user is not None:
+        # Autenticar usando email como USERNAME_FIELD
+        user = authenticate(request, email=email, password=password)
+
+        if user is not None and user.is_active:
             auth_login(request, user)
-            return redirect('camara')
+            return redirect('camara')  # redirección exitosa
         else:
             return render(request, 'login.html', {'error': 'Correo o contraseña incorrectos'})
 
     return render(request, 'login.html')
+
+
+
 
 # Logout
 def logout_view(request):
