@@ -31,7 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'gestion.apps.GestionConfig',
+    'gestion.apps.GestionConfig',  # CORRECTO: nombre de tu app
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -39,6 +39,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 ]
+
+
+AUTH_USER_MODEL = 'gestion.Usuario'
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -76,17 +80,15 @@ WSGI_APPLICATION = 'ProhectoTitulo.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'sentibot_db',      # tu base de datos
-        'USER': 'sentibot',         # tu usuario creado
-        'PASSWORD': 'admin',     # tu contraseña
-        'HOST': 'localhost',        # mismo servidor
-        'PORT': '3306',             # puerto por defecto de MySQL
-        'OPTIONS': {
-            'charset': 'utf8mb4',
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-        },
+        'NAME': 'sentibot',
+        'USER': 'admin',
+        'PASSWORD': 'admin',
+        'HOST': 'localhost',
+        'PORT': '3306',
     }
 }
+
+
 
 
 
@@ -135,3 +137,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
+
