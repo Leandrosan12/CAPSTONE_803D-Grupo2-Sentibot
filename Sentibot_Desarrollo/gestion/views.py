@@ -1,4 +1,9 @@
 from django.shortcuts import render, redirect
+<<<<<<< HEAD
+=======
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, login as auth_login, logout
+>>>>>>> ef09a7ebc1310a687b0d9de8ddcdcf0aeeab57d2
 from django.contrib import messages
 from django.template.loader import get_template
 from django.http import HttpResponse
@@ -11,6 +16,14 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 
+<<<<<<< HEAD
+=======
+
+
+def home(request):
+    return render(request, 'index.html')    
+
+>>>>>>> ef09a7ebc1310a687b0d9de8ddcdcf0aeeab57d2
 def registro(request):
     if request.method == "POST":
         email = request.POST.get('correo')
@@ -18,6 +31,7 @@ def registro(request):
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name')
 
+<<<<<<< HEAD
         if User.objects.filter(email=email).exists():
             return render(request, 'registro.html', {'error': 'El email ya está registrado'})
 
@@ -29,12 +43,23 @@ def registro(request):
             last_name=last_name
         )
         return redirect('login') 
+=======
+        if User.objects.filter(username=correo).exists():
+            messages.error(request, "El correo ya está registrado.")
+            return redirect("registro")
+        
+        user = User.objects.create_user(username=correo, email=correo, password=contrasena)
+        user.save()
+        messages.success(request, "Cuenta creada con éxito. Ahora inicia sesión.")
+        return redirect("login")
+>>>>>>> ef09a7ebc1310a687b0d9de8ddcdcf0aeeab57d2
 
     return render(request, 'registro.html')
 
 
 def login(request):
     if request.method == "POST":
+<<<<<<< HEAD
         email = request.POST.get('correo')      # coincide con tu formulario
         password = request.POST.get('contrasena')
 
@@ -44,11 +69,26 @@ def login(request):
         if user is not None and user.is_active:
             auth_login(request, user)
             return redirect('camara')  # redirección 
+=======
+        correo = request.POST.get("correo")
+        contrasena = request.POST.get("contrasena")
+        
+        # Opción 1: usuario fijo
+        if correo == USUARIO_PRUEBA["correo"] and contrasena == USUARIO_PRUEBA["contrasena"]:
+            return redirect("home")
+
+        # Opción 2: usuario registrado en la base de datos
+        user = authenticate(request, username=correo, password=contrasena)
+        if user is not None:
+            auth_login(request, user)
+            return redirect("home")
+>>>>>>> ef09a7ebc1310a687b0d9de8ddcdcf0aeeab57d2
         else:
             return render(request, 'login.html', {'error': 'Correo o contraseña incorrectos'})
 
     return render(request, 'login.html')
 
+<<<<<<< HEAD
 
 
 
@@ -127,3 +167,14 @@ def emociones_data(request):
     }
     return JsonResponse(data)
 
+=======
+def perfil(request):
+    return render(request, 'perfil.html')
+
+# 👇 Nueva vista
+def actividades(request):
+    return render(request, 'actividades.html')
+    
+def seguimiento(request):
+    return render(request, 'seguimiento.html')
+>>>>>>> ef09a7ebc1310a687b0d9de8ddcdcf0aeeab57d2
