@@ -15,6 +15,8 @@ def registro(request):
     if request.method == "POST":
         email = request.POST.get('correo')
         password = request.POST.get('contrasena')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
 
         if User.objects.filter(email=email).exists():
             return render(request, 'registro.html', {'error': 'El email ya está registrado'})
@@ -22,7 +24,9 @@ def registro(request):
         User.objects.create_user(
             username=email, 
             email=email,
-            password=password
+            password=password,
+            first_name=first_name,
+            last_name=last_name
         )
         return redirect('login') 
 
@@ -39,7 +43,7 @@ def login(request):
 
         if user is not None and user.is_active:
             auth_login(request, user)
-            return redirect('camara')  # redirección exitosa
+            return redirect('camara')  # redirección 
         else:
             return render(request, 'login.html', {'error': 'Correo o contraseña incorrectos'})
 

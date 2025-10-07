@@ -30,7 +30,7 @@ class Usuario(AbstractUser):
     rol = models.ForeignKey(Rol, on_delete=models.CASCADE, related_name="usuarios", null=True)
     escuela = models.ForeignKey(Escuela, on_delete=models.CASCADE, related_name="usuarios", null=True)
 
-    REQUIRED_FIELDS = []  # email ya será USERNAME_FIELD
+    REQUIRED_FIELDS = []  
     EMAIL_FIELD = 'email'
     USERNAME_FIELD = 'email'
 
