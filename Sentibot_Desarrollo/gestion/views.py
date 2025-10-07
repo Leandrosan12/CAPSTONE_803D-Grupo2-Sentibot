@@ -141,21 +141,35 @@ def emociones_data(request):
     return JsonResponse(data)
 
 
+# gestion/views.py
+from django.shortcuts import render
+from .models import EmocionReal
+from django.db.models import Count
+
 def seguimiento(request):
-    # Contar emociones reales
-    emociones_counts = (EmocionReal.objects
-                        .values('tipo_emocion')
-                        .annotate(count=Count('id'))
-                        .order_by('tipo_emocion'))
+    datos = EmocionReal.objects.values('emocion').annotate(total=Count('emocion'))
+    etiquetas = [d['emocion'] for d in datos]
+    valores = [d['total'] for d in datos]
 
-    labels = [e['tipo_emocion'] for e in emociones_counts]
-    counts = [e['count'] for e in emociones_counts]
-
-    total = sum(counts)
-    progreso = int((counts[0] / total) * 100) if total > 0 else 0
-
-    return render(request, 'dashboard.html', {
-        'emociones_labels': labels,
-        'emociones_counts': counts,
-        'progreso': progreso
+    return render(request, 'seguimiento.html', {
+        'emociones_labels': etiquetas,
+        'emociones_counts': valores,
     })
+
+from django.shortcuts import render
+from .models import EmocionCamara
+
+from django.db import connection
+from django.shortcuts import render
+
+def dashboard_emociones(request):
+    # Ejecutamos la vista directamente
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT * FROM vw_emociones_camara")
+        columnas = [col[0] for col in cursor.description]
+        datos = [dict(zip(columnas, row)) for row in cursor.fetchall()]
+
+    context = {
+        'emociones': datos
+    }
+    return render(request, 'dashboard_emociones.html', context)
