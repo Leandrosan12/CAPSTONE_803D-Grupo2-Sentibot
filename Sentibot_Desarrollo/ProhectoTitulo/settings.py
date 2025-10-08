@@ -75,18 +75,11 @@ WSGI_APPLICATION = 'ProhectoTitulo.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'sentibot_db',      # tu base de datos
-        'USER': 'sentibot',         # tu usuario creado
-        'PASSWORD': 'lilo1309',     # tu contraseña
-        'HOST': 'localhost',        # mismo servidor
-        'PORT': '3306',             # puerto por defecto de MySQL
-        'OPTIONS': {
-            'charset': 'utf8mb4',
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-        },
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / "db.sqlite3",
     }
 }
+
 
 
 
