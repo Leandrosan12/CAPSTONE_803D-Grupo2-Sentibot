@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Emociones{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <h2>📊 Dashboard de Emociones</h2>
+
+    <table class="tabla-emociones">
+        <thead>
+            <tr>
+                <th>Usuario</th>
+                <th>Rol</th>
+                <th>Escuela</th>
+                <th>Sesión</th>
+                <th>ID Emoción</th>
+                <th>Probabilidad</th>
+                <th>Inicio</th>
+                <th>Fin</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for e in emociones %}
+            <tr>
+                <td>{{ e.nombre_completo }}</td>
+                <td>{{ e.rol }}</td>
+                <td>{{ e.escuela }}</td>
+                <td>{{ e.id_sesion }}</td>
+                <td>{{ e.id_emocion }}</td>
+                <td>{{ e.probabilidad|floatformat:2 }}</td>
+                <td>{{ e.fecha_emocion_inicio }}</td>
+                <td>{{ e.fecha_emocion_fin }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<style>
+.dashboard-container {
+    background-color: #f8fafc;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+    max-width: 1200px;
+    margin: 30px auto;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.dashboard-container h2 {
+    text-align: center;
+    color: #1e293b;
+    margin-bottom: 25px;
+    font-size: 26px;
+}
+
+.tabla-emociones {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #ffffff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.tabla-emociones thead {
+    background-color: #3b82f6;
+    color: white;
+}
+
+.tabla-emociones th, .tabla-emociones td {
+    padding: 12px 15px;
+    text-align: center;
+}
+
+.tabla-emociones tbody tr:nth-child(even) {
+    background-color: #f1f5f9;
+}
+
+.tabla-emociones tbody tr:hover {
+    background-color: #e0f2fe;
+    transition: background-color 0.3s ease;
+}
+
+.tabla-emociones th {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.tabla-emociones td {
+    color: #334155;
+}
+</style>
+{% endblock %}

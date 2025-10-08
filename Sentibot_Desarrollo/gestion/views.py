@@ -162,6 +162,20 @@ from .models import EmocionCamara
 from django.db import connection
 from django.shortcuts import render
 
+def lista_usuarios(request):
+    # Ejecutamos la vista directamente
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT * FROM vw_emociones_camara")
+        columnas = [col[0] for col in cursor.description]
+        datos = [dict(zip(columnas, row)) for row in cursor.fetchall()]
+
+    context = {
+        'emociones': datos
+    }
+    return render(request, 'lista_usuarios.html', context)
+
+
+
 def dashboard_emociones(request):
     # Ejecutamos la vista directamente
     with connection.cursor() as cursor:
