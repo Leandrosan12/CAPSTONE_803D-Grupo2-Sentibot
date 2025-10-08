@@ -1,59 +1,51 @@
 {% extends "base.html" %}
-{% block title %}Dashboard Emociones{% endblock %}
+{% block title %}Lista de Usuarios{% endblock %}
 
 {% block content %}
-<div class="dashboard-container">
-    <h2>📊 Dashboard de Emociones</h2>
+<div class="usuarios-container">
+    <h2>👥 Lista de Usuarios</h2>
 
-    <table class="tabla-emociones">
+    <table class="tabla-usuarios">
         <thead>
             <tr>
-                <th>Usuario</th>
-                <th>Rol</th>
-                <th>Escuela</th>
-                <th>Sesión</th>
-                <th>ID Emoción</th>
-                <th>Probabilidad</th>
-                <th>Inicio</th>
-                <th>Fin</th>
+                 <th>Id</th>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>Correo</th>
+                
             </tr>
         </thead>
         <tbody>
-            {% for e in emociones %}
+            {% for z in usuarios %}
             <tr>
-                <td>{{ e.nombre_completo }}</td>
-                <td>{{ e.rol }}</td>
-                <td>{{ e.escuela }}</td>
-                <td>{{ e.id_sesion }}</td>
-                <td>{{ e.id_emocion }}</td>
-                <td>{{ e.probabilidad|floatformat:2 }}</td>
-                <td>{{ e.fecha_emocion_inicio }}</td>
-                <td>{{ e.fecha_emocion_fin }}</td>
+                <td>{{ z.id }}</td>
+                <td>{{ z.first_name }}</td>
+                <td>{{ z.last_name }}</td>
+                <td>{{ z.email }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
-
 <style>
-.dashboard-container {
+.usuarios-container {
     background-color: #f8fafc;
     padding: 30px;
     border-radius: 16px;
     box-shadow: 0 6px 15px rgba(0,0,0,0.1);
     max-width: 1200px;
-    margin: 30px auto;
+    margin: 40px auto;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.dashboard-container h2 {
+.usuarios-container h2 {
     text-align: center;
     color: #1e293b;
     margin-bottom: 25px;
     font-size: 26px;
 }
 
-.tabla-emociones {
+.tabla-usuarios {
     width: 100%;
     border-collapse: collapse;
     background-color: #ffffff;
@@ -62,32 +54,33 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
-.tabla-emociones thead {
-    background-color: #3b82f6;
+.tabla-usuarios thead {
+    background-color: #0ea5e9;
     color: white;
 }
 
-.tabla-emociones th, .tabla-emociones td {
-    padding: 12px 15px;
+.tabla-usuarios th, .tabla-usuarios td {
+    padding: 10px 12px;
     text-align: center;
+    border-bottom: 1px solid #e2e8f0;
 }
 
-.tabla-emociones tbody tr:nth-child(even) {
+.tabla-usuarios tbody tr:nth-child(even) {
     background-color: #f1f5f9;
 }
 
-.tabla-emociones tbody tr:hover {
+.tabla-usuarios tbody tr:hover {
     background-color: #e0f2fe;
     transition: background-color 0.3s ease;
 }
 
-.tabla-emociones th {
+.tabla-usuarios th {
     font-weight: 600;
-    letter-spacing: 0.5px;
 }
 
-.tabla-emociones td {
+.tabla-usuarios td {
     color: #334155;
+    font-size: 14px;
 }
 </style>
 {% endblock %}

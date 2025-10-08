@@ -91,9 +91,10 @@
   <div class="perfil-datos">
     <ul>
       <li><span>Sede:</span> Melipilla</li>
+      <li><span>Nombre:</span> {{ user.first_name }}</li>
+      <li><span>Apellido:</span> {{ user.last_name }}</li>
       <li><span>Correo:</span> {{ user.email }}</li>
       <li><span>Rol:</span> {{ user.groups.first.name|default:"Usuario" }}</li>
-      <li><span>Rut:</span> 20.567.786-3</li>
     </ul>
   </div>
 
