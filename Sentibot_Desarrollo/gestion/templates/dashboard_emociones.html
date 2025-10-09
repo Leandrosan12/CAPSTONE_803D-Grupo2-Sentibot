@@ -4,49 +4,28 @@
 {% block title %}Seguimiento{% endblock %}
 
 {% block content %}
-<h2 style="text-align:center; margin-bottom:20px;">📊 Dashboard de Emociones</h2>
+<div class="container my-5">
+    <h2 class="text-center mb-4">📊 Dashboard de Emociones</h2>
 
-<div style="display:flex; flex-wrap: wrap; gap:20px; justify-content:center;">
-    {% for e in emociones %}
-    <div class="card">
-        <h3>{{ e.nombre_completo }}</h3>
-        <p><strong>Rol:</strong> {{ e.rol }}</p>
-        <p><strong>Escuela:</strong> {{ e.escuela }}</p>
-        <p><strong>Sesión:</strong> {{ e.id_sesion }}</p>
-        <p><strong>ID Emoción:</strong> {{ e.id_emocion }}</p>
-        <p><strong>Probabilidad:</strong> {{ e.probabilidad|floatformat:2 }}</p>
-        <p><strong>Inicio:</strong> {{ e.fecha_emocion_inicio }}</p>
-        <p><strong>Fin:</strong> {{ e.fecha_emocion_fin }}</p>
+    <div class="row justify-content-center g-4">
+        {% for e in emociones %}
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+            <div class="card shadow-sm h-100 border-0">
+                <div class="card-body text-center">
+                    <h5 class="card-title fw-bold text-dark">{{ e.nombre_completo }}</h5>
+                    <ul class="list-group list-group-flush text-start small">
+                        <li class="list-group-item"><strong>Rol:</strong> {{ e.rol }}</li>
+                        <li class="list-group-item"><strong>Escuela:</strong> {{ e.escuela }}</li>
+                        <li class="list-group-item"><strong>Sesión:</strong> {{ e.id_sesion }}</li>
+                        <li class="list-group-item"><strong>ID Emoción:</strong> {{ e.id_emocion }}</li>
+                        <li class="list-group-item"><strong>Probabilidad:</strong> {{ e.probabilidad|floatformat:2 }}</li>
+                        <li class="list-group-item"><strong>Inicio:</strong> {{ e.fecha_emocion_inicio }}</li>
+                        <li class="list-group-item"><strong>Fin:</strong> {{ e.fecha_emocion_fin }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
     </div>
-    {% endfor %}
 </div>
-
-<style>
-.card {
-    background-color: #f0f4f8;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    padding: 15px 20px;
-    width: 250px;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 15px rgba(0,0,0,0.2);
-}
-
-.card h3 {
-    margin-top: 0;
-    margin-bottom: 10px;
-    font-size: 18px;
-    color: #1f2937;
-}
-
-.card p {
-    margin: 4px 0;
-    font-size: 14px;
-    color: #374151;
-}
-</style>
 {% endblock %}

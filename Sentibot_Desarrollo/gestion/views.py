@@ -71,15 +71,10 @@ def perfil(request):
     return render(request, 'perfil.html')
 
 
+
 def camara(request):
     return render(request, 'camara.html')
 
-
-
-
-
-def dashboard(request):
-    return render(request, 'dashboard.html')
 
 
 def actividades(request):
