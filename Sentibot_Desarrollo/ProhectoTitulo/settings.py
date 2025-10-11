@@ -78,7 +78,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'sentibot_db',      # tu base de datos
         'USER': 'sentibot',         # tu usuario creado
-        'PASSWORD': 'lilo1309',     # tu contraseña
+        'PASSWORD': 'admin',     # tu contraseña
         'HOST': 'localhost',        # mismo servidor
         'PORT': '3306',             # puerto por defecto de MySQL
         'OPTIONS': {

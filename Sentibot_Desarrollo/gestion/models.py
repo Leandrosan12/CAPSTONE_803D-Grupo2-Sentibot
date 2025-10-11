@@ -107,3 +107,7 @@ class DocenteArea(models.Model):
 
     def __str__(self):
         return self.nombre_area
+    
+
+    
+
