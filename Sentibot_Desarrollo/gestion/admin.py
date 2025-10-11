@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (
     Sala, Emocion, Pregunta, Actividad, Sesion, Respuesta, 
-    EncuestaSatisfaccion, Reporte, DocenteArea
+    EncuestaSatisfaccion, Reporte
 )
 
 @admin.register(Sala)
@@ -36,6 +36,4 @@ class EncuestaSatisfaccionAdmin(admin.ModelAdmin):
 class ReporteAdmin(admin.ModelAdmin):
     list_display = ('usuario', 'tipo', 'fecha_generacion')
 
-@admin.register(DocenteArea)
-class DocenteAreaAdmin(admin.ModelAdmin):
-    list_display = ('nombre_area',)
+

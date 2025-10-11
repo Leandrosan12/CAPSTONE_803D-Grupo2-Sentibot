@@ -14,7 +14,7 @@ def crear_roles_y_permisos(sender, **kwargs):
     Actividad = apps.get_model(app_label, 'Actividad')
     Reporte = apps.get_model(app_label, 'Reporte')
     Encuesta = apps.get_model(app_label, 'EncuestaSatisfaccion')
-    DocenteArea = apps.get_model(app_label, 'DocenteArea')
+   
     User = apps.get_model('auth', 'User')
 
     # Crear permisos
@@ -32,13 +32,13 @@ def crear_roles_y_permisos(sender, **kwargs):
         ('ver_estadisticas_alumnos', 'Puede ver estadísticas de alumnos', Sesion),
         ('gestionar_actividades', 'Puede gestionar actividades', Actividad),
         ('gestionar_reportes', 'Puede generar reportes', Reporte),
-        ('gestionar_escuelas', 'Puede gestionar escuelas', DocenteArea),
+       
         ('gestionar_recomendaciones', 'Puede gestionar recomendaciones', Actividad),
         ('integrar_api_citas', 'Puede integrar API de citas', Sesion),
 
         # Docente
         ('ver_vista_docente', 'Puede ver vista docente', User),
-        ('ver_vista_escuela', 'Puede ver vista escuela', DocenteArea),
+      
         ('ver_recomendaciones', 'Puede ver recomendaciones', Actividad),
         ('ver_graficos', 'Puede ver gráficos de estadísticas', Sesion),
     ]
