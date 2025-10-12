@@ -1,0 +1,27 @@
+/* Estilos generales para el seguimiento */
+body {
+  background: linear-gradient(180deg, #eef3f9 0%, #dbe7f3 100%);
+  font-family: 'Poppins', sans-serif;
+}
+
+.card-header {
+  background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+  color: white;
+  font-weight: 500;
+}
+
+.card {
+  border-radius: 1.2rem;
+}
+
+.card-body {
+  height: 350px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+h2 {
+  font-weight: 600;
+  color: #333;
+}

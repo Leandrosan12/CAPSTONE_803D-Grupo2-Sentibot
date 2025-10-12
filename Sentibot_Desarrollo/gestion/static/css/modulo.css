@@ -1,0 +1,21 @@
+body { background-color: #f8f9fa; }
+h3,h4,h5 { font-weight:600; }
+
+.mod-card {
+  border-radius: 16px; color: white; padding: 28px; min-height: 180px;
+  position: relative; overflow: hidden; background-size: cover; background-position: center;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.2); transition: transform .25s, box-shadow .25s;
+}
+.mod-card:hover { transform: translateY(-5px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+.mod-overlay { position:absolute; inset:0; background: linear-gradient(135deg, rgba(0,0,0,.55), rgba(0,0,0,.25)); }
+.mod-content { position:relative; z-index:2; }
+
+.btn-ingresar { background-color:#198754; border:none; color:white; border-radius:8px; padding:8px 20px; font-weight:500; }
+
+.avatar-circle { width:110px; height:110px; border-radius:50%; object-fit:cover; border:4px solid white; box-shadow:0 0 10px rgba(255,255,255,.4); }
+
+.screen { display:none; } .screen.active { display:block; animation: fadeIn .4s ease; }
+@keyframes fadeIn { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+
+.chart-card { border-radius:12px; background:white; box-shadow:0 5px 16px rgba(0,0,0,.1); padding:16px; }
+.chart-wrapper { height:220px; }

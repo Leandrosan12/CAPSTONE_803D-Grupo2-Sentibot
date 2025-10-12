@@ -72,6 +72,22 @@ def perfil(request):
 
 def camara(request):
     return render(request, 'camara.html')
+    return render(request, "camara.html")
+def extra(request):
+    return render(request, 'extra.html')
+
+def agenda_view(request):
+    return render(request, 'agenda.html')
+
+# ------------------------------
+# Modulo
+# ------------------------------
+def modulo(request):
+    return render(request, 'modulo.html')
+
+# ------------------------------
+def dashboard(request):
+    return render(request, "dashboard.html")
 
 
 # ------------------------------
