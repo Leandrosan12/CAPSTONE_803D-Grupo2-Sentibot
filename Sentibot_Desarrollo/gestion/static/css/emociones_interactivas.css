@@ -1,0 +1,107 @@
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f4f6f9;
+}
+
+h2, h3 {
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+.menu-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 25px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.menu-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.menu-icon {
+  font-size: 48px;
+  color: #0d6efd;
+  margin-bottom: 15px;
+}
+
+.section {
+  display: none;
+  margin-top: 50px;
+}
+
+.btn-small {
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 8px 24px;
+  transition: all 0.2s;
+}
+
+.btn-small:hover {
+  transform: scale(1.05);
+}
+
+/* Cámara */
+.camara-container {
+  background: #000;
+  border-radius: 16px;
+  overflow: hidden;
+  margin: 0 auto;
+  position: relative;
+  max-width: 600px;
+}
+
+.camara-container video {
+  width: 100%;
+  height: auto;
+  border-radius: 16px;
+  object-fit: cover;
+}
+
+.estado {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  padding: 6px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+/* Foto capturada */
+.captured-photo-card {
+  margin-top: 20px;
+  background: #fff;
+  padding: 15px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.captured-photo-card img {
+  width: 100%;
+  border-radius: 16px;
+}
+
+/* Reporte */
+.report-box {
+  background: #fff;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  min-height: 180px;
+}
+
+.report-box h5 {
+  font-weight: 700;
+}

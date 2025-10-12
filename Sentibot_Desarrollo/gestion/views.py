@@ -95,11 +95,16 @@ def camara(request):
 def extra(request):
     return render(request, 'extra.html')
 
+def agenda_view(request):
+    return render(request, 'agenda.html')
 
+# ------------------------------
+# Modulo
+# ------------------------------
+def modulo(request):
+    return render(request, 'modulo.html')
 
-
-
-
+# ------------------------------
 def dashboard(request):
     return render(request, "dashboard.html")
 

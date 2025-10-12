@@ -4,27 +4,11 @@
 {% block title %}Emociones Interactivas{% endblock %}
 
 {% block content %}
+<!-- Bootstrap -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-<style>
-body { font-family:'Segoe UI',sans-serif; background-color:#f4f6f9; }
-h2,h3 { font-weight:700; color:#2c3e50; }
-.menu-card { background:#fff; border-radius:16px; padding:25px; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.1); transition:all 0.3s ease; }
-.menu-card:hover { transform:translateY(-5px); box-shadow:0 8px 20px rgba(0,0,0,0.15); }
-.menu-icon { font-size:48px; color:#0d6efd; margin-bottom:15px; }
-.section { display:none; margin-top:50px; }
-.btn-small { border-radius:12px; font-weight:600; font-size:0.95rem; padding:8px 24px; transition:all 0.2s; }
-.btn-small:hover { transform:scale(1.05); }
-
-/* Cámara y predecisión */
-.camara-container { background:#000; border-radius:16px; overflow:hidden; margin:0 auto; position:relative; max-width:600px; }
-.camara-container video { width:100%; height:auto; border-radius:16px; object-fit:cover; }
-.estado { position:absolute; bottom:0; width:100%; background:rgba(0,0,0,0.75); color:#fff; padding:6px; text-align:center; font-weight:600; font-size:0.9rem; }
-.captured-photo-card { margin-top:20px; background:#fff; padding:15px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.15); text-align:center; max-width:600px; margin-left:auto; margin-right:auto; }
-.captured-photo-card img { width:100%; border-radius:16px; }
-.report-box { background:#fff; padding:20px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.1); margin-bottom:20px; min-height:180px; }
-.report-box h5 { font-weight:700; }
-</style>
+<!-- CSS externo -->
+<link href="{% static 'css/emociones_interactivas.css' %}" rel="stylesheet">
 
 <div class="container text-center mt-4">
   <h2 class="mb-5">🎭 Emociones Interactivas</h2>
@@ -65,82 +49,6 @@ h2,h3 { font-weight:700; color:#2c3e50; }
   </div>
 </div>
 
-<script>
-let camaraActiva=false, stream=null;
-let segundosFeliz=0, segundosTriste=0, segundosNeutral=0, segundosNull=0;
-
-// Activar cámara
-function activarCamara(si){
-    if(si){
-        document.getElementById('camaraSection').style.display='block';
-        iniciarCamara();
-    }else{
-        // Redirige directamente a extras.html
-        window.location.href="{% url 'extra' %}";
-    }
-}
-
-// Iniciar cámara y tomar foto automáticamente
-function iniciarCamara(){
-    const videoCamara = document.getElementById('videoCamara');
-    const estadoCamara = document.querySelector('.estado');
-    const capturedPhotoContainer = document.getElementById('capturedPhotoContainer');
-    const felizEl = document.getElementById('feliz');
-    const tristeEl = document.getElementById('triste');
-    const neutralEl = document.getElementById('neutral');
-    const nullEl = document.getElementById('null');
-
-    navigator.mediaDevices.getUserMedia({video:true})
-    .then(s=>{
-        stream=s;
-        videoCamara.srcObject = stream;
-        camaraActiva = true;
-        estadoCamara.textContent='Cámara activa';
-
-        // Tomar primera foto automáticamente
-        tomarFoto();
-
-        // Simular predicción cada 5s
-        setInterval(()=>{
-            const emocionesArray=["Feliz","Triste","Neutral","Null"];
-            const emocion=emocionesArray[Math.floor(Math.random()*emocionesArray.length)];
-
-            if(emocion==="Feliz") segundosFeliz+=5;
-            if(emocion==="Triste") segundosTriste+=5;
-            if(emocion==="Neutral") segundosNeutral+=5;
-            if(emocion==="Null") segundosNull+=5;
-
-            felizEl.textContent=`😊 Feliz: ${segundosFeliz} seg`;
-            tristeEl.textContent=`😢 Triste: ${segundosTriste} seg`;
-            neutralEl.textContent=`😐 Neutral: ${segundosNeutral} seg`;
-            nullEl.textContent=`❓ Null: ${segundosNull} seg`;
-
-            tomarFoto();
-        },5000);
-
-    }).catch(err=>{
-        estadoCamara.textContent='⚠️ Error al iniciar cámara';
-        console.error(err);
-    });
-}
-
-// Tomar foto y mostrar en tarjeta
-function tomarFoto(){
-    if(!camaraActiva) return;
-    const videoCamara = document.getElementById('videoCamara');
-    const capturedPhotoContainer = document.getElementById('capturedPhotoContainer');
-    const canvas = document.createElement('canvas');
-    canvas.width = videoCamara.videoWidth || 640;
-    canvas.height = videoCamara.videoHeight || 480;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(videoCamara,0,0,canvas.width,canvas.height);
-    const imgData = canvas.toDataURL('image/png');
-    capturedPhotoContainer.innerHTML = `
-        <div class="captured-photo-card">
-            <h6>📸 Foto capturada automáticamente</h6>
-            <img src="${imgData}" alt="Foto captura">
-        </div>
-    `;
-}
-</script>
+<!-- JS externo -->
+<script src="{% static 'js/emociones_interactivas.js' %}"></script>
 {% endblock %}

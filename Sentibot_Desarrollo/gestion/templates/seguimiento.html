@@ -4,144 +4,42 @@
 {% block title %}Seguimiento{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
+<link href="{% static '/css/seguimiento.css' %}" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="container mt-5 mb-5">
   <h2 class="mb-4 text-center">📊 Seguimiento de Emociones</h2>
 
   <div class="row g-4">
-    <!-- Gráfico de Barras -->
     <div class="col-md-6">
-      <div class="card shadow-lg border-0 rounded-4 h-100">
-        <div class="card-header text-center bg-gradient text-white" 
-             style="background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);">
-          Emociones
-        </div>
-        <div class="card-body d-flex align-items-center justify-content-center">
-          <canvas id="chartBarras" style="max-height:300px;"></canvas>
-        </div>
+      <div class="card shadow-lg border-0 h-100">
+        <div class="card-header text-center">Gráfico de Barras</div>
+        <div class="card-body"><canvas id="chartBarras"></canvas></div>
       </div>
     </div>
 
-    <!-- Gráfico de Pastel -->
     <div class="col-md-6">
-      <div class="card shadow-lg border-0 rounded-4 h-100">
-        <div class="card-header text-center bg-gradient text-white" 
-             style="background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);">
-          Emociones
-        </div>
-        <div class="card-body d-flex align-items-center justify-content-center">
-          <canvas id="chartPastel" style="max-height:300px;"></canvas>
-        </div>
+      <div class="card shadow-lg border-0 h-100">
+        <div class="card-header text-center">Gráfico de Pastel</div>
+        <div class="card-body"><canvas id="chartPastel"></canvas></div>
       </div>
     </div>
 
-    <!-- Gráfico Gauge -->
     <div class="col-md-6">
-      <div class="card shadow-lg border-0 rounded-4 h-100">
-        <div class="card-header text-center bg-gradient text-white" 
-             style="background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);">
-          Emociones
-        </div>
-        <div class="card-body d-flex flex-column align-items-center justify-content-center">
-          <canvas id="chartGauge" style="max-height:300px;"></canvas>
-          <h5 class="mt-3 text-secondary">Estado: 75%</h5>
-        </div>
+      <div class="card shadow-lg border-0 h-100">
+        <div class="card-header text-center">Progreso General</div>
+        <div class="card-body flex-column"><canvas id="chartGauge"></canvas></div>
       </div>
     </div>
 
-    <!-- Gráfico Radar -->
     <div class="col-md-6">
-      <div class="card shadow-lg border-0 rounded-4 h-100">
-        <div class="card-header text-center bg-gradient text-white" 
-             style="background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);">
-          Emociones
-        </div>
-        <div class="card-body d-flex align-items-center justify-content-center">
-          <canvas id="chartRadar" style="max-height:300px;"></canvas>
-        </div>
+      <div class="card shadow-lg border-0 h-100">
+        <div class="card-header text-center">Gráfico Radar</div>
+        <div class="card-body"><canvas id="chartRadar"></canvas></div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-  // Paleta de colores suave
-  const colors = ['#6a11cb', '#2575fc', '#ff7eb3', '#fbc531', '#4cd137'];
-
-  // Gráfico de Barras
-  new Chart(document.getElementById('chartBarras'), {
-    type: 'bar',
-    data: {
-      labels: ['Alegría', 'Tristeza', 'Ira', 'Miedo'],
-      datasets: [{
-        label: 'Emociones',
-        data: [12, 19, 17, 5],
-        backgroundColor: colors
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: { legend: { display: false } }
-    }
-  });
-
-  // Gráfico de Pastel
-  new Chart(document.getElementById('chartPastel'), {
-    type: 'pie',
-    data: {
-      labels: ['Alegría', 'Tristeza', 'Ira', 'Miedo', 'Asco'],
-      datasets: [{
-        data: [10, 20, 15, 8, 7],
-        backgroundColor: colors
-      }]
-    },
-    options: { maintainAspectRatio: false }
-  });
-
-  // Gráfico tipo Gauge
-  new Chart(document.getElementById('chartGauge'), {
-    type: 'doughnut',
-    data: {
-      labels: ['Progreso', 'Restante'],
-      datasets: [{
-        data: [75, 25],
-        backgroundColor: ['#6a11cb', '#e0e0e0'],
-        cutout: '70%'
-      }]
-    },
-    options: {
-      rotation: -90,
-      circumference: 180,
-      plugins: { legend: { display: false } },
-      maintainAspectRatio: false
-    }
-  });
-
-  // Gráfico Radar
-  new Chart(document.getElementById('chartRadar'), {
-    type: 'radar',
-    data: {
-      labels: ['Alegría', 'Tristeza', 'Ira', 'Miedo', 'Asco'],
-      datasets: [{
-        label: 'Intensidad',
-        data: [15, 20, 10, 8, 12],
-        backgroundColor: 'rgba(106, 17, 203, 0.2)',
-        borderColor: '#6a11cb',
-        pointBackgroundColor: '#2575fc'
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        r: {
-          angleLines: { color: '#ddd' },
-          grid: { color: '#ccc' }
-        }
-      }
-    }
-  });
-</script>
+<script src="{% static '/js/seguimiento.js' %}"></script>
 {% endblock %}

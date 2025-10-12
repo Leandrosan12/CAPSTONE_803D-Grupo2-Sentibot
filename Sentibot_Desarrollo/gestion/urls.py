@@ -10,8 +10,10 @@ urlpatterns = [
     path('seguimiento/', views.seguimiento, name='seguimiento'),
     path('logout/', views.logout_view, name='logout'),
     path('camara/', views.camara, name='camara'),
-    
+    path('agenda/', views.agenda_view, name='agenda'),
     path('emociones-data/', views.emociones_data, name='emociones_data'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('extra/', views.extra, name='extra'),
+    path('modulo/', views.modulo, name='modulo')
+    
 ]
