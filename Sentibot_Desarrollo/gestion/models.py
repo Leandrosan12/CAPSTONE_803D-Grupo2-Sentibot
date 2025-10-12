@@ -98,16 +98,17 @@ class Reporte(models.Model):
     def __str__(self):
         return f"Reporte {self.tipo} - {self.usuario.username} - {self.fecha_generacion.date()}"
 
-# ------------------------------
-# DocenteArea
-# ------------------------------
-class DocenteArea(models.Model):
-    nombre_area = models.CharField(max_length=100)
-    docentes = models.ManyToManyField(User, related_name="areas_docente")  # filtrar usuarios por rol "Docente"
 
+<<<<<<< HEAD
+=======
     def __str__(self):
         return self.nombre_area
     
 
     
 
+<<<<<<< HEAD
+=======
+>>>>>>> 7b018d93d72a4dd9ab805114f84ccbe1746fc1ec
+>>>>>>> 653918ca86d64d9cfac87c1efe0684436af9160b
+>>>>>>> ceb9425c073fef9e0553199a2c48d4516dc00226
