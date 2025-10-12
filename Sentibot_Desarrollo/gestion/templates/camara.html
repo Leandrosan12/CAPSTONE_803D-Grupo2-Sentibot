@@ -1,243 +1,67 @@
 {% extends "base.html" %}
-{% block title %}{% endblock %}
-{% block content %}
+{% block title %}Dashboard Emociones{% endblock %}
 {% load static %}
 
-<title>Dashboard Emociones</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #f0f2f5;
-    margin: 20px;
-    text-align: center;
-  }
+{% block content %}
+<div class="container my-5 text-center">
+  <h2 class="mb-4">Dashboard de Emociones</h2>
 
-  .camara-container {
-    position: relative;
-    width: 100%;
-    max-width: 600px;
-    margin: 0 auto 20px auto;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 6px 12px rgba(0,0,0,0.2);
-  }
-
-  .camara-container img,
-  .camara-container video {
-    width: 100%;
-    display: block;
-  }
-
-  .estado {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    background: rgba(0,0,0,0.85);
-    color: white;
-    padding: 8px 0;
-    font-weight: bold;
-  }
-
-  button#startBtn {
-    background-color: #7ED321;
-    color: white;
-    border: none;
-    padding: 12px 25px;
-    font-size: 18px;
-    font-weight: bold;
-    border-radius: 8px;
-    cursor: pointer;
-    margin: 15px 0;
-  }
-
-  button#startBtn:hover {
-    background-color: #52a003;
-  }
-
-  #usuario {
-    font-size: 20px;
-    font-weight: bold;
-    margin-bottom: 15px;
-  }
-
-  .report-container {
-    display: none;
-    max-width: 900px;
-    margin: 0 auto;
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    flex-wrap: wrap;
-  }
-
-  .report-box {
-    background-color: #9b5f5f;
-    color: white;
-    padding: 15px;
-    border-radius: 10px;
-    flex: 1 1 200px;
-    min-width: 200px;
-  }
-
-  .report-box h3 {
-    margin-top: 0;
-  }
-
-  .foto-box img {
-    width: 200px;
-    height: 200px;
-    border-radius: 12px;
-    object-fit: cover;
-  }
-</style>
-</head>
-<body>
-
-<h2>Inicio</h2>
-
-<div class="camara-container">
-  <video id="videoCamara" autoplay playsinline></video>
-  <div class="estado">Apagado</div>
-</div>
-
-<button id="startBtn">Iniciar</button>
-
-<div id="usuario">Hombre Completo</div>
-
-<div class="report-container" id="reportContainer">
- 
-
-</div>
-
-
-
-</body>
-
- <div class="row g-4"> 
-  <!-- Reporte actual -->
-  <div class="col-12 col-md-6 col-lg-4">
-    <div class="report-box p-3 border rounded">
-      <h3>Reporte actual</h3>
-      <p id="feliz">Feliz: 0 seg</p>
-      <p id="triste">Triste: 0 seg</p>
-      <p id="neutral">Neutral: 0 seg</p>
-      <p id="null">Null: 0 seg</p>
-    </div>
-  </div>
-  
-  <!-- Imagen -->
-  <div class="col-12 col-md-6 col-lg-4">
-    <div class="foto-box text-center p-3 border rounded">
-      <img src="{% static 'img/prueba.jpg' %}" 
-           alt="icono Sentibot" 
-           class="icono img-fluid" 
-           id="fotoCapturada">
+  <!-- Cámara -->
+  <div class="card shadow-lg mx-auto mb-4" style="max-width: 600px;">
+    <div class="position-relative">
+      <video id="videoCamara" autoplay playsinline class="w-100 rounded-top"></video>
+      <div class="estado position-absolute bottom-0 w-100 bg-dark bg-opacity-75 text-white py-2 fw-bold">
+        Apagado
+      </div>
     </div>
   </div>
 
+  <!-- Botón principal -->
+  <button id="startBtn" class="btn btn-success btn-lg mb-3">Iniciar</button>
 
-  
-  <!-- Informe básico -->
-  <div class="col-12 col-md-6 col-lg-4">
-    <div class="report-box p-3 border rounded">
-      <h3>Informe básico</h3>
-      <p id="estado">Estado: Neutral</p>
-      <p id="porcentaje">Porcentaje: 0%</p>
-      <p id="rostro">Estado del rostro: No detectado</p>
-      <p id="sujeto">Id: ---</p>
+  <!-- Usuario -->
+  <div id="usuario" class="fw-bold fs-5 mb-4">Hombre Completo</div>
+
+  <!-- Reportes -->
+  <div class="row g-4">
+    <!-- Reporte actual -->
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <h4 class="card-title mb-3">Reporte actual</h4>
+          <p id="feliz">Feliz: 0 seg</p>
+          <p id="triste">Triste: 0 seg</p>
+          <p id="neutral">Neutral: 0 seg</p>
+          <p id="null">Null: 0 seg</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Imagen -->
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card shadow-sm border-0 text-center">
+        <div class="card-body">
+          <h4 class="card-title mb-3">Captura actual</h4>
+          <img src="{% static 'img/prueba.jpg' %}" alt="icono Sentibot" id="fotoCapturada" class="img-fluid rounded">
+        </div>
+      </div>
+    </div>
+
+    <!-- Informe básico -->
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <h4 class="card-title mb-3">Informe básico</h4>
+          <p id="estado">Estado: Neutral</p>
+          <p id="porcentaje">Porcentaje: 0%</p>
+          <p id="rostro">Estado del rostro: No detectado</p>
+          <p id="sujeto">Id: ---</p>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const startBtn = document.getElementById('startBtn');
-    const videoCamara = document.getElementById('videoCamara');
-    const estadoCamara = document.querySelector('.estado');
-    const fotoCapturada = document.getElementById('fotoCapturada');
-
-    // Referencias a las tarjetas
-    const felizEl = document.getElementById('feliz');
-    const tristeEl = document.getElementById('triste');
-    const neutralEl = document.getElementById('neutral');
-    const nullEl = document.getElementById('null');
-
-    const estadoEl = document.getElementById('estado');
-    const porcentajeEl = document.getElementById('porcentaje');
-    const rostroEl = document.getElementById('rostro');
-    const sujetoEl = document.getElementById('sujeto');
-
-    let stream = null;
-    let fotoInterval = null;
-    let camaraEncendida = false;
-
-    // Simulador de segundos para emociones
-    let segundosFeliz = 0;
-    let segundosTriste = 0;
-    let segundosNeutral = 0;
-    let segundosNull = 0;
-
-    startBtn.addEventListener('click', async () => {
-      if (!camaraEncendida) {
-        try {
-          stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-          videoCamara.srcObject = stream;
-          estadoCamara.textContent = 'Cámara activa';
-          camaraEncendida = true;
-          startBtn.textContent = 'Apagar';
-
-          // Tomar foto cada 10 segundos
-          fotoInterval = setInterval(() => {
-            const canvas = document.createElement('canvas');
-            canvas.width = videoCamara.videoWidth;
-            canvas.height = videoCamara.videoHeight;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(videoCamara, 0, 0, canvas.width, canvas.height);
-            const fotoBase64 = canvas.toDataURL('image/png');
-            fotoCapturada.src = fotoBase64;
-
-            // Simular valores de prueba
-            const emociones = ["Feliz", "Triste", "Neutral", "Null"];
-            const emocionRandom = emociones[Math.floor(Math.random() * emociones.length)];
-            const porcentajeRandom = Math.floor(Math.random() * 100) + 1;
-
-            // Aumentar contadores de ejemplo
-            if (emocionRandom === "Feliz") segundosFeliz += 10;
-            if (emocionRandom === "Triste") segundosTriste += 10;
-            if (emocionRandom === "Neutral") segundosNeutral += 10;
-            if (emocionRandom === "Null") segundosNull += 10;
-
-            // Actualizar tarjeta Reporte actual
-            felizEl.textContent = `Feliz: ${segundosFeliz} seg`;
-            tristeEl.textContent = `Triste: ${segundosTriste} seg`;
-            neutralEl.textContent = `Neutral: ${segundosNeutral} seg`;
-            nullEl.textContent = `Null: ${segundosNull} seg`;
-
-            // Actualizar tarjeta Informe básico
-            estadoEl.textContent = `Estado: ${emocionRandom}`;
-            porcentajeEl.textContent = `Porcentaje: ${porcentajeRandom}%`;
-            rostroEl.textContent = `Estado del rostro: Detectado`;
-            sujetoEl.textContent = `Id: 001`;
-
-          }, 5000);
-
-        } catch (err) {
-          console.error("Error al acceder a la cámara: ", err);
-          estadoCamara.textContent = 'Error al iniciar cámara';
-        }
-      } else {
-        // Apagar cámara
-        stream.getTracks().forEach(track => track.stop());
-        videoCamara.srcObject = null;
-        clearInterval(fotoInterval);
-        estadoCamara.textContent = 'Apagado';
-        camaraEncendida = false;
-        startBtn.textContent = 'Iniciar';
-      }
-    });
-  });
-</script>
-    
- 
-
+<!-- Vincula el script externo -->
+<script src="{% static 'js/camara.js' %}"></script>
 {% endblock %}

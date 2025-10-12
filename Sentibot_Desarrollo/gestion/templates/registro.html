@@ -9,15 +9,23 @@
     <h2>Crear Cuenta</h2>
 <form method="post">
     {% csrf_token %}
+        <div class="mb-3">
+        <label for="first_name" class="form-label">Nombre</label>
+        <input type="first_name" class="form-control" id="first_name" name="first_name" required>
+    </div>
+        <div class="mb-3">
+        <label for="last_name" class="form-label">Apellido</label>
+        <input type="last_name" class="form-control" id="last_name" name="last_name" required>
+    </div>
     <div class="mb-3">
         <label for="correo" class="form-label">Correo electrónico</label>
         <input type="email" class="form-control" id="correo" name="correo" required>
     </div>
-
     <div class="mb-3">
         <label for="contrasena" class="form-label">Contraseña</label>
         <input type="password" class="form-control" id="contrasena" name="contrasena" required>
     </div>
+
 
     <button type="submit" class="btn btn-gradiente w-100">Enviar</button>
     <a href="{% url 'login' %}">¿Ya tienes cuenta?</a>

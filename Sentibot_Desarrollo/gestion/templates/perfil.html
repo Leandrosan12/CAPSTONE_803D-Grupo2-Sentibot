@@ -4,100 +4,42 @@
 {% block title %}Perfil de Usuario{% endblock %}
 
 {% block content %}
-<style>
-  
+<div class="container my-5">
+  <div class="card shadow-lg mx-auto text-center" style="max-width: 500px;">
+    <div class="card-body">
+      <!-- Foto de perfil -->
+      <img src="{% static 'Icon/gente.gif' %}" 
+           alt="Foto de perfil" 
+           class="rounded-circle border border-success border-3 mb-3" 
+           style="width: 120px; height: 120px; object-fit: cover;">
 
-  .perfil-card {
-    max-width: 500px;
-    margin: 60px auto;
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
-    text-align: center;
-    padding: 30px 20px;
-  }
+      <!-- Nombre -->
+      <h4 class="card-title fw-bold text-dark mb-3">
+        {{ user.get_full_name|default:user.username }}
+      </h4>
 
-  /* Imagen de perfil */
-  .perfil-card .foto-perfil {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    border: 4px solid #4CAF50;
-    object-fit: cover;
-    margin-bottom: 15px;
-  }
+      <!-- Datos del perfil -->
+      <ul class="list-group list-group-flush text-start mb-3">
+        <li class="list-group-item d-flex justify-content-between">
+          <span class="fw-semibold">Sede:</span> <span>Melipilla</span>
+        </li>
+        <li class="list-group-item d-flex justify-content-between">
+          <span class="fw-semibold">Nombre:</span> <span>{{ user.first_name }}</span>
+        </li>
+        <li class="list-group-item d-flex justify-content-between">
+          <span class="fw-semibold">Apellido:</span> <span>{{ user.last_name }}</span>
+        </li>
+        <li class="list-group-item d-flex justify-content-between">
+          <span class="fw-semibold">Correo:</span> <span>{{ user.email }}</span>
+        </li>
+        <li class="list-group-item d-flex justify-content-between">
+          <span class="fw-semibold">Rol:</span> <span>{{ user.groups.first.name|default:"Usuario" }}</span>
+        </li>
+      </ul>
 
-  .perfil-card .nombre {
-    font-size: 1.6rem;
-    font-weight: bold;
-    color: #2c3e50;
-    margin-bottom: 10px;
-    
-  }
-
-  /* Datos */
-  .perfil-datos {
-    margin-top: 15px;
-    text-align: left;
-    padding: 0 15px;
-  }
-
-  .perfil-datos ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-
-  .perfil-datos ul li {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px 0;
-    border-bottom: 1px solid #ddd;
-    font-size: 0.95rem;
-  }
-
-  .perfil-datos ul li span {
-    font-weight: bold;
-    color: #333;
-  }
-
-  /* Botón Editar */
-  .editar-btn {
-    margin-top: 20px;
-    background: #4CAF50;
-    color: white;
-    padding: 10px 25px;
-    border-radius: 10px;
-    font-size: 1rem;
-    font-weight: bold;
-    border: none;
-    cursor: pointer;
-    transition: background 0.3s, transform 0.2s;
-  }
-
-  .editar-btn:hover {
-    background: #43a047;
-    transform: scale(1.05);
-  }
-</style>
-
-<div class="perfil-card">
-  <!-- Foto y nombre -->
-  <img src="{% static 'Icon/gente.gif' %}" alt="Foto de perfil" class="foto-perfil">
-  <div class="nombre">{{ user.get_full_name|default:user.username }}</div>
-
-  <!-- Datos -->
-  <div class="perfil-datos">
-    <ul>
-      <li><span>Sede:</span> Melipilla</li>
-      <li><span>Correo:</span> {{ user.email }}</li>
-      <li><span>Rol:</span> {{ user.groups.first.name|default:"Usuario" }}</li>
-      <li><span>Rut:</span> 20.567.786-3</li>
-    </ul>
+      <!-- Botón editar -->
+      <button class="btn btn-success px-4 fw-bold">Editar</button>
+    </div>
   </div>
-
-  <!-- Botón Editar -->
-  <button class="editar-btn">Editar</button>
 </div>
 {% endblock %}
