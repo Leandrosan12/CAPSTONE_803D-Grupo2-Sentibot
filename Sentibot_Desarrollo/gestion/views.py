@@ -4,7 +4,6 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.template.loader import get_template
 from django.http import HttpResponse
-from weasyprint import HTML
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 
 
