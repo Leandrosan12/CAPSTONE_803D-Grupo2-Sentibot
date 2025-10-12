@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Seguimiento{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h2 class="text-center mb-4">📊 Dashboard de Emociones</h2>
+
+    <div class="row justify-content-center g-4">
+        {% for e in emociones %}
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+            <div class="card shadow-sm h-100 border-0">
+                <div class="card-body text-center">
+                    <h5 class="card-title fw-bold text-dark">{{ e.nombre_completo }}</h5>
+                    <ul class="list-group list-group-flush text-start small">
+                        <li class="list-group-item"><strong>Rol:</strong> {{ e.rol }}</li>
+                        <li class="list-group-item"><strong>Escuela:</strong> {{ e.escuela }}</li>
+                        <li class="list-group-item"><strong>Sesión:</strong> {{ e.id_sesion }}</li>
+                        <li class="list-group-item"><strong>ID Emoción:</strong> {{ e.id_emocion }}</li>
+                        <li class="list-group-item"><strong>Probabilidad:</strong> {{ e.probabilidad|floatformat:2 }}</li>
+                        <li class="list-group-item"><strong>Inicio:</strong> {{ e.fecha_emocion_inicio }}</li>
+                        <li class="list-group-item"><strong>Fin:</strong> {{ e.fecha_emocion_fin }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

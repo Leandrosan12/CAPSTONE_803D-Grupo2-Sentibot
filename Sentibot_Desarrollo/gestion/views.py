@@ -1,96 +1,77 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth.models import User
-from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
-from django.contrib import messages
-from django.template.loader import get_template
+from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout, get_user_model
 from django.http import HttpResponse, JsonResponse
+from django.template.loader import get_template
+from django.db.models import Count
 from django.db import connection
-
-
-# Usuario de prueba
-USUARIO_PRUEBA = {
-    "correo": "test@correo.com",
-    "contrasena": "1234"
-}
-
-# ------------------------------
-# LOGIN
-# ------------------------------
-def login(request):
-    if request.method == "POST":
-        correo = request.POST.get("correo")
-        contrasena = request.POST.get("contrasena")
-
-        # Usuario de prueba
-        if correo == USUARIO_PRUEBA["correo"] and contrasena == USUARIO_PRUEBA["contrasena"]:
-            return redirect("home")
-
-        # Usuario real de la base de datos
-        user = authenticate(request, username=correo, password=contrasena)
-        if user is not None:
-            auth_login(request, user)
-            return redirect("camara")
-        else:
-            messages.error(request, "Correo o contraseña incorrectos")
-            return render(request, "login.html")
-
-    return render(request, "login.html")
+from gestion.models import Usuario, Emocion, EmocionReal, Sesion
+User = get_user_model()
 
 
 # ------------------------------
-# REGISTRO
+# Vistas de autenticación
 # ------------------------------
-def registro(request):
-    if request.method == "POST":
-        correo = request.POST.get("correo")
-        contrasena = request.POST.get("contrasena")
 
-        if User.objects.filter(username=correo).exists():
-            messages.error(request, "El correo ya está registrado.")
-            return redirect("registro")
-
-        user = User.objects.create_user(username=correo, email=correo, password=contrasena)
-        user.save()
-        messages.success(request, "Cuenta creada con éxito. Ahora inicia sesión.")
-        return redirect("login")
-
-    return render(request, "registro.html")
-
-
-# ------------------------------
-# HOME
-# ------------------------------
 def home(request):
     if not request.user.is_authenticated:
         return redirect("login")
     return render(request, "home.html", {"user": request.user})
 
 
+def registro(request):
+    if request.method == "POST":
+        email = request.POST.get('correo')
+        password = request.POST.get('contrasena')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+
+        if User.objects.filter(email=email).exists():
+            return render(request, 'registro.html', {'error': 'El email ya está registrado'})
+
+        User.objects.create_user(
+            username=email,
+            email=email,
+            password=password,
+            first_name=first_name,
+            last_name=last_name
+        )
+        return redirect('login')
+
+    return render(request, 'registro.html')
+
+
+def login(request):
+    if request.method == "POST":
+        email = request.POST.get('correo')
+        password = request.POST.get('contrasena')
+
+        user = authenticate(request, email=email, password=password)
+
+        if user is not None and user.is_active:
+            auth_login(request, user)
+            return redirect('camara')
+        else:
+            return render(request, 'login.html', {'error': 'Correo o contraseña incorrectos'})
+
+    return render(request, 'login.html')
+
+
+def logout_view(request):
+    auth_logout(request)
+    return redirect('login')
+
+
 # ------------------------------
-# PERFIL
+# Vistas principales
 # ------------------------------
+
 def perfil(request):
-    return render(request, "perfil.html")
+    return render(request, 'perfil.html')
 
 
-# ------------------------------
-# ACTIVIDADES
-# ------------------------------
-def actividades(request):
-    return render(request, "actividades.html")
 
-
-# ------------------------------
-# SEGUIMIENTO
-# ------------------------------
-def seguimiento(request):
-    return render(request, "seguimiento.html")
-
-
-# ------------------------------
-# CÁMARA
-# ------------------------------
 def camara(request):
+<<<<<<< HEAD
     return render(request, "camara.html")
 def extra(request):
     return render(request, 'extra.html')
@@ -107,6 +88,9 @@ def modulo(request):
 # ------------------------------
 def dashboard(request):
     return render(request, "dashboard.html")
+=======
+    return render(request, 'camara.html')
+>>>>>>> origin/Alvarez
 
 
 # ------------------------------
@@ -116,10 +100,14 @@ def logout_view(request):
     auth_logout(request)
     return redirect("login")
 
+def actividades(request):
+    return render(request, 'actividades.html')
+
 
 # ------------------------------
-# EMOCIONES DATA (JSON para gráficos)
+# Vistas con datos
 # ------------------------------
+
 def emociones_data(request):
     with connection.cursor() as cursor:
         cursor.execute("""
@@ -134,3 +122,55 @@ def emociones_data(request):
         "values": [row[1] for row in rows],
     }
     return JsonResponse(data)
+
+
+# gestion/views.py
+from django.shortcuts import render
+from .models import EmocionReal
+from django.db.models import Count
+
+def seguimiento(request):
+    datos = EmocionReal.objects.values('emocion').annotate(total=Count('emocion'))
+    etiquetas = [d['emocion'] for d in datos]
+    valores = [d['total'] for d in datos]
+
+    return render(request, 'seguimiento.html', {
+        'emociones_labels': etiquetas,
+        'emociones_counts': valores,
+    })
+
+from django.shortcuts import render
+from .models import EmocionCamara
+
+from django.db import connection
+from django.shortcuts import render
+
+from .models import Usuario
+
+def lista_usuarios(request):
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT * FROM gestion_usuario")
+        columnas = [col[0] for col in cursor.description]
+        datos = [dict(zip(columnas, row)) for row in cursor.fetchall()]
+
+    return render(request, 'lista_usuarios.html', {'usuarios': datos})
+
+
+
+def dashboard_emociones(request):
+    # Ejecutamos la vista directamente
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT * FROM vw_emociones_camara")
+        columnas = [col[0] for col in cursor.description]
+        datos = [dict(zip(columnas, row)) for row in cursor.fetchall()]
+
+    context = {
+        'emociones': datos
+    }
+    return render(request, 'dashboard_emociones.html', context)
+
+def mantenimiento(request):
+    return render(request, 'mantenimiento.html')
+
+def extra(request):
+    return render(request, 'extra.html')
