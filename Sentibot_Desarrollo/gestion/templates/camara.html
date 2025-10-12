@@ -1,67 +1,146 @@
 {% extends "base.html" %}
-{% block title %}Dashboard Emociones{% endblock %}
 {% load static %}
 
+{% block title %}Emociones Interactivas{% endblock %}
+
 {% block content %}
-<div class="container my-5 text-center">
-  <h2 class="mb-4">Dashboard de Emociones</h2>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-  <!-- Cámara -->
-  <div class="card shadow-lg mx-auto mb-4" style="max-width: 600px;">
-    <div class="position-relative">
-      <video id="videoCamara" autoplay playsinline class="w-100 rounded-top"></video>
-      <div class="estado position-absolute bottom-0 w-100 bg-dark bg-opacity-75 text-white py-2 fw-bold">
-        Apagado
-      </div>
-    </div>
-  </div>
+<style>
+body { font-family:'Segoe UI',sans-serif; background-color:#f4f6f9; }
+h2,h3 { font-weight:700; color:#2c3e50; }
+.menu-card { background:#fff; border-radius:16px; padding:25px; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.1); transition:all 0.3s ease; }
+.menu-card:hover { transform:translateY(-5px); box-shadow:0 8px 20px rgba(0,0,0,0.15); }
+.menu-icon { font-size:48px; color:#0d6efd; margin-bottom:15px; }
+.section { display:none; margin-top:50px; }
+.btn-small { border-radius:12px; font-weight:600; font-size:0.95rem; padding:8px 24px; transition:all 0.2s; }
+.btn-small:hover { transform:scale(1.05); }
 
-  <!-- Botón principal -->
-  <button id="startBtn" class="btn btn-success btn-lg mb-3">Iniciar</button>
+/* Cámara y predecisión */
+.camara-container { background:#000; border-radius:16px; overflow:hidden; margin:0 auto; position:relative; max-width:600px; }
+.camara-container video { width:100%; height:auto; border-radius:16px; object-fit:cover; }
+.estado { position:absolute; bottom:0; width:100%; background:rgba(0,0,0,0.75); color:#fff; padding:6px; text-align:center; font-weight:600; font-size:0.9rem; }
+.captured-photo-card { margin-top:20px; background:#fff; padding:15px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.15); text-align:center; max-width:600px; margin-left:auto; margin-right:auto; }
+.captured-photo-card img { width:100%; border-radius:16px; }
+.report-box { background:#fff; padding:20px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.1); margin-bottom:20px; min-height:180px; }
+.report-box h5 { font-weight:700; }
+</style>
 
-  <!-- Usuario -->
-  <div id="usuario" class="fw-bold fs-5 mb-4">Hombre Completo</div>
-
-  <!-- Reportes -->
-  <div class="row g-4">
-    <!-- Reporte actual -->
-    <div class="col-12 col-md-6 col-lg-4">
-      <div class="card shadow-sm border-0">
-        <div class="card-body">
-          <h4 class="card-title mb-3">Reporte actual</h4>
-          <p id="feliz">Feliz: 0 seg</p>
-          <p id="triste">Triste: 0 seg</p>
-          <p id="neutral">Neutral: 0 seg</p>
-          <p id="null">Null: 0 seg</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Imagen -->
-    <div class="col-12 col-md-6 col-lg-4">
-      <div class="card shadow-sm border-0 text-center">
-        <div class="card-body">
-          <h4 class="card-title mb-3">Captura actual</h4>
-          <img src="{% static 'img/prueba.jpg' %}" alt="icono Sentibot" id="fotoCapturada" class="img-fluid rounded">
-        </div>
-      </div>
-    </div>
-
-    <!-- Informe básico -->
-    <div class="col-12 col-md-6 col-lg-4">
-      <div class="card shadow-sm border-0">
-        <div class="card-body">
-          <h4 class="card-title mb-3">Informe básico</h4>
-          <p id="estado">Estado: Neutral</p>
-          <p id="porcentaje">Porcentaje: 0%</p>
-          <p id="rostro">Estado del rostro: No detectado</p>
-          <p id="sujeto">Id: ---</p>
+<div class="container text-center mt-4">
+  <h2 class="mb-5">🎭 Emociones Interactivas</h2>
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="menu-card">
+        <div class="menu-icon">🎥</div>
+        <h5>¿Deseas activar la cámara?</h5>
+        <div class="d-flex justify-content-center gap-3 mt-3">
+          <button class="btn btn-success btn-small" onclick="activarCamara(true)">Sí</button>
+          <button class="btn btn-danger btn-small" onclick="activarCamara(false)">No</button>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Vincula el script externo -->
-<script src="{% static 'js/camara.js' %}"></script>
+<!-- Sección Cámara -->
+<div id="camaraSection" class="section container mt-4">
+  <h3 class="mb-4 text-center">🎥 Detección de Emociones</h3>
+  <div class="row justify-content-center g-4 align-items-start">
+    <div class="col-md-6 text-center">
+      <div class="camara-container mb-3">
+        <video id="videoCamara" autoplay playsinline></video>
+        <div class="estado">Apagado</div>
+      </div>
+      <div id="capturedPhotoContainer"></div>
+    </div>
+    <div class="col-md-6">
+      <div class="report-box">
+        <h5>📊 Predecisión Emocional</h5>
+        <p id="feliz">😊 Feliz: 0 seg</p>
+        <p id="triste">😢 Triste: 0 seg</p>
+        <p id="neutral">😐 Neutral: 0 seg</p>
+        <p id="null">❓ Null: 0 seg</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let camaraActiva=false, stream=null;
+let segundosFeliz=0, segundosTriste=0, segundosNeutral=0, segundosNull=0;
+
+// Activar cámara
+function activarCamara(si){
+    if(si){
+        document.getElementById('camaraSection').style.display='block';
+        iniciarCamara();
+    }else{
+        // Redirige directamente a extras.html
+        window.location.href="{% url 'extra' %}";
+    }
+}
+
+// Iniciar cámara y tomar foto automáticamente
+function iniciarCamara(){
+    const videoCamara = document.getElementById('videoCamara');
+    const estadoCamara = document.querySelector('.estado');
+    const capturedPhotoContainer = document.getElementById('capturedPhotoContainer');
+    const felizEl = document.getElementById('feliz');
+    const tristeEl = document.getElementById('triste');
+    const neutralEl = document.getElementById('neutral');
+    const nullEl = document.getElementById('null');
+
+    navigator.mediaDevices.getUserMedia({video:true})
+    .then(s=>{
+        stream=s;
+        videoCamara.srcObject = stream;
+        camaraActiva = true;
+        estadoCamara.textContent='Cámara activa';
+
+        // Tomar primera foto automáticamente
+        tomarFoto();
+
+        // Simular predicción cada 5s
+        setInterval(()=>{
+            const emocionesArray=["Feliz","Triste","Neutral","Null"];
+            const emocion=emocionesArray[Math.floor(Math.random()*emocionesArray.length)];
+
+            if(emocion==="Feliz") segundosFeliz+=5;
+            if(emocion==="Triste") segundosTriste+=5;
+            if(emocion==="Neutral") segundosNeutral+=5;
+            if(emocion==="Null") segundosNull+=5;
+
+            felizEl.textContent=`😊 Feliz: ${segundosFeliz} seg`;
+            tristeEl.textContent=`😢 Triste: ${segundosTriste} seg`;
+            neutralEl.textContent=`😐 Neutral: ${segundosNeutral} seg`;
+            nullEl.textContent=`❓ Null: ${segundosNull} seg`;
+
+            tomarFoto();
+        },5000);
+
+    }).catch(err=>{
+        estadoCamara.textContent='⚠️ Error al iniciar cámara';
+        console.error(err);
+    });
+}
+
+// Tomar foto y mostrar en tarjeta
+function tomarFoto(){
+    if(!camaraActiva) return;
+    const videoCamara = document.getElementById('videoCamara');
+    const capturedPhotoContainer = document.getElementById('capturedPhotoContainer');
+    const canvas = document.createElement('canvas');
+    canvas.width = videoCamara.videoWidth || 640;
+    canvas.height = videoCamara.videoHeight || 480;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(videoCamara,0,0,canvas.width,canvas.height);
+    const imgData = canvas.toDataURL('image/png');
+    capturedPhotoContainer.innerHTML = `
+        <div class="captured-photo-card">
+            <h6>📸 Foto capturada automáticamente</h6>
+            <img src="${imgData}" alt="Foto captura">
+        </div>
+    `;
+}
+</script>
 {% endblock %}

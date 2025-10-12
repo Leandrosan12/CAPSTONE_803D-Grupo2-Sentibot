@@ -4,9 +4,7 @@ from django.http import HttpResponse, JsonResponse
 from django.template.loader import get_template
 from django.db.models import Count
 from django.db import connection
-
 from gestion.models import Usuario, Emocion, EmocionReal, Sesion
-
 User = get_user_model()
 
 
@@ -16,8 +14,8 @@ User = get_user_model()
 
 def home(request):
     if not request.user.is_authenticated:
-        return redirect('login')
-    return render(request, 'home.html', {'user': request.user})
+        return redirect("login")
+    return render(request, "home.html", {"user": request.user})
 
 
 def registro(request):
@@ -76,6 +74,12 @@ def camara(request):
     return render(request, 'camara.html')
 
 
+# ------------------------------
+# LOGOUT
+# ------------------------------
+def logout_view(request):
+    auth_logout(request)
+    return redirect("login")
 
 def actividades(request):
     return render(request, 'actividades.html')
@@ -96,7 +100,7 @@ def emociones_data(request):
 
     data = {
         "labels": [row[0] for row in rows],
-        "values": [row[1] for row in rows]
+        "values": [row[1] for row in rows],
     }
     return JsonResponse(data)
 
@@ -145,3 +149,9 @@ def dashboard_emociones(request):
         'emociones': datos
     }
     return render(request, 'dashboard_emociones.html', context)
+
+def mantenimiento(request):
+    return render(request, 'mantenimiento.html')
+
+def extra(request):
+    return render(request, 'extra.html')
