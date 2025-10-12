@@ -76,8 +76,8 @@ WSGI_APPLICATION = 'ProhectoTitulo.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'sentibot_db',      # tu base de datos
-        'USER': 'sentibot',         # tu usuario creado
+        'NAME': 'sentibot',      # tu base de datos
+        'USER': 'root',         # tu usuario creado
         'PASSWORD': 'admin',     # tu contraseña
         'HOST': 'localhost',        # mismo servidor
         'PORT': '3306',             # puerto por defecto de MySQL
