@@ -71,7 +71,6 @@ def perfil(request):
 
 
 def camara(request):
-<<<<<<< HEAD
     return render(request, "camara.html")
 def extra(request):
     return render(request, 'extra.html')
@@ -88,9 +87,6 @@ def modulo(request):
 # ------------------------------
 def dashboard(request):
     return render(request, "dashboard.html")
-=======
-    return render(request, 'camara.html')
->>>>>>> origin/Alvarez
 
 
 # ------------------------------

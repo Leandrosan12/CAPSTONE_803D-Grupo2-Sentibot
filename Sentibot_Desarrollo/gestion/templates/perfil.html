@@ -4,8 +4,7 @@
 {% block title %}Perfil de Usuario{% endblock %}
 
 {% block content %}
-<<<<<<< HEAD
-<link rel="stylesheet" href="{% static 'css/perfil' %}">
+<link rel="stylesheet" href="{% static '/css/perfil' %}">
 
 <div class="perfil-card">
   <!-- Foto y nombre -->
@@ -20,44 +19,6 @@
       <li><span>Rol:</span> {{ user.groups.first.name|default:"Usuario" }}</li>
       <li><span>Rut:</span> 20.567.786-3</li>
     </ul>
-=======
-<div class="container my-5">
-  <div class="card shadow-lg mx-auto text-center" style="max-width: 500px;">
-    <div class="card-body">
-      <!-- Foto de perfil -->
-      <img src="{% static 'Icon/gente.gif' %}" 
-           alt="Foto de perfil" 
-           class="rounded-circle border border-success border-3 mb-3" 
-           style="width: 120px; height: 120px; object-fit: cover;">
-
-      <!-- Nombre -->
-      <h4 class="card-title fw-bold text-dark mb-3">
-        {{ user.get_full_name|default:user.username }}
-      </h4>
-
-      <!-- Datos del perfil -->
-      <ul class="list-group list-group-flush text-start mb-3">
-        <li class="list-group-item d-flex justify-content-between">
-          <span class="fw-semibold">Sede:</span> <span>Melipilla</span>
-        </li>
-        <li class="list-group-item d-flex justify-content-between">
-          <span class="fw-semibold">Nombre:</span> <span>{{ user.first_name }}</span>
-        </li>
-        <li class="list-group-item d-flex justify-content-between">
-          <span class="fw-semibold">Apellido:</span> <span>{{ user.last_name }}</span>
-        </li>
-        <li class="list-group-item d-flex justify-content-between">
-          <span class="fw-semibold">Correo:</span> <span>{{ user.email }}</span>
-        </li>
-        <li class="list-group-item d-flex justify-content-between">
-          <span class="fw-semibold">Rol:</span> <span>{{ user.groups.first.name|default:"Usuario" }}</span>
-        </li>
-      </ul>
-
-      <!-- Botón editar -->
-      <button class="btn btn-success px-4 fw-bold">Editar</button>
-    </div>
->>>>>>> origin/Alvarez
   </div>
 </div>
 {% endblock %}
