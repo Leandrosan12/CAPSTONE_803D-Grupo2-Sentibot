@@ -1,0 +1,37 @@
+{% load static %}
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/flatly/bootstrap.min.css">
+
+<body class="d-flex align-items-center justify-content-center vh-100 bg-light">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-8 col-lg-6">
+        <div class="card shadow-lg">
+          <div class="card-body text-center p-5">
+            <div class="mb-4">
+              <div class="spinner-border spinner-border-lg text-primary" role="status" aria-hidden="true"></div>
+            </div>
+
+            <h1 class="display-6 fw-bold">Seguimos trabajando en este apartado</h1>
+            <p class="lead text-muted mb-4">
+              Estamos mejorando esta sección para ofrecerte una mejor experiencia.
+            </p>
+
+            <button class="btn btn-primary btn-lg" onclick="history.back()"> Volver atrás</button>
+
+            <hr class="my-4">
+            <small class="text-muted">Gracias por tu paciencia</small>
+          </div>
+        </div>
+
+        <p class="text-center text-muted mt-3 small">© <span id="year"></span> sentibot</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Mostrar año actual
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
+

@@ -1,5 +1,10 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.contrib.auth.models import User
+from django.conf import settings  # 👈 Esto trae el modelo de usuario correcto según AUTH_USER_MODEL
+
+
+    
 
 # ------------------------------
 # Rol
@@ -168,3 +173,33 @@ class EmocionCamara(models.Model):
     class Meta:
         managed = False  # Django no crea ni modifica esta tabla
         db_table = 'vw_emociones_camara'
+    
+
+from django.db import models
+from django.contrib.auth.models import User
+
+class EmotionSession(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+    feliz_seg = models.IntegerField(default=0)
+    feliz_pct = models.FloatField(default=0.0)
+
+    triste_seg = models.IntegerField(default=0)
+    triste_pct = models.FloatField(default=0.0)
+
+    neutral_seg = models.IntegerField(default=0)
+    neutral_pct = models.FloatField(default=0.0)
+
+    enojado_seg = models.IntegerField(default=0)
+    enojado_pct = models.FloatField(default=0.0)
+
+    sorprendido_seg = models.IntegerField(default=0)
+    sorprendido_pct = models.FloatField(default=0.0)
+
+    sinreconocer_seg = models.IntegerField(default=0)
+    sinreconocer_pct = models.FloatField(default=0.0)
+
+    fecha = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Sesión de {self.user or 'Anónimo'} - {self.fecha.strftime('%Y-%m-%d %H:%M:%S')}"

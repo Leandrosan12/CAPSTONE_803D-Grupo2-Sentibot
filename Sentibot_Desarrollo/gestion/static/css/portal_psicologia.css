@@ -1,0 +1,49 @@
+body {
+  background: linear-gradient(180deg, #e3f2fd 0%, #bbdefb 100%);
+  font-family: 'Poppins', sans-serif;
+  min-height: 100vh;
+}
+
+.portal-card {
+  border: none;
+  border-radius: 1.5rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  max-width: 400px;
+}
+
+.portal-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+}
+
+.portal-icon {
+  font-size: 3.5rem;
+  color: #0d6efd;
+}
+
+.portal-title {
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: #0d47a1;
+}
+
+.portal-text {
+  color: #6c757d;
+  font-size: 1rem;
+}
+
+.btn-portal {
+  background: linear-gradient(135deg, #0d6efd, #00bcd4);
+  border: none;
+  color: white;
+  border-radius: 50px;
+  padding: 10px 35px;
+  font-weight: 600;
+  transition: 0.3s ease;
+}
+
+.btn-portal:hover {
+  background: linear-gradient(135deg, #00bcd4, #0d6efd);
+  transform: scale(1.05);
+}
