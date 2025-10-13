@@ -1,70 +1,6 @@
 {% load static %}
-<style>
-.sidebar {
-    margin-top: 1%;
-    margin-left: 2%;
-    margin-bottom: 100%;
-    border-radius: 1.8vh;
-    width: 18.5%;
-    background-color: #ffffff;
-    color: rgb(3, 3, 3);
-    padding: 20px;
-    box-sizing: border-box;
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 96vh;
-    z-index: 21;
-    transition: transform 0.3s ease, opacity 0.3s ease;
-}
-.sidebar.collapsed {
-    transform: translateX(-120%); /* se mueve completamente a la izquierda */
-    opacity: 0; /* desaparece */
-    pointer-events: none; /* no se puede clickear */
-}
+<link rel="stylesheet" href="{% static 'css/siderbar.css' %}">
 
-.sidebar h2 {
-    margin-top: 0;
-    margin-bottom: 30px;
-    font-weight: normal;
-    color: #757880;
-}
-
-.sidebar a {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: rgb(1, 1, 1);
-    text-decoration: none;
-    margin-bottom: 15px;
-    padding: 10px 15px;
-    border-radius: 4px;
-    transition: background-color 0.2s ease;
-}
-.sidebar a:hover {
-    background-color: #34495e;
-    color: #fff;
-}
-
-.sidebar a img {
-    width: 43px;
-    height: 43px;
-}
-
-.titulo-sidebar {
-    display: flex;
-    align-items: center;
-    font-size: 24px;
-    color: #333;
-}
-
-.titulo-sidebar .icono {
-    width: 60px;
-    height: 60px;
-    margin-right: 10px;
-    border-radius: 6px;
-}
-</style>
 
 <nav class="sidebar" id="sidebar">
     <h2 class="titulo-sidebar">
@@ -74,9 +10,12 @@
 
     <a href="{% url 'camara' %}"><img src="{% static 'Icon/casa.gif' %}" alt="Inicio"> Inicio</a>
     <a href="{% url 'perfil' %}"><img src="{% static 'Icon/gente.gif' %}" alt="Perfil"> Perfil</a>
-    <a href="{% url 'home' %}"><img src="{% static 'Icon/exito.gif' %}" alt="Actividades"> Actividades</a>
-    <a href="{% url 'home' %}"><img src="{% static 'Icon/lista.gif' %}" alt="Seguimiento"> Seguimiento</a>
-    <a href="{% url 'home' %}"><img src="{% static 'Icon/reserva.gif' %}" alt="Reserva"> Reserva</a>
-    <a href="{% url 'home' %}"><img src="{% static 'Icon/contento.gif' %}" alt="Extras"> Extras</a>
-    <a href="{% url 'dashboard' %}"><img src="{% static 'Icon/cerrar-sesion.gif' %}" alt="Cerrar sesión"> Cerrar sesión</a>
+    <a href="{% url 'actividades' %}"><img src="{% static 'Icon/exito.gif' %}" alt="Actividades"> Actividades</a>
+    <a href="{% url 'seguimiento' %}"><img src="{% static 'Icon/lista.gif' %}" alt="seguimiento"> seguimiento</a>
+    <a href="{% url 'mantenimiento' %}"><img src="{% static 'Icon/reserva.gif' %}" alt="Reserva"> Reserva</a>
+    <a href="{% url 'mantenimiento' %}"><img src="{% static 'Icon/contento.gif' %}" alt="Extras"> Extras</a>
+    <a href="{% url 'modulo' %}"><img src="{% static 'Icon/buscar.gif' %}" alt="modulo">Modulo_psicóloga</a>
+    <a href="{% url 'agenda' %}"><img src="{% static 'Icon/reserva.gif' %}" alt="Agenda"> Agenda</a>
+    <a href="{% url 'login' %}"><img src="{% static 'Icon/cerrar-sesion.gif' %}" alt="Cerrar sesión"> Cerrar sesión</a>
+
 </nav>

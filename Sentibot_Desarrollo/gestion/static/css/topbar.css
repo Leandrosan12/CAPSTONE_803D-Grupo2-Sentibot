@@ -1,0 +1,97 @@
+.top-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%; /* ocupa todo el ancho */
+  background: #344767;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 0.8rem 1rem;
+  box-sizing: border-box;
+  z-index: 20;
+}
+
+.top-left {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: 1; /* ocupa todo el espacio disponible a la izquierda */
+  margin-left: 0; /* valor por defecto en móviles */
+}
+
+/* Aplicar margen solo en escritorio grande */
+@media (min-width: 1501px) {
+  .top-left {
+    margin-left: 21.5%; /* mismo que el contenido respecto al sidebar */
+  }
+}
+.top-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1; /* ocupa todo el espacio disponible a la derecha */
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.h1-top-bar {
+  font-size: 1.2rem;
+  color: #7B8BA4;
+  
+}
+
+.h2-top-bar {
+  font-size: 1.2rem;
+  color: #fff;
+  margin-left: 0.3rem;
+}
+
+.search-box {
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: none;
+  outline: none;
+}
+
+.icon {
+  color: #fff;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.btn-login {
+  color: #fff;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+/* Botón hamburguesa solo en móvil */
+#btn-toggle-sidebar {
+  display: none;
+}
+
+@media (max-width: 1300px) {
+  #btn-toggle-sidebar {
+    display: inline-block;
+    margin-right: 0.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .top-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .top-left, .top-right {
+    flex: 1 1 100%;
+    justify-content: flex-start;
+  }
+  .search-box {
+    width: 100%;
+  }
+}
+
+

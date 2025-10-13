@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Seguimiento{% endblock %}
+
+{% block content %}
+<link href="{% static '/css/seguimiento.css' %}" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="container mt-5 mb-5">
+  <h2 class="mb-4 text-center">📊 Seguimiento de Emociones</h2>
+
+  <div class="row g-4">
+    <div class="col-md-6">
+      <div class="card shadow-lg border-0 h-100">
+        <div class="card-header text-center">Gráfico de Barras</div>
+        <div class="card-body"><canvas id="chartBarras"></canvas></div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card shadow-lg border-0 h-100">
+        <div class="card-header text-center">Gráfico de Pastel</div>
+        <div class="card-body"><canvas id="chartPastel"></canvas></div>
+      </div>
+    </div>
+    <div class="card-body d-flex align-items-center justify-content-center">
+      <canvas id="chartPastel" style="max-height:300px;"></canvas>
+    </div>
+  </div>
+</div>
+```
+
+    <div class="col-md-6">
+      <div class="card shadow-lg border-0 h-100">
+        <div class="card-header text-center">Progreso General</div>
+        <div class="card-body flex-column"><canvas id="chartGauge"></canvas></div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card shadow-lg border-0 h-100">
+        <div class="card-header text-center">Gráfico Radar</div>
+        <div class="card-body"><canvas id="chartRadar"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="{% static '/js/seguimiento.js' %}"></script>
+{% endblock %}
