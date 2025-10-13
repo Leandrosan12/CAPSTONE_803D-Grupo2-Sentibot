@@ -1,5 +1,4 @@
 from django.contrib import admin
-<<<<<<< HEAD
 from .models import (
     Sala, Emocion, Pregunta, Actividad, Sesion, Respuesta, 
     EncuestaSatisfaccion, Reporte
@@ -38,5 +37,3 @@ class ReporteAdmin(admin.ModelAdmin):
     list_display = ('usuario', 'tipo', 'fecha_generacion')
 
 
-=======
->>>>>>> 653918ca86d64d9cfac87c1efe0684436af9160b
