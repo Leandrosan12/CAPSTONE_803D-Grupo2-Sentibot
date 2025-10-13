@@ -157,24 +157,6 @@ class Actividad(models.Model):
 
     #prueba vista dashboard
 
-class EmocionCamara(models.Model):
-    id_usuario = models.IntegerField()
-    nombre_completo = models.CharField(max_length=255)
-    rol = models.CharField(max_length=100)
-    escuela = models.CharField(max_length=100)
-    id_sesion = models.IntegerField()
-    id_emocion = models.IntegerField()
-    emocion_camara = models.CharField(max_length=100)
-    emocion_real = models.CharField(max_length=100)
-    probabilidad = models.FloatField()
-    fecha_emocion_inicio = models.DateTimeField()
-    fecha_emocion_fin = models.DateTimeField()
-
-    class Meta:
-        managed = False  # Django no crea ni modifica esta tabla
-        db_table = 'vw_emociones_camara'
-    
-
 from django.db import models
 from django.contrib.auth.models import User
 

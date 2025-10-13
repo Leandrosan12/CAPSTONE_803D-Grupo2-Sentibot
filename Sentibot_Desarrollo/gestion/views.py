@@ -97,11 +97,6 @@ def dashboard(request):
     return render(request, "dashboard.html")
 
 
-def seguimiento(request):
-    return render(request, 'seguimiento.html')
-def dashboard(request):
-    return render(request, 'dashboard.html')
-
 
 # ------------------------------
 # LOGOUT
