@@ -4,21 +4,44 @@
 {% block title %}Perfil de Usuario{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="{% static 'css/perfil' %}">
+<div class="container my-5">
+  <div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+      <div class="card shadow-lg text-center p-4">
+        <!-- Foto -->
+        <img src="{% static 'Icon/gente.gif' %}" alt="Foto de perfil"
+             class="rounded-circle border border-4 border-success mb-3"
+             style="width: 150px; height: 150px; object-fit: cover;">
+        
+        <!-- Nombre -->
+        <h3 class="card-title mb-3">{{ user.get_full_name|default:user.username }}</h3>
 
-<div class="perfil-card">
-  <!-- Foto y nombre -->
-  <img src="{% static 'Icon/gente.gif' %}" alt="Foto de perfil" class="foto-perfil">
-  <div class="nombre">{{ user.get_full_name|default:user.username }}</div>
+        <!-- Datos -->
+        <ul class="list-group list-group-flush text-start mb-3">
+                    <li class="list-group-item d-flex justify-content-between">
+            <span class="fw-bold">Nombre:</span> <span>{{ user.first_name }}</span>
+          </li>
+            <li class="list-group-item d-flex justify-content-between">
+            <span class="fw-bold">Apellido:</span> <span>{{ user.last_name }}</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between">
+            <span class="fw-bold">Sede:</span> <span>Melipilla</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between">
+            <span class="fw-bold">Correo:</span> <span>{{ user.email }}</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between">
+            <span class="fw-bold">Rol:</span> <span>{{ user.groups.first.name|default:"Usuario" }}</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between">
+            <span class="fw-bold">Rut:</span> <span>20.567.786-3</span>
+          </li>
+        </ul>
 
-  <!-- Datos -->
-  <div class="perfil-datos">
-    <ul>
-      <li><span>Sede:</span> Melipilla</li>
-      <li><span>Correo:</span> {{ user.email }}</li>
-      <li><span>Rol:</span> {{ user.groups.first.name|default:"Usuario" }}</li>
-      <li><span>Rut:</span> 20.567.786-3</li>
-    </ul>
+        <!-- Botón Editar -->
+        <a href="#" class="btn btn-success btn-lg">Editar</a>
+      </div>
+    </div>
   </div>
 </div>
 {% endblock %}

@@ -1,8 +1,6 @@
-
 .sidebar {
     margin-top: 1%;
     margin-left: 2%;
-    margin-bottom: 100%;
     border-radius: 1.8vh;
     width: 18.5%;
     background-color: #ffffff;
@@ -12,14 +10,18 @@
     position: fixed;
     top: 0;
     left: 0;
-    height: 96vh;
+    height: 96vh;           /* altura casi completa */
     z-index: 21;
     transition: transform 0.3s ease, opacity 0.3s ease;
+
+    overflow-y: auto;       /* agrega scroll vertical si hay muchos enlaces */
+    overflow-x: hidden;     /* evita scroll horizontal */
 }
+
 .sidebar.collapsed {
-    transform: translateX(-120%); /* se mueve completamente a la izquierda */
-    opacity: 0; /* desaparece */
-    pointer-events: none; /* no se puede clickear */
+    transform: translateX(-120%);
+    opacity: 0;
+    pointer-events: none;
 }
 
 .sidebar h2 {
@@ -40,6 +42,7 @@
     border-radius: 4px;
     transition: background-color 0.2s ease;
 }
+
 .sidebar a:hover {
     background-color: #34495e;
     color: #fff;
