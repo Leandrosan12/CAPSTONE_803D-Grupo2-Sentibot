@@ -1,7 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-
+<<<<<<< HEAD
+=======
 # ------------------------------
 # Sala
 # ------------------------------
@@ -103,31 +104,7 @@ class Reporte(models.Model):
         return self.nombre_area
     
 
-    from django.db import models
-from django.contrib.auth.models import User
+    
 
-class EmotionSession(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
-
-    feliz_seg = models.IntegerField(default=0)
-    feliz_pct = models.FloatField(default=0.0)
-
-    triste_seg = models.IntegerField(default=0)
-    triste_pct = models.FloatField(default=0.0)
-
-    neutral_seg = models.IntegerField(default=0)
-    neutral_pct = models.FloatField(default=0.0)
-
-    enojado_seg = models.IntegerField(default=0)
-    enojado_pct = models.FloatField(default=0.0)
-
-    sorprendido_seg = models.IntegerField(default=0)
-    sorprendido_pct = models.FloatField(default=0.0)
-
-    sinreconocer_seg = models.IntegerField(default=0)
-    sinreconocer_pct = models.FloatField(default=0.0)
-
-    fecha = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"Sesión de {self.user or 'Anónimo'} - {self.fecha.strftime('%Y-%m-%d %H:%M:%S')}"
+>>>>>>> 7b018d93d72a4dd9ab805114f84ccbe1746fc1ec
+>>>>>>> 653918ca86d64d9cfac87c1efe0684436af9160b
