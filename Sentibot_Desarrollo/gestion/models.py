@@ -1,8 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-<<<<<<< HEAD
-=======
 # ------------------------------
 # Sala
 # ------------------------------
@@ -105,6 +103,3 @@ class Reporte(models.Model):
     
 
     
-
->>>>>>> 7b018d93d72a4dd9ab805114f84ccbe1746fc1ec
->>>>>>> 653918ca86d64d9cfac87c1efe0684436af9160b
