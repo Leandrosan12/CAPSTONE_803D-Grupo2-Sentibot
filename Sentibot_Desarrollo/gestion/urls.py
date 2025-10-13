@@ -12,7 +12,7 @@ urlpatterns = [
     path("emociones-data/", views.emociones_data, name="emociones_data"),
     path("dashboard/", views.dashboard, name="dashboard"),
     path('emociones_data/', views.emociones_data, name='emociones_data'),
-    path('predict_emotion/', views.predict_emotion_view, name='predict_emotion')
+    path('predict_emotion/', views.predict_emotion_view, name='predict_emotion'),
     path('actividades/', views.actividades, name='actividades'), 
 
     path('dashboard_emociones/', views.dashboard_emociones, name='dashboard_emociones'),
@@ -20,7 +20,7 @@ urlpatterns = [
     path('mantenimiento/', views.mantenimiento, name='mantenimiento'),
     path('agenda/', views.agenda_view, name='agenda'),
     path('extra/', views.extra, name='extra'),
-    path('modulo/', views.modulo, name='modulo')
+    path('modulo/', views.modulo, name='modulo'),
     
 ]
 

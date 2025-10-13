@@ -2,16 +2,16 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout, get_user_model
 from django.http import HttpResponse, JsonResponse
 from django.template.loader import get_template
-<<<<<<< HEAD
 from django.http import HttpResponse
 
-from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
-=======
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout, get_user_model
+from django.http import HttpResponse, JsonResponse
+from django.template.loader import get_template
 from django.db.models import Count
 from django.db import connection
 from gestion.models import Usuario, Emocion, EmocionReal, Sesion
 User = get_user_model()
->>>>>>> bb3b0de094bcf539b311358677c36a83cff9876e
 
 
 # ------------------------------
