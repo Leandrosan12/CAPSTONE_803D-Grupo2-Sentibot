@@ -10,7 +10,7 @@ model_path = os.path.join(BASE_DIR, 'models', 'sentibotv2.h5')  # ajusta según 
 model = load_model(model_path)
 
 # Define las clases según tu entrenamiento
-CLASSES = ['Sorprendido', 'Enojado', 'Feliz','Triste' ,'Neutral' ]  # Ajusta según tu modelo
+CLASSES = ['Sorprendido', 'Enojado', 'Feliz','Neutral', 'Triste' ]  # Ajusta según tu modelo
 
 def predict_emotion(image):
     image = image.convert('L')  # Escala de grises
