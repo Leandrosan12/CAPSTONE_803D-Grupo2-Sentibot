@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}📘 Módulos{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/estilos_modulo.css' %}">
+
+<div class="modulo-header text-center my-4">
+  <h2>📘 Módulos</h2>
+  <p>Accede a los módulos disponibles del sistema</p>
+</div>
+
+<div class="d-flex justify-content-center gap-5 flex-wrap mt-4">
+  <!-- Módulo Alumnos -->
+  <div class="card-modulo text-center p-4 shadow-sm rounded">
+    <h4>Alumnos</h4>
+    <p>Accede al módulo de alumnos</p>
+    <a href="{% url 'alumnos' %}" class="btn btn-success mt-2">Ingresar</a>
+  </div>
+
+  <!-- Módulo Escuelas -->
+  <div class="card-modulo text-center p-4 shadow-sm rounded">
+    <h4>Escuelas</h4>
+    <p>Accede al módulo de escuelas</p>
+    <a href="{% url 'escuelas' %}" class="btn btn-success mt-2">Ingresar</a>
+  </div>
+
+  <!-- Módulo Profesores -->
+  <div class="card-modulo text-center p-4 shadow-sm rounded">
+    <h4>Profesores</h4>
+    <p>Accede al módulo de profesores</p>
+    <a href="{% url 'modulo_profesor' %}" class="btn btn-success mt-2">Ingresar</a>
+  </div>
+</div>
+
+<footer class="text-center mt-5 mb-3">© 2025 Sistema de Módulos</footer>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}👩‍🎓 Alumnos{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/estilos_modulo.css' %}">
+
+<div class="modulo-header">
+  <h2>👩‍🎓 Módulo de Alumnos</h2>
+  <p>Gestiona la información de los alumnos registrados</p>
+</div>
+
+<div class="container table-container">
+  <h3 class="mb-4">Listado de Alumnos</h3>
+
+  <form class="search-bar mb-3" method="get">
+    <input type="text" name="rut" placeholder="Buscar por RUT" />
+    <button type="submit">Buscar</button>
+  </form>
+
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Apellido</th>
+        <th>Email</th>
+        <th>Sede</th>
+        <th>Acción</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for alumno in alumnos %}
+      <tr>
+        <td>{{ alumno.id }}</td>
+        <td>{{ alumno.first_name }}</td>
+        <td>{{ alumno.last_name }}</td>
+        <td>{{ alumno.email }}</td>
+        <td>{{ alumno.sede }}</td>
+        <td>
+          <a href="{% url 'detalle_alumno' alumno.id %}" class="btn btn-success btn-sm">Ver</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="6" class="text-center text-muted">No hay alumnos registrados.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="text-end mt-3">
+    <a href="{% url 'modulo' %}" class="btn btn-volver">Volver</a>
+  </div>
+</div>
+
+<footer>© 2025 Sistema de Módulos</footer>
+{% endblock %}
