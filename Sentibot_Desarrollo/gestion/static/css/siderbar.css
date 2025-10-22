@@ -1,28 +1,57 @@
-/* ------------------ Sidebar Principal ------------------ */
 .sidebar {
+    margin-top: 1%;
+    margin-left: 2%;
+    border-radius: 1.8vh;
+    width: 18.5%;
+    background-color: #ffffff;
+    color: rgb(3, 3, 3);
+    padding: 20px;
+    box-sizing: border-box;
     position: fixed;
     top: 0;
     left: 0;
-    width: 18.5%;
-    height: 96vh;
-    margin: 1% 0 0 2%;
-    padding: 25px 20px;
-    background-color: #ffffff;
-    color: #030303;
-    border-radius: 1.8vh;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    box-sizing: border-box;
+    height: 96vh;           /* altura casi completa */
     z-index: 21;
-    transition: transform 0.3s ease, opacity 0.3s ease, width 0.3s ease;
-    overflow-y: auto;
-    font-family: 'Poppins', sans-serif;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+
+    overflow-y: auto;       /* agrega scroll vertical si hay muchos enlaces */
+    overflow-x: hidden;     /* evita scroll horizontal */
 }
 
-/* ------------------ Sidebar Colapsada ------------------ */
 .sidebar.collapsed {
     transform: translateX(-120%);
     opacity: 0;
     pointer-events: none;
+<<<<<<< HEAD
+=======
+}
+
+.sidebar h2 {
+    margin-top: 0;
+    margin-bottom: 30px;
+    font-weight: normal;
+    color: #757880;
+}
+
+.sidebar a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: rgb(1, 1, 1);
+    text-decoration: none;
+    margin-bottom: 15px;
+    padding: 10px 15px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.sidebar a:hover {
+}
+
+.sidebar a img {
+    width: 43px;
+    height: 43px;
+>>>>>>> eff6f01c27b06bbbd1392fc743d0f63bccb3d120
 }
 
 /* ------------------ Título de Sidebar ------------------ */
@@ -46,7 +75,6 @@
 
 .titulo-sidebar:hover .icono {
     transform: scale(1.05);
-}
 
 /* ------------------ Encabezados dentro de Sidebar ------------------ */
 .sidebar h2 {

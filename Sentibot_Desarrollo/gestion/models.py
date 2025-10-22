@@ -1,5 +1,10 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.contrib.auth.models import User
+from django.conf import settings  # 👈 Esto trae el modelo de usuario correcto según AUTH_USER_MODEL
+
+
+    
 
 # ------------------------------
 # Rol
@@ -157,22 +162,36 @@ class Actividad(models.Model):
 
 from django.db import models
 
-class School(models.Model):
-    name = models.CharField(max_length=200)
-    sede = models.CharField(max_length=100, blank=True)
-    description = models.TextField(blank=True)
+    class Meta:
+        managed = False  # Django no crea ni modifica esta tabla
+        db_table = 'vw_emociones_camara'
+    
+
+from django.db import models
+from django.contrib.auth.models import User
+
+class EmotionSession(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+    feliz_seg = models.IntegerField(default=0)
+    feliz_pct = models.FloatField(default=0.0)
+
+    triste_seg = models.IntegerField(default=0)
+    triste_pct = models.FloatField(default=0.0)
+
+    neutral_seg = models.IntegerField(default=0)
+    neutral_pct = models.FloatField(default=0.0)
+
+    enojado_seg = models.IntegerField(default=0)
+    enojado_pct = models.FloatField(default=0.0)
+
+    sorprendido_seg = models.IntegerField(default=0)
+    sorprendido_pct = models.FloatField(default=0.0)
+
+    sinreconocer_seg = models.IntegerField(default=0)
+    sinreconocer_pct = models.FloatField(default=0.0)
+
+    fecha = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.name
-
-class Student(models.Model):
-    rut = models.CharField(max_length=20, unique=True)
-    nombre = models.CharField(max_length=200)
-    sede = models.CharField(max_length=100)
-    edad = models.PositiveIntegerField(null=True, blank=True)
-    correo = models.EmailField(blank=True)
-    telefono = models.CharField(max_length=50, blank=True)
-    school = models.ForeignKey(School, related_name='students', on_delete=models.SET_NULL, null=True, blank=True)
-
-    def __str__(self):
-        return f"{self.nombre} ({self.rut})"
+        return f"Sesión de {self.user or 'Anónimo'} - {self.fecha.strftime('%Y-%m-%d %H:%M:%S')}"

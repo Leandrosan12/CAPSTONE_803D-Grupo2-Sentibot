@@ -4,7 +4,7 @@
 {% block title %}Seguimiento{% endblock %}
 
 {% block content %}
-<link href="{% static 'css/seguimiento.css' %}" rel="stylesheet">
+<link href="{% static '/css/seguimiento.css' %}" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <div class="container mt-5 mb-5">
@@ -30,10 +30,16 @@
         </div>
       </div>
     </div>
+    <div class="card-body d-flex align-items-center justify-content-center">
+      <canvas id="chartPastel" style="max-height:300px;"></canvas>
+    </div>
   </div>
 
+<<<<<<< HEAD
   <div class="row g-4 mt-2">
     <!-- Progreso General (Gauge) -->
+=======
+>>>>>>> eff6f01c27b06bbbd1392fc743d0f63bccb3d120
     <div class="col-md-6">
       <div class="card shadow-lg border-0 h-100">
         <div class="card-header text-center">Progreso General</div>
@@ -55,5 +61,9 @@
   </div>
 </div>
 
+<<<<<<< HEAD
 <script src="{% static 'js/seguimiento.js' %}"></script>
+=======
+<script src="{% static '/js/seguimiento.js' %}"></script>
+>>>>>>> eff6f01c27b06bbbd1392fc743d0f63bccb3d120
 {% endblock %}

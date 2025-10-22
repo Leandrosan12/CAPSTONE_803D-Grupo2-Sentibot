@@ -1,6 +1,17 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout, get_user_model
+<<<<<<< HEAD
 from django.http import JsonResponse
+=======
+from django.http import HttpResponse, JsonResponse
+from django.template.loader import get_template
+from django.http import HttpResponse
+
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout, get_user_model
+from django.http import HttpResponse, JsonResponse
+from django.template.loader import get_template
+>>>>>>> eff6f01c27b06bbbd1392fc743d0f63bccb3d120
 from django.db.models import Count
 from django.db import connection
 from gestion.models import Usuario, Emocion, EmocionReal, Sesion
@@ -59,6 +70,10 @@ def perfil(request):
     return render(request, 'perfil.html')
 
 def camara(request):
+<<<<<<< HEAD
+=======
+    return render(request, 'camara.html')
+>>>>>>> eff6f01c27b06bbbd1392fc743d0f63bccb3d120
     return render(request, "camara.html")
 
 def extra(request):
@@ -82,6 +97,7 @@ def modulo_profesor(request):
     return render(request, 'modulo_profesor.html', {'profesores': profesores})
 
 # ------------------------------
+<<<<<<< HEAD
 # Módulo Alumnos y Escuelas
 # ------------------------------
 def alumnos(request):
@@ -90,6 +106,10 @@ def alumnos(request):
         columnas = [col[0] for col in cursor.description]
         alumnos = [dict(zip(columnas, fila)) for fila in cursor.fetchall()]
     return render(request, 'alumnos.html', {'alumnos': alumnos})
+=======
+def dashboard(request):
+    return render(request, "dashboard.html")
+>>>>>>> eff6f01c27b06bbbd1392fc743d0f63bccb3d120
 
 def detalle_alumno(request, alumno_id):
     with connection.cursor() as cursor:
@@ -128,6 +148,39 @@ def emociones_data(request):
         "values": [row[1] for row in rows],
     }
     return JsonResponse(data)
+
+import json
+import base64
+from io import BytesIO
+from PIL import Image
+from django.http import JsonResponse
+from .ml_model import predict_emotion
+
+def predict_emotion_view(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        image_base64 = data.get("image")
+
+        if not image_base64:
+            return JsonResponse({"label": "Null", "confidence": 0})
+
+        # Quitar encabezado data:image/png;base64,
+        if "," in image_base64:
+            image_base64 = image_base64.split(",")[1]
+
+        try:
+            image_bytes = base64.b64decode(image_base64)
+            image = Image.open(BytesIO(image_bytes)).convert("L")  # Escala de grises
+        except Exception as e:
+            return JsonResponse({"label": "Null", "confidence": 0, "error": str(e)})
+
+        label, confidence = predict_emotion(image)
+        return JsonResponse({"label": label, "confidence": confidence})
+
+# gestion/views.py
+from django.shortcuts import render
+from .models import EmocionReal
+from django.db.models import Count
 
 def seguimiento(request):
     datos = EmocionReal.objects.values('emocion').annotate(total=Count('emocion'))
