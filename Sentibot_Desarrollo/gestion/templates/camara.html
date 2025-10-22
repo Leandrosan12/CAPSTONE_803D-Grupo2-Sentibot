@@ -10,7 +10,6 @@
     margin: 20px;
     text-align: center;
   }
-
   .camara-container {
     position: relative;
     width: 100%;
@@ -20,12 +19,10 @@
     overflow: hidden;
     box-shadow: 0 6px 12px rgba(0,0,0,0.2);
   }
-
   .camara-container video {
     width: 100%;
     display: block;
   }
-
   .estado {
     position: absolute;
     bottom: 0;
@@ -35,8 +32,6 @@
     padding: 8px 0;
     font-weight: bold;
   }
-
-  /* Overlay cuadrado de guía */
   .overlay {
     position: absolute;
     top: 50%;
@@ -47,7 +42,6 @@
     transform: translate(-50%, -50%);
     pointer-events: none;
   }
-
   button {
     background-color: #7ED321;
     color: white;
@@ -59,17 +53,8 @@
     cursor: pointer;
     margin: 15px 10px 15px 0;
   }
-
-  button:hover {
-    background-color: #52a003;
-  }
-
-  #usuario {
-    font-size: 20px;
-    font-weight: bold;
-    margin-bottom: 15px;
-  }
-
+  button:hover { background-color: #52a003; }
+  #usuario { font-size: 20px; font-weight: bold; margin-bottom: 15px; }
   .report-box {
     background-color: #9b5f5f;
     color: white;
@@ -77,14 +62,12 @@
     border-radius: 10px;
     margin-bottom: 20px;
   }
-
   .foto-box img {
     width: 200px;
     height: 200px;
     border-radius: 12px;
     object-fit: cover;
   }
-
   #emocionEnCamara {
     position: absolute;
     top: 15px;
@@ -110,7 +93,6 @@
 
 <div>
   <button id="startBtn">Iniciar Cámara</button>
-  <button id="fotoBtn" disabled>Tomar Foto</button>
 </div>
 
 <div id="usuario">Hombre Completo</div>
@@ -139,18 +121,15 @@
   </div>
 </div>
 
-{% csrf_token %}
-
 <script>
 document.addEventListener("DOMContentLoaded", () => {
+    const API_URL = "https://apisentibot-production.up.railway.app/predict_emotion"; // 🌐 API externa
     const startBtn = document.getElementById('startBtn');
-    const fotoBtn = document.getElementById('fotoBtn');
     const videoCamara = document.getElementById('videoCamara');
     const estadoCamara = document.querySelector('.estado');
     const fotoCapturada = document.getElementById('fotoCapturada');
     const emocionEnCamara = document.getElementById('emocionEnCamara');
 
-    // Elementos del reporte
     const felizEl = document.getElementById('feliz');
     const tristeEl = document.getElementById('triste');
     const neutralEl = document.getElementById('neutral');
@@ -165,31 +144,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let stream = null;
     let camaraEncendida = false;
-    let segundos = {
-      Feliz: 0,
-      Triste: 0,
-      Neutral: 0,
-      Enojado: 0,
-      Sorprendido: 0,
-      SinReconocer: 0
-    };
-
-    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    let segundos = { Feliz: 0, Triste: 0, Neutral: 0, Enojado: 0, Sorprendido: 0, SinReconocer: 0 };
 
     startBtn.addEventListener('click', async () => {
         if (!camaraEncendida) {
             try {
-                stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 videoCamara.srcObject = stream;
                 estadoCamara.textContent = 'Cámara activa';
                 camaraEncendida = true;
                 startBtn.textContent = 'Apagar Cámara';
-                fotoBtn.disabled = false;
 
-                // Llamar predicción cada 2 segundos
-                setInterval(() => {
+                const intervalo = setInterval(() => {
                     if (camaraEncendida) capturarYPredecir();
-                }, 1000);
+                    else clearInterval(intervalo);
+                }, 2000);
 
             } catch (err) {
                 console.error(err);
@@ -201,7 +170,6 @@ document.addEventListener("DOMContentLoaded", () => {
             estadoCamara.textContent = 'Apagado';
             camaraEncendida = false;
             startBtn.textContent = 'Iniciar Cámara';
-            fotoBtn.disabled = true;
         }
     });
 
@@ -220,9 +188,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const fotoBase64 = canvas.toDataURL('image/png');
         fotoCapturada.src = fotoBase64;
 
-        fetch("{% url 'predict_emotion' %}", {
+        fetch(API_URL, {
             method: 'POST',
-            headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrftoken},
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ image: fotoBase64 })
         })
         .then(res => res.json())
@@ -231,21 +199,17 @@ document.addEventListener("DOMContentLoaded", () => {
             const confianza = data.confidence || 0;
 
             if (!['Feliz','Triste','Neutral','Enojado','Sorprendido'].includes(emocion)) {
-                emocion = "Sin reconocer";
+                emocion = "SinReconocer";
             }
 
-            // Mostrar emoción + porcentaje sobre la cámara
             emocionEnCamara.textContent = `${emocion} — ${confianza.toFixed(1)}%`;
-
             estadoEl.textContent = `Estado: ${emocion}`;
             porcentajeEl.textContent = `Porcentaje: ${confianza.toFixed(2)}%`;
             rostroEl.textContent = `Estado del rostro: Detectado`;
             sujetoEl.textContent = `Id: 001`;
 
-            // Sumar segundos
-            if (emocion in segundos) segundos[emocion] += 2;
+            segundos[emocion] += 2;
 
-            // Actualizar reporte
             felizEl.textContent = `Feliz: ${segundos.Feliz} seg`;
             tristeEl.textContent = `Triste: ${segundos.Triste} seg`;
             neutralEl.textContent = `Neutral: ${segundos.Neutral} seg`;
@@ -257,5 +221,4 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 </script>
-
 {% endblock %}

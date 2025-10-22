@@ -1,16 +1,14 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout, get_user_model
-from django.http import HttpResponse, JsonResponse
-from django.template.loader import get_template
-from django.http import HttpResponse
-
-from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout, get_user_model
-from django.http import HttpResponse, JsonResponse
-from django.template.loader import get_template
+from django.http import JsonResponse
 from django.db.models import Count
 from django.db import connection
-from gestion.models import Usuario, Emocion, EmocionReal, Sesion
+import json
+import base64
+from io import BytesIO
+from PIL import Image
+import requests  # Para llamar a la API externa
+
 User = get_user_model()
 
 
@@ -75,36 +73,32 @@ def perfil(request):
     return render(request, 'perfil.html')
 
 
-
 def camara(request):
     return render(request, 'camara.html')
-    return render(request, "camara.html")
+
+
 def extra(request):
     return render(request, 'extra.html')
+
 
 def agenda_view(request):
     return render(request, 'agenda.html')
 
-# ------------------------------
-# Modulo
-# ------------------------------
+
 def modulo(request):
     return render(request, 'modulo.html')
 
-# ------------------------------
+
 def dashboard(request):
     return render(request, "dashboard.html")
 
 
-# ------------------------------
-# LOGOUT
-# ------------------------------
-def logout_view(request):
-    auth_logout(request)
-    return redirect("login")
-
 def actividades(request):
     return render(request, 'actividades.html')
+
+
+def mantenimiento(request):
+    return render(request, 'mantenimiento.html')
 
 
 # ------------------------------
@@ -126,12 +120,10 @@ def emociones_data(request):
     }
     return JsonResponse(data)
 
-import json
-import base64
-from io import BytesIO
-from PIL import Image
-from django.http import JsonResponse
-from .ml_model import predict_emotion
+
+# ------------------------------
+# Predicción de emociones vía API externa
+# ------------------------------
 
 def predict_emotion_view(request):
     if request.method == "POST":
@@ -146,20 +138,31 @@ def predict_emotion_view(request):
             image_base64 = image_base64.split(",")[1]
 
         try:
+            # Decodificar y abrir la imagen
             image_bytes = base64.b64decode(image_base64)
-            image = Image.open(BytesIO(image_bytes)).convert("L")  # Escala de grises
+            Image.open(BytesIO(image_bytes))  # Solo validar que es imagen
         except Exception as e:
             return JsonResponse({"label": "Null", "confidence": 0, "error": str(e)})
 
-        label, confidence = predict_emotion(image)
+        # Llamada al API externa
+        API_URL = "http://127.0.0.1:5000/predict_emotion"  # Cambia a tu URL real si la API está en otro host
+        try:
+            response = requests.post(API_URL, json={"image": image_base64}, timeout=5)
+            result = response.json()
+            label = result.get("label", "Sin reconocer")
+            confidence = result.get("confidence", 0)
+        except Exception as e:
+            return JsonResponse({"label": "Null", "confidence": 0, "error": str(e)})
+
         return JsonResponse({"label": label, "confidence": confidence})
 
-# gestion/views.py
-from django.shortcuts import render
-from .models import EmocionReal
-from django.db.models import Count
+
+# ------------------------------
+# Seguimiento emociones
+# ------------------------------
 
 def seguimiento(request):
+    from .models import EmocionReal
     datos = EmocionReal.objects.values('emocion').annotate(total=Count('emocion'))
     etiquetas = [d['emocion'] for d in datos]
     valores = [d['total'] for d in datos]
@@ -169,13 +172,6 @@ def seguimiento(request):
         'emociones_counts': valores,
     })
 
-from django.shortcuts import render
-from .models import EmocionCamara
-
-from django.db import connection
-from django.shortcuts import render
-
-from .models import Usuario
 
 def lista_usuarios(request):
     with connection.cursor() as cursor:
@@ -186,9 +182,7 @@ def lista_usuarios(request):
     return render(request, 'lista_usuarios.html', {'usuarios': datos})
 
 
-
 def dashboard_emociones(request):
-    # Ejecutamos la vista directamente
     with connection.cursor() as cursor:
         cursor.execute("SELECT * FROM vw_emociones_camara")
         columnas = [col[0] for col in cursor.description]
@@ -198,9 +192,3 @@ def dashboard_emociones(request):
         'emociones': datos
     }
     return render(request, 'dashboard_emociones.html', context)
-
-def mantenimiento(request):
-    return render(request, 'mantenimiento.html')
-
-def extra(request):
-    return render(request, 'extra.html')
