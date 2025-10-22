@@ -1,74 +1,98 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const startBtn = document.getElementById('startBtn');
-  const videoCamara = document.getElementById('videoCamara');
-  const estadoCamara = document.querySelector('.estado');
-  const fotoCapturada = document.getElementById('fotoCapturada');
+    const API_URL = "https://apisentibot-production.up.railway.app/predict_emotion"; // 🌐 API externa
+    const startBtn = document.getElementById('startBtn');
+    const videoCamara = document.getElementById('videoCamara');
+    const estadoCamara = document.querySelector('.estado');
+    const fotoCapturada = document.getElementById('fotoCapturada');
+    const emocionEnCamara = document.getElementById('emocionEnCamara');
 
-  const felizEl = document.getElementById('feliz');
-  const tristeEl = document.getElementById('triste');
-  const neutralEl = document.getElementById('neutral');
-  const nullEl = document.getElementById('null');
+    const felizEl = document.getElementById('feliz');
+    const tristeEl = document.getElementById('triste');
+    const neutralEl = document.getElementById('neutral');
+    const enojadoEl = document.getElementById('enojado');
+    const sorprendidoEl = document.getElementById('sorprendido');
+    const sinreconocerEl = document.getElementById('sinreconocer');
 
-  const estadoEl = document.getElementById('estado');
-  const porcentajeEl = document.getElementById('porcentaje');
-  const rostroEl = document.getElementById('rostro');
-  const sujetoEl = document.getElementById('sujeto');
+    const estadoEl = document.getElementById('estado');
+    const porcentajeEl = document.getElementById('porcentaje');
+    const rostroEl = document.getElementById('rostro');
+    const sujetoEl = document.getElementById('sujeto');
 
-  let stream = null;
-  let fotoInterval = null;
-  let camaraEncendida = false;
+    let stream = null;
+    let camaraEncendida = false;
+    let segundos = { Feliz: 0, Triste: 0, Neutral: 0, Enojado: 0, Sorprendido: 0, SinReconocer: 0 };
 
-  let segundosFeliz = 0, segundosTriste = 0, segundosNeutral = 0, segundosNull = 0;
+    startBtn.addEventListener('click', async () => {
+        if (!camaraEncendida) {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                videoCamara.srcObject = stream;
+                estadoCamara.textContent = 'Cámara activa';
+                camaraEncendida = true;
+                startBtn.textContent = 'Apagar Cámara';
 
-  startBtn.addEventListener('click', async () => {
-    if (!camaraEncendida) {
-      try {
-        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-        videoCamara.srcObject = stream;
-        estadoCamara.textContent = 'Cámara activa';
-        camaraEncendida = true;
-        startBtn.textContent = 'Apagar';
+                const intervalo = setInterval(() => {
+                    if (camaraEncendida) capturarYPredecir();
+                    else clearInterval(intervalo);
+                }, 2000);
 
-        fotoInterval = setInterval(() => {
-          const canvas = document.createElement('canvas');
-          canvas.width = videoCamara.videoWidth;
-          canvas.height = videoCamara.videoHeight;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(videoCamara, 0, 0, canvas.width, canvas.height);
-          const fotoBase64 = canvas.toDataURL('image/png');
-          fotoCapturada.src = fotoBase64;
+            } catch (err) {
+                console.error(err);
+                estadoCamara.textContent = 'Error al iniciar cámara';
+            }
+        } else {
+            stream.getTracks().forEach(track => track.stop());
+            videoCamara.srcObject = null;
+            estadoCamara.textContent = 'Apagado';
+            camaraEncendida = false;
+            startBtn.textContent = 'Iniciar Cámara';
+        }
+    });
 
-          const emociones = ["Feliz", "Triste", "Neutral", "Null"];
-          const emocionRandom = emociones[Math.floor(Math.random() * emociones.length)];
-          const porcentajeRandom = Math.floor(Math.random() * 100) + 1;
+    function capturarYPredecir() {
+        const canvas = document.createElement('canvas');
+        const size = 220;
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        const vw = videoCamara.videoWidth;
+        const vh = videoCamara.videoHeight;
+        const sx = (vw - size) / 2;
+        const sy = (vh - size) / 2;
+        ctx.drawImage(videoCamara, sx, sy, size, size, 0, 0, size, size);
 
-          if (emocionRandom === "Feliz") segundosFeliz += 10;
-          if (emocionRandom === "Triste") segundosTriste += 10;
-          if (emocionRandom === "Neutral") segundosNeutral += 10;
-          if (emocionRandom === "Null") segundosNull += 10;
+        const fotoBase64 = canvas.toDataURL('image/png');
+        fotoCapturada.src = fotoBase64;
 
-          felizEl.textContent = `Feliz: ${segundosFeliz} seg`;
-          tristeEl.textContent = `Triste: ${segundosTriste} seg`;
-          neutralEl.textContent = `Neutral: ${segundosNeutral} seg`;
-          nullEl.textContent = `Null: ${segundosNull} seg`;
+        fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image: fotoBase64 })
+        })
+        .then(res => res.json())
+        .then(data => {
+            let emocion = data.label || "Sin reconocer";
+            const confianza = data.confidence || 0;
 
-          estadoEl.textContent = `Estado: ${emocionRandom}`;
-          porcentajeEl.textContent = `Porcentaje: ${porcentajeRandom}%`;
-          rostroEl.textContent = `Estado del rostro: Detectado`;
-          sujetoEl.textContent = `Id: 001`;
-        }, 5000);
+            if (!['Feliz','Triste','Neutral','Enojado','Sorprendido'].includes(emocion)) {
+                emocion = "SinReconocer";
+            }
 
-      } catch (err) {
-        console.error("Error al acceder a la cámara: ", err);
-        estadoCamara.textContent = 'Error al iniciar cámara';
-      }
-    } else {
-      stream.getTracks().forEach(track => track.stop());
-      videoCamara.srcObject = null;
-      clearInterval(fotoInterval);
-      estadoCamara.textContent = 'Apagado';
-      camaraEncendida = false;
-      startBtn.textContent = 'Iniciar';
+            emocionEnCamara.textContent = `${emocion} — ${confianza.toFixed(1)}%`;
+            estadoEl.textContent = `Estado: ${emocion}`;
+            porcentajeEl.textContent = `Porcentaje: ${confianza.toFixed(2)}%`;
+            rostroEl.textContent = `Estado del rostro: Detectado`;
+            sujetoEl.textContent = `Id: 001`;
+
+            segundos[emocion] += 2;
+
+            felizEl.textContent = `Feliz: ${segundos.Feliz} seg`;
+            tristeEl.textContent = `Triste: ${segundos.Triste} seg`;
+            neutralEl.textContent = `Neutral: ${segundos.Neutral} seg`;
+            enojadoEl.textContent = `Enojado: ${segundos.Enojado} seg`;
+            sorprendidoEl.textContent = `Sorprendido: ${segundos.Sorprendido} seg`;
+            sinreconocerEl.textContent = `Sin reconocer: ${segundos.SinReconocer} seg`;
+        })
+        .catch(err => console.error("Error predicción:", err));
     }
-  });
 });
