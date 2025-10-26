@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}🏫 Escuelas{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/estilos_modulo.css' %}">
+
+<div class="modulo-header">
+  <h2>🏫 Módulo de Escuelas</h2>
+  <p>Consulta las escuelas disponibles y sus carreras asociadas</p>
+</div>
+
+<div class="container mt-4">
+  <div class="row g-4 justify-content-center">
+    {% for escuela in escuelas %}
+    <div class="col-md-4">
+      <div class="card card-modulo h-100">
+        <div class="card-body">
+          <h4 class="card-title">{{ escuela.nombre }}</h4>
+          <p class="card-text"><strong>Sede:</strong> {{ escuela.sede }}</p>
+          <p><strong>Carreras:</strong></p>
+          <ul class="text-start">
+            {% for carrera in escuela.carreras %}
+            <li>{{ carrera }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="text-center mt-4">
+    <a href="{% url 'modulo' %}" class="btn btn-volver">Volver</a>
+  </div>
+</div>
+
+<footer>© 2025 Sistema de Módulos</footer>
+{% endblock %}
