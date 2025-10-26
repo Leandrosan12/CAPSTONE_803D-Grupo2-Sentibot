@@ -23,4 +23,7 @@ urlpatterns = [
 
     # ✅ Ruta para la API externa de predicción de emociones
     path('predict_emotion/', views.predict_emotion_view, name='predict_emotion'),
+    path('guardar_emocion/', views.registrar_emocion, name='guardar_emocion'),
+    path('emocion_camara/registrar_emocion/', views.registrar_emocion, name='registrar_emocion'),
+    
 ]

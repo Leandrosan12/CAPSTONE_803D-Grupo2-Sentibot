@@ -2,11 +2,13 @@
 {% block title %}Dashboard Emociones{% endblock %}
 {% block content %}
 {% load static %}
+<meta name="csrf-token" content="{{ csrf_token }}">
 
 <link href="{% static '/css/camara.css' %}" rel="stylesheet">
 
 <h2>Inicio</h2>
 
+<!-- Contenedor cámara -->
 <div class="camara-container">
   <video id="videoCamara" autoplay playsinline></video>
   <div class="overlay"></div>
@@ -18,7 +20,13 @@
   <button id="startBtn">Iniciar Cámara</button>
 </div>
 
-<div id="usuario">Hombre Completo</div>
+<!-- Información del usuario y sesión -->
+<div id="usuario" 
+     data-usuario="{{ request.user.id }}" 
+     data-sesion="{{ sesion_id|default:0 }}">
+    {{ request.user.username }}
+</div>
+
 
 <div class="row g-4">
   <div class="col-12 col-md-6 col-lg-4 report-box">
@@ -44,5 +52,5 @@
   </div>
 </div>
 
- <script src="{% static 'js/camara.js' %}"></script>
+<script src="{% static 'js/camara.js' %}"></script>
 {% endblock %}

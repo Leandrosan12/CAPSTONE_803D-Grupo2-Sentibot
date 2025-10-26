@@ -1,12 +1,18 @@
 from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout, get_user_model
+from django.http import HttpResponse, JsonResponse
+from django.template.loader import get_template
+from django.http import HttpResponse
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
-from django.http import JsonResponse
-import json
-import base64
-from io import BytesIO
-from PIL import Image
-import requests
 
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout, get_user_model
+from django.http import HttpResponse, JsonResponse
+from django.template.loader import get_template
+from django.db.models import Count
+from django.db import connection
+from gestion.models import Usuario, Emocion, EmocionReal, Sesion
+User = get_user_model()
 # ------------------------------
 # Autenticación
 # ------------------------------
@@ -14,15 +20,47 @@ def home(request):
     if not request.user.is_authenticated:
         return redirect("login")
     return render(request, "home.html", {"user": request.user})
-
 def registro(request):
-    return render(request, "registro.html")
+    if request.method == "POST":
+        email = request.POST.get('correo')
+        password = request.POST.get('contrasena')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+
+        if User.objects.filter(email=email).exists():
+            return render(request, 'registro.html', {'error': 'El email ya está registrado'})
+
+        User.objects.create_user(
+            username=email,
+            email=email,
+            password=password,
+            first_name=first_name,
+            last_name=last_name
+        )
+        return redirect('login')
+
+    return render(request, 'registro.html')
+
 
 def login(request):
-    return render(request, "login.html")
+    if request.method == "POST":
+        email = request.POST.get('correo')
+        password = request.POST.get('contrasena')
+
+        user = authenticate(request, email=email, password=password)
+
+        if user is not None and user.is_active:
+            auth_login(request, user)
+            return redirect('camara')
+        else:
+            return render(request, 'login.html', {'error': 'Correo o contraseña incorrectos'})
+
+    return render(request, 'login.html')
+
 
 def logout_view(request):
-    return redirect("login")
+    auth_logout(request)
+    return redirect('login')
 
 # ------------------------------
 # Páginas principales
@@ -31,7 +69,9 @@ def perfil(request):
     return render(request, 'perfil.html')
 
 def camara(request):
-    return render(request, "camara.html")
+    # Obtener o crear sesión activa
+    sesion, created = Sesion.objects.get_or_create(usuario=request.user, fecha_fin__isnull=True)
+    return render(request, "camara.html", {"sesion_id": sesion.id})
 
 def extra(request):
     return render(request, 'extra.html')
@@ -67,7 +107,9 @@ def lista_usuarios(request):
     return render(request, 'lista_usuarios.html')
 
 def dashboard_emociones(request):
-    return render(request, 'dashboard_emociones.html')
+    sesion, created = Sesion.objects.get_or_create(usuario=request.user, fecha_fin__isnull=True)
+    return render(request, "dashboard_emociones.html", {"sesion": sesion})
+
 
 # ------------------------------
 # API de predicción de emociones
@@ -99,3 +141,48 @@ def predict_emotion_view(request):
             return JsonResponse({"label": "Null", "confidence": 0, "error": str(e)})
 
         return JsonResponse({"label": label, "confidence": confidence})
+
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+import json
+from .models import EmocionCamara, Sesion
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+import json
+from .models import EmocionCamara, Sesion
+
+@csrf_exempt
+@require_POST
+def registrar_emocion(request):
+    try:
+        data = json.loads(request.body)
+        print("Datos recibidos:", data)  # 🔹 Para ver qué llega desde JS
+
+        sesion_id = data.get("sesion_id")
+        nombre_emocion = data.get("nombre_emocion")
+        probabilidad = data.get("probabilidad")
+        duracion = data.get("duracion")
+        fiabilidad = data.get("fiabilidad")
+
+        sesion = Sesion.objects.get(id=sesion_id)
+
+        emocion = EmocionCamara.objects.create(
+            sesion=sesion,
+            nombre_emocion=nombre_emocion,
+            probabilidad=probabilidad,
+            duracion=duracion,
+            fiabilidad=fiabilidad
+        )
+
+        return JsonResponse({"status": "ok", "id": emocion.id, "mensaje": f"Emoción {nombre_emocion} guardada"})
+
+    except Sesion.DoesNotExist:
+        print("Sesión no encontrada:", sesion_id)
+        return JsonResponse({"status": "error", "mensaje": "Sesión no encontrada"}, status=404)
+    except Exception as e:
+        print("Error interno:", str(e))
+        return JsonResponse({"status": "error", "mensaje": str(e)}, status=500)
