@@ -1,0 +1,154 @@
+/* ===============================
+   🌐 ESTILOS GLOBALES DE MÓDULOS
+   =============================== */
+
+body {
+  background-color: #1e3557; /* azul oscuro elegante */
+  font-family: "Poppins", sans-serif;
+  color: #212529;
+  margin: 0;
+  padding: 0;
+}
+
+/* ---------- CABECERA ---------- */
+.modulo-header {
+  text-align: center;
+  padding: 40px 0 20px;
+  color: white;
+}
+
+.modulo-header h2 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #4da3ff;
+}
+
+.modulo-header p {
+  font-size: 1.1rem;
+  opacity: 0.9;
+}
+
+/* ---------- TARJETAS ---------- */
+.card-modulo {
+  background: #fff;
+  border-radius: 18px;
+  padding: 25px;
+  text-align: center;
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-modulo:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+}
+
+.card-modulo h4 {
+  color: #222;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.card-modulo p {
+  color: #666;
+  font-size: 0.95rem;
+  margin-bottom: 1.2rem;
+}
+
+.card-modulo .btn {
+  border-radius: 12px;
+  padding: 8px 18px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: background 0.3s;
+}
+
+.card-modulo .btn-success {
+  background-color: #28c76f;
+  border: none;
+}
+
+.card-modulo .btn-success:hover {
+  background-color: #22b463;
+}
+
+/* ---------- TABLAS ---------- */
+.table-container {
+  background: #fff;
+  border-radius: 18px;
+  padding: 25px;
+  margin-top: 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.table thead {
+  background-color: #101f33;
+  color: #fff;
+  font-size: 1rem;
+}
+
+.table th,
+.table td {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.table tbody tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+.table tbody tr:hover {
+  background-color: #e9f2ff;
+}
+
+/* ---------- BOTONES ---------- */
+.btn-volver {
+  background-color: #495057;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 8px 18px;
+  font-weight: 600;
+  transition: background 0.3s ease;
+}
+
+.btn-volver:hover {
+  background-color: #343a40;
+}
+
+/* ---------- BUSCADOR ---------- */
+.search-bar {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.search-bar input {
+  border-radius: 10px 0 0 10px;
+  border: none;
+  padding: 10px;
+  width: 100%;
+}
+
+.search-bar button {
+  border-radius: 0 10px 10px 0;
+  border: none;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  font-weight: 600;
+  transition: background 0.3s ease;
+}
+
+.search-bar button:hover {
+  background-color: #0069d9;
+}
+
+/* ---------- PIE ---------- */
+footer {
+  text-align: center;
+  padding: 10px;
+  color: #ccc;
+  font-size: 0.9rem;
+  margin-top: 40px;
+}

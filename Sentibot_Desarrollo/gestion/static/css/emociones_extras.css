@@ -1,0 +1,78 @@
+body {
+    background: linear-gradient(to bottom, #f5f7fa, #e9f0f7);
+    font-family: 'Segoe UI', sans-serif;
+}
+h1 { 
+    font-weight:700; 
+    color:#08192b; 
+    margin-bottom:40px; 
+    text-align:center; 
+}
+
+.emotion-card {
+    border-radius: 20px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    background: #fff;
+    padding: 30px 20px;
+    text-align: center;
+}
+.emotion-card:hover {
+    transform: translateY(-8px) scale(1.05);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+}
+.emotion-icon { font-size: 5rem; margin-bottom: 15px; }
+.card-title { font-weight:700; font-size:1.4rem; color:#34495e; }
+
+.section { display:none; margin-top:50px; }
+
+.question-card {
+    background:#fff;
+    border-radius:20px;
+    padding:30px;
+    box-shadow:0 8px 20px rgba(0,0,0,0.1);
+    max-width:700px;
+    margin:0 auto;
+}
+.opcion-btn {
+    border-radius:15px;
+    font-weight:600;
+    padding:12px 25px;
+    transition:all 0.2s;
+}
+.opcion-btn:hover {
+    transform:scale(1.05);
+}
+
+.result-card {
+    background: #fff;
+    border-radius: 20px;
+    padding:25px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    text-align:center;
+    margin-top:20px;
+}
+.result-card h4 { color:#0d6efd; font-weight:700; margin-bottom:15px; }
+.recommendations {
+    margin-top:20px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:15px;
+    justify-content:center;
+}
+.recommendation-card {
+    background:#f8f9fa;
+    border-left:5px solid #007bff;
+    border-radius:15px;
+    padding:15px 20px;
+    display:flex;
+    align-items:center;
+    min-width:200px;
+    transition:all 0.2s;
+}
+.recommendation-card:hover {
+    transform:translateY(-5px);
+    box-shadow:0 6px 15px rgba(0,0,0,0.1);
+}
+.recommendation-card span { font-size:1.8rem; margin-right:15px; }

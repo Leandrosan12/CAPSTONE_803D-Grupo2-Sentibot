@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}📄 Detalle Alumno{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/estilos_modulo.css' %}">
+
+<div class="modulo-header">
+  <h2>📄 Detalle del Alumno</h2>
+  <p>Información detallada del estudiante seleccionado</p>
+</div>
+
+<div class="container mt-5">
+  <div class="card card-modulo p-4 mx-auto" style="max-width: 600px;">
+    <h4 class="card-title mb-3">{{ alumno.first_name }} {{ alumno.last_name }}</h4>
+    <p class="card-text"><strong>ID:</strong> {{ alumno.id }}</p>
+    <p class="card-text"><strong>Email:</strong> {{ alumno.email }}</p>
+    <p class="card-text"><strong>Sede:</strong> {{ alumno.sede }}</p>
+  </div>
+
+  <div class="text-center mt-4">
+    <a href="{% url 'alumnos' %}" class="btn btn-volver">Volver</a>
+  </div>
+</div>
+
+<footer>© 2025 Sistema de Módulos</footer>
+{% endblock %}

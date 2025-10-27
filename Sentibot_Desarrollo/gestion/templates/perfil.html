@@ -5,41 +5,46 @@
 
 {% block content %}
 <div class="container my-5">
-  <div class="card shadow-lg mx-auto text-center" style="max-width: 500px;">
-    <div class="card-body">
-      <!-- Foto de perfil -->
-      <img src="{% static 'Icon/gente.gif' %}" 
-           alt="Foto de perfil" 
-           class="rounded-circle border border-success border-3 mb-3" 
-           style="width: 120px; height: 120px; object-fit: cover;">
+  <div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+      <div class="card shadow-lg text-center p-4">
+        <!-- Foto -->
+        <img src="{% static 'Icon/user.png' %}" alt="Foto de perfil"
+             class="rounded-circle border border-4 border-success mb-3"
+             style="width: 150px; height: 150px; object-fit: cover;">
+        
+        <!-- Nombre -->
+        <h3 class="card-title mb-3">{{ user.get_full_name|default:user.username }}</h3>
 
-      <!-- Nombre -->
-      <h4 class="card-title fw-bold text-dark mb-3">
-        {{ user.get_full_name|default:user.username }}
-      </h4>
+        <!-- Datos -->
+        <ul class="list-group list-group-flush text-start mb-3">
+          <li class="list-group-item d-flex justify-content-between">
+            <span class="fw-bold">Nombre:</span> <span>{{ user.first_name }}</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between">
+            <span class="fw-bold">Apellido:</span> <span>{{ user.last_name }}</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between">
+            <span class="fw-bold">Sede:</span> <span>Melipilla</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between">
+            <span class="fw-bold">Correo:</span> <span>{{ user.email }}</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between">
+            <span class="fw-bold">Rol:</span> <span>{{ user.groups.first.name|default:"Usuario" }}</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between">
+            <span class="fw-bold">Rut:</span> <span>20.567.786-3</span>
+          </li>
+        </ul>
 
-      <!-- Datos del perfil -->
-      <ul class="list-group list-group-flush text-start mb-3">
-        <li class="list-group-item d-flex justify-content-between">
-          <span class="fw-semibold">Sede:</span> <span>Melipilla</span>
-        </li>
-        <li class="list-group-item d-flex justify-content-between">
-          <span class="fw-semibold">Nombre:</span> <span>{{ user.first_name }}</span>
-        </li>
-        <li class="list-group-item d-flex justify-content-between">
-          <span class="fw-semibold">Apellido:</span> <span>{{ user.last_name }}</span>
-        </li>
-        <li class="list-group-item d-flex justify-content-between">
-          <span class="fw-semibold">Correo:</span> <span>{{ user.email }}</span>
-        </li>
-        <li class="list-group-item d-flex justify-content-between">
-          <span class="fw-semibold">Rol:</span> <span>{{ user.groups.first.name|default:"Usuario" }}</span>
-        </li>
-      </ul>
-
-      <!-- Botón editar -->
-      <button class="btn btn-success px-4 fw-bold">Editar</button>
+        <!-- Botón Editar (cambiado a <button>) -->
+        <button type="button" id="editProfileBtn" class="btn btn-success btn-lg">Editar</button>
+      </div>
     </div>
   </div>
 </div>
+
+<!-- Enlace al script JS -->
+<script src="{% static 'js/perfil.js' %}"></script>
 {% endblock %}
