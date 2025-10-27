@@ -1,104 +1,142 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Actividades{% endblock %}
+{% block title %}Actividades Emocionales{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-  <div class="card shadow-lg border-0 rounded-4">
-    <div class="card-header text-center bg-primary text-white rounded-top-4">
-      <h3 class="mb-0">📌 Recomendaciones</h3>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/actividades.css' %}">
+
+<div class="container my-5">
+  <h2 class="text-center fw-bold mb-3 text-dark">🌿 Actividades para Regular tus Emociones</h2>
+  <p class="text-center text-muted mb-5">
+    Haz clic en una emoción para descubrir pequeñas acciones que pueden ayudarte a sentirte mejor.
+  </p>
+
+  <div class="accordion" id="emocionesAccordion">
+
+    <!-- ALEGRÍA -->
+    <div class="accordion-item emocion alegria">
+      <h2 class="accordion-header" id="alegriaHeader">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#alegria" aria-expanded="false" aria-controls="alegria">
+          🌞 Alegría
+        </button>
+      </h2>
+      <div id="alegria" class="accordion-collapse collapse" aria-labelledby="alegriaHeader" data-bs-parent="#emocionesAccordion">
+        <div class="accordion-body">
+          <ul>
+            <li>Escribe tres cosas por las que te sientas agradecido hoy.</li>
+            <li>Comparte tu alegría: envía un mensaje positivo a alguien que aprecias.</li>
+            <li>Disfruta de algo simple: una canción, un paseo o una comida deliciosa.</li>
+            <li>Crea un mural o collage con tus momentos felices.</li>
+            <li>Ríe sin razón: busca un video divertido o juega con alguien.</li>
+          </ul>
+        </div>
+      </div>
     </div>
-    <div class="card-body d-grid gap-3">
 
-      <!-- BOTÓN 1: Relajación Muscular Progresiva -->
-      <button class="btn btn-primary btn-lg w-100" type="button" data-bs-toggle="collapse" data-bs-target="#relajacion" aria-expanded="false" aria-controls="relajacion">
-        Relajación Muscular Progresiva
-      </button>
-      <div class="collapse mt-3" id="relajacion">
-        <div class="card card-body border-0 shadow-sm">
-          <h5 class="text-center">Relajación Muscular Progresiva</h5>
-          <ol>
-            <li>Encuentra un lugar tranquilo: siéntate o recuéstate en una posición cómoda y respira profundo.</li>
-            <li>Empieza por los pies: tensa 5 segundos, relaja 10–15 segundos.</li>
-            <li>Sube por el cuerpo: Pantorrillas → Muslos → Glúteos → Abdomen → Pecho → Espalda → Brazos → Manos → Cuello → Cara.</li>
-            <li>Respira profundamente durante todo el proceso.</li>
-            <li>Finaliza con unos minutos en calma.</li>
-          </ol>
-          <p>Video guía: <a href="https://youtu.be/eu-2iWv_fCM" target="_blank">Ver aquí</a></p>
-          <span class="badge bg-primary">15 min</span>
-        </div>
-      </div>
-
-      <!-- BOTÓN 2: Respiración Diafragmática -->
-      <button class="btn btn-primary btn-lg w-100" type="button" data-bs-toggle="collapse" data-bs-target="#respiracion" aria-expanded="false" aria-controls="respiracion">
-        Respiración Diafragmática
-      </button>
-      <div class="collapse mt-3" id="respiracion">
-        <div class="card card-body border-0 shadow-sm">
-          <h5 class="text-center">Respiración Diafragmática</h5>
-          <ol>
-            <li>Siéntate o acuéstate en una postura cómoda.</li>
-            <li>Coloca una mano en el pecho y otra en el abdomen.</li>
-            <li>Inhala por la nariz, llevando el aire hacia el abdomen (no al pecho).</li>
-            <li>Mantén el aire 2–3 segundos.</li>
-            <li>Exhala lentamente por la boca.</li>
-            <li>Repite 5–10 minutos.</li>
-          </ol>
-          <span class="badge bg-success">10 min</span>
-        </div>
-      </div>
-
-      <!-- BOTÓN 3: Meditación -->
-      <button class="btn btn-primary btn-lg w-100" type="button" data-bs-toggle="collapse" data-bs-target="#meditacion" aria-expanded="false" aria-controls="meditacion">
-        Meditación
-      </button>
-      <div class="collapse mt-3" id="meditacion">
-        <div class="card card-body border-0 shadow-sm">
-          <h5 class="text-center">Meditación</h5>
+    <!-- TRISTEZA -->
+    <div class="accordion-item emocion tristeza">
+      <h2 class="accordion-header" id="tristezaHeader">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#tristeza" aria-expanded="false" aria-controls="tristeza">
+          🌧️ Tristeza
+        </button>
+      </h2>
+      <div id="tristeza" class="accordion-collapse collapse" aria-labelledby="tristezaHeader" data-bs-parent="#emocionesAccordion">
+        <div class="accordion-body">
           <ul>
-            <li>Encuentra un lugar tranquilo y cómodo.</li>
-            <li>Cierra los ojos y concéntrate en tu respiración.</li>
-            <li>Si tu mente se distrae, vuelve suavemente a la respiración.</li>
-            <li>Practica entre 5 y 20 minutos según tu disponibilidad.</li>
+            <li>Escucha una lista de canciones suaves y deja fluir tus emociones.</li>
+            <li>Sal a caminar y observa algo bonito de tu entorno.</li>
+            <li>Escribe lo que sientes sin juzgarte, solo déjalo salir.</li>
+            <li>Habla con alguien de confianza sobre lo que te pasa.</li>
+            <li>Haz algo pequeño que te genere bienestar (una ducha caliente, un té, una siesta).</li>
           </ul>
-          <span class="badge bg-warning text-dark">20 min</span>
         </div>
       </div>
-
-      <!-- BOTÓN 4: Masajes -->
-      <button class="btn btn-primary btn-lg w-100" type="button" data-bs-toggle="collapse" data-bs-target="#masajes" aria-expanded="false" aria-controls="masajes">
-        Masajes
-      </button>
-      <div class="collapse mt-3" id="masajes">
-        <div class="card card-body border-0 shadow-sm">
-          <h5 class="text-center">Masajes</h5>
-          <ul>
-            <li>Usa movimientos circulares en cuello, hombros y espalda.</li>
-            <li>Presiona suavemente en áreas tensas.</li>
-            <li>Puedes usar aceites o cremas relajantes.</li>
-          </ul>
-          <span class="badge bg-info text-dark">15 min</span>
-        </div>
-      </div>
-
-      <!-- BOTÓN 5: Actividades Físicas -->
-      <button class="btn btn-primary btn-lg w-100" type="button" data-bs-toggle="collapse" data-bs-target="#fisicas" aria-expanded="false" aria-controls="fisicas">
-        Actividades Físicas
-      </button>
-      <div class="collapse mt-3" id="fisicas">
-        <div class="card card-body border-0 shadow-sm">
-          <h5 class="text-center">Actividades Físicas</h5>
-          <ul>
-            <li>Caminar al aire libre 15–20 minutos.</li>
-            <li>Estiramientos suaves para liberar tensión.</li>
-            <li>Yoga o ejercicios de movilidad.</li>
-          </ul>
-          <span class="badge bg-danger">20–30 min</span>
-        </div>
-      </div>
-
     </div>
+
+    <!-- MIEDO -->
+    <div class="accordion-item emocion miedo">
+      <h2 class="accordion-header" id="miedoHeader">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#miedo" aria-expanded="false" aria-controls="miedo">
+          🌙 Miedo
+        </button>
+      </h2>
+      <div id="miedo" class="accordion-collapse collapse" aria-labelledby="miedoHeader" data-bs-parent="#emocionesAccordion">
+        <div class="accordion-body">
+          <ul>
+            <li>Haz respiraciones lentas y profundas durante un minuto.</li>
+            <li>Escribe tus miedos y analiza cuáles son reales y cuáles imaginarios.</li>
+            <li>Haz algo que te dé una sensación de control (organiza tu espacio, tu día o tus metas).</li>
+            <li>Repite una afirmación calmante: “Estoy a salvo, puedo manejar esto”.</li>
+            <li>Ve una película o lee algo inspirador que te relaje.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ENOJO -->
+    <div class="accordion-item emocion enojo">
+      <h2 class="accordion-header" id="enojoHeader">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#enojo" aria-expanded="false" aria-controls="enojo">
+          🔥 Enojo
+        </button>
+      </h2>
+      <div id="enojo" class="accordion-collapse collapse" aria-labelledby="enojoHeader" data-bs-parent="#emocionesAccordion">
+        <div class="accordion-body">
+          <ul>
+            <li>Haz una pausa de 5 minutos antes de reaccionar.</li>
+            <li>Descarga la energía: sal a caminar, haz ejercicio o respira profundamente.</li>
+            <li>Escribe lo que te molesta y luego destruye el papel.</li>
+            <li>Escucha música que te ayude a liberar la tensión.</li>
+            <li>Reflexiona: ¿Qué necesitas en realidad en este momento?</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ASCO -->
+    <div class="accordion-item emocion asco">
+      <h2 class="accordion-header" id="ascoHeader">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#asco" aria-expanded="false" aria-controls="asco">
+          🌿 Asco
+        </button>
+      </h2>
+      <div id="asco" class="accordion-collapse collapse" aria-labelledby="ascoHeader" data-bs-parent="#emocionesAccordion">
+        <div class="accordion-body">
+          <ul>
+            <li>Haz limpieza de tu espacio o elimina algo que ya no necesitas.</li>
+            <li>Respira aire fresco o cambia de entorno.</li>
+            <li>Escribe lo que te causa rechazo y busca entender por qué.</li>
+            <li>Realiza una actividad creativa (dibujar, cocinar, pintar).</li>
+            <li>Recuerda una experiencia que te haya generado calma o aceptación.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- NEUTRAL -->
+    <div class="accordion-item emocion neutral">
+      <h2 class="accordion-header" id="neutralHeader">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#neutral" aria-expanded="false" aria-controls="neutral">
+          🌤️ Neutral
+        </button>
+      </h2>
+      <div id="neutral" class="accordion-collapse collapse" aria-labelledby="neutralHeader" data-bs-parent="#emocionesAccordion">
+        <div class="accordion-body">
+          <ul>
+            <li>Haz una pausa consciente de 10 minutos sin distracciones.</li>
+            <li>Planea una actividad nueva o un pequeño reto para hoy.</li>
+            <li>Piensa en una persona o recuerdo que te haga sentir tranquilo.</li>
+            <li>Realiza estiramientos o yoga suave.</li>
+            <li>Escucha sonidos naturales o una meditación guiada.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 {% endblock %}

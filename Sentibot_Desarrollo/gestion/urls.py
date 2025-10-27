@@ -20,7 +20,6 @@ urlpatterns = [
     path('modulo/escuelas/', views.escuelas, name='escuelas'),
     path('modulo/alumnos/', views.alumnos, name='alumnos'),
     path('modulo/detalle_alumno/<int:alumno_id>/', views.detalle_alumno, name='detalle_alumno'),
-    path('seguimiento/', views.seguimiento, name='seguimiento'),
     path("emociones-data/", views.emociones_data, name="emociones_data"),
     path("dashboard/", views.dashboard, name="dashboard"),
     path('emociones_data/', views.emociones_data, name='emociones_data'),
