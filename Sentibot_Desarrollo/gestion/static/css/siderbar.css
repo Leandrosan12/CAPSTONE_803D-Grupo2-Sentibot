@@ -1,3 +1,4 @@
+/* ------------------ Sidebar Base ------------------ */
 .sidebar {
     margin-top: 1%;
     margin-left: 2%;
@@ -10,51 +11,22 @@
     position: fixed;
     top: 0;
     left: 0;
-    height: 96vh;           /* altura casi completa */
+    height: 96vh;
     z-index: 21;
     transition: transform 0.3s ease, opacity 0.3s ease;
-
-    overflow-y: auto;       /* agrega scroll vertical si hay muchos enlaces */
-    overflow-x: hidden;     /* evita scroll horizontal */
+    overflow-y: auto;
+    overflow-x: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
 }
 
+/* Sidebar Oculta */
 .sidebar.collapsed {
     transform: translateX(-120%);
     opacity: 0;
     pointer-events: none;
-<<<<<<< HEAD
-=======
 }
 
-.sidebar h2 {
-    margin-top: 0;
-    margin-bottom: 30px;
-    font-weight: normal;
-    color: #757880;
-}
-
-.sidebar a {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: rgb(1, 1, 1);
-    text-decoration: none;
-    margin-bottom: 15px;
-    padding: 10px 15px;
-    border-radius: 4px;
-    transition: background-color 0.2s ease;
-}
-
-.sidebar a:hover {
-}
-
-.sidebar a img {
-    width: 43px;
-    height: 43px;
->>>>>>> eff6f01c27b06bbbd1392fc743d0f63bccb3d120
-}
-
-/* ------------------ Título de Sidebar ------------------ */
+/* ------------------ Título ------------------ */
 .titulo-sidebar {
     display: flex;
     align-items: center;
@@ -75,8 +47,9 @@
 
 .titulo-sidebar:hover .icono {
     transform: scale(1.05);
+}
 
-/* ------------------ Encabezados dentro de Sidebar ------------------ */
+/* ------------------ Encabezados ------------------ */
 .sidebar h2 {
     margin: 0 0 25px 0;
     font-weight: 500;
@@ -95,24 +68,40 @@
     color: #010101;
     text-decoration: none;
     font-size: 1rem;
-    transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+    background: transparent;
+    transition: background-color 0.25s ease, color 0.25s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+/* Efecto hover */
 .sidebar a:hover {
     background-color: #34495e;
     color: #ffffff;
     transform: translateX(4px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
 }
 
-/* ------------------ Iconos dentro de Links ------------------ */
+/* Efecto click “presionado” */
+.sidebar a:active {
+    transform: translateX(2px) scale(0.98);
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.25);
+    background-color: #2c3e50;
+}
+
+/* ------------------ Iconos ------------------ */
 .sidebar a img {
     width: 43px;
     height: 43px;
     object-fit: cover;
     border-radius: 6px;
+    transition: transform 0.2s ease;
 }
 
-/* ------------------ Scrollbar Estética ------------------ */
+/* Brillo del ícono al pasar el mouse */
+.sidebar a:hover img {
+    transform: scale(1.1) rotate(3deg);
+}
+
+/* ------------------ Scrollbar ------------------ */
 .sidebar::-webkit-scrollbar {
     width: 6px;
 }
@@ -126,7 +115,7 @@
     border-radius: 3px;
 }
 
-/* ------------------ Media Query para Responsividad ------------------ */
+/* ------------------ Responsividad ------------------ */
 @media (max-width: 1024px) {
     .sidebar {
         width: 220px;

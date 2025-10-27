@@ -17,11 +17,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 ]
 
-<<<<<<< HEAD
 AUTH_USER_MODEL = 'gestion.Usuario'
 
-=======
->>>>>>> eff6f01c27b06bbbd1392fc743d0f63bccb3d120
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -50,6 +47,18 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'ProhectoTitulo.wsgi.application'
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'sentibot',
+        'USER': 'root',
+        'PASSWORD': 'admin',
+        'HOST': 'localhost',
+        'PORT': '3306',
+    }
+}
+
 AUTH_USER_MODEL = 'gestion.Usuario'
 
 # Database
