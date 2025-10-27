@@ -5,7 +5,7 @@ from django.template.loader import get_template
 from django.db.models import Count
 from django.db import connection
 from .models import Usuario, Emocion, EmocionReal, Sesion
-from .ml_model import predict_emotion
+
 import json
 import base64
 from io import BytesIO
