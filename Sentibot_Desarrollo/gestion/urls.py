@@ -26,4 +26,8 @@ urlpatterns = [
     path('guardar_emocion/', views.registrar_emocion, name='guardar_emocion'),
     path('emocion_camara/registrar_emocion/', views.registrar_emocion, name='registrar_emocion'),
     
+
+    path('detalle/<int:id>/', views.detalle_alumno, name='detalle_alumno'),
+
+    
 ]

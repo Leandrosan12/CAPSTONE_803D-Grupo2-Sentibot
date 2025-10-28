@@ -1,21 +1,21 @@
+# Django shortcuts y utilidades
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout, get_user_model
 from django.http import HttpResponse, JsonResponse
 from django.template.loader import get_template
-from django.http import HttpResponse
-from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
+from django.contrib.auth.decorators import login_required
+from django.utils import timezone
 
-from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout, get_user_model
-from django.http import HttpResponse, JsonResponse
-from django.template.loader import get_template
-from django.db.models import Count
-from django.db import connection
-from gestion.models import Usuario, Emocion, EmocionReal, Sesion
-User = get_user_model()
-# ------------------------------
 # Autenticación
-# ------------------------------
+from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout, get_user_model
+User = get_user_model()
+
+# Modelos y base de datos
+from django.db.models import Count, Avg
+from django.db import connection
+from .models import Sesion, EmocionCamara, Usuario
+from gestion.models import Usuario as GestionUsuario, Emocion, EmocionReal, Sesion as GestionSesion
+
+
 def home(request):
     if not request.user.is_authenticated:
         return redirect("login")
@@ -68,9 +68,14 @@ def logout_view(request):
 def perfil(request):
     return render(request, 'perfil.html')
 
+
+
+@login_required(login_url='login')  # ajusta la URL si la llamas distinto
 def camara(request):
-    # Obtener o crear sesión activa
-    sesion, created = Sesion.objects.get_or_create(usuario=request.user, fecha_fin__isnull=True)
+    # Obtener o crear sesión activa solo para usuarios autenticados
+    sesion = Sesion.objects.filter(usuario=request.user, fecha_fin__isnull=True).first()
+    if not sesion:
+        sesion = Sesion.objects.create(usuario=request.user, inicio=timezone.now())
     return render(request, "camara.html", {"sesion_id": sesion.id})
 
 def extra(request):
@@ -85,11 +90,21 @@ def modulo(request):
 def modulo_profesor(request):
     return render(request, 'modulo_profesor.html')
 
-def alumnos(request):
-    return render(request, 'modulo/alumnos.html')
+from django.shortcuts import render
+from .models import Usuario  # o el modelo que uses para usuarios
 
-def detalle_alumno(request, alumno_id):
-    return render(request, 'modulo/detalle_alumno.html', {'alumno_id': alumno_id})
+def alumnos(request):
+    usuarios = Usuario.objects.all()  # Trae todos los usuarios
+    return render(request, 'modulo/alumnos.html', {'usuarios': usuarios})
+
+
+# views.py
+from django.shortcuts import render, get_object_or_404
+from .models import Usuario  # tu modelo personalizado
+
+def detalle_alumno(request, id):
+    alumno = get_object_or_404(Usuario, id=id)
+    return render(request, 'modulo/detalle_alumno.html', {'alumno': alumno})
 
 def escuelas(request):
     return render(request, 'modulo/escuelas.html')
@@ -100,8 +115,29 @@ def actividades(request):
 def mantenimiento(request):
     return render(request, 'mantenimiento.html')
 
+
 def seguimiento(request):
-    return render(request, 'seguimiento.html')
+    # Agregamos las emociones totales por nombre
+    emociones_agg = EmocionCamara.objects.values('nombre_emocion').annotate(cantidad=Count('id'))
+    emociones = list(emociones_agg)  # [{'nombre_emocion': 'Feliz', 'cantidad': 5}, ...]
+
+    # Agregamos datos por usuario
+    datos_usuarios = []
+    usuarios = Usuario.objects.all()
+    for u in usuarios:
+        sesiones = Sesion.objects.filter(usuario=u)
+        emociones_usuario = EmocionCamara.objects.filter(sesion__in=sesiones)
+        emociones_count = emociones_usuario.values('nombre_emocion').annotate(cantidad=Count('id'))
+        datos_usuarios.append({
+            'usuario': u.username,
+            'emociones': list(emociones_count)
+        })
+
+    return render(request, 'seguimiento.html', {
+        'emociones': emociones,
+        'datos_usuarios': datos_usuarios
+    })
+
 
 def lista_usuarios(request):
     return render(request, 'lista_usuarios.html')

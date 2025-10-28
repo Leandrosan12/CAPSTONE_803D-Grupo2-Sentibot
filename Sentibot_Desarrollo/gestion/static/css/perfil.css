@@ -1,26 +1,23 @@
 /* ====== Tarjeta de Perfil ====== */
 body {
-    background: linear-gradient(180deg, #e9eff4 0%, #dbe7f3 100%);
-    font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    margin: 0;
-    padding: 0;
-    color: #2c3e50;
+    background-color: #e9eff4;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .perfil-card {
-    max-width: 420px;
+    max-width: 400px;
     margin: 80px auto;
     background: #ffffff;
-    border-radius: 20px;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    border-radius: 18px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
     text-align: center;
     padding: 40px 30px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: all 0.3s ease;
 }
 
 .perfil-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
 }
 
 /* ====== Imagen de perfil ====== */
@@ -30,34 +27,26 @@ body {
     border-radius: 50%;
     object-fit: cover;
     border: 4px solid #4caf50;
-    box-shadow: 0 0 20px rgba(76, 175, 80, 0.3);
+    box-shadow: 0 0 15px rgba(76, 175, 80, 0.3);
     margin-bottom: 20px;
     background-color: #f9f9f9;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.foto-perfil:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 25px rgba(76, 175, 80, 0.45);
 }
 
 /* ====== Nombre ====== */
 .nombre {
-    font-size: 1.8rem;
+    font-size: 1.7rem;
     font-weight: 700;
     color: #2c3e50;
-    margin-bottom: 20px;
-    letter-spacing: 0.5px;
+    margin-bottom: 15px;
 }
 
 /* ====== Sección de datos ====== */
 .perfil-datos {
     text-align: left;
     background: #f8f9fa;
-    border-radius: 14px;
-    padding: 18px 22px;
-    margin-top: 20px;
-    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    padding: 15px 20px;
+    margin-top: 15px;
 }
 
 .perfil-datos ul {
@@ -70,20 +59,14 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 0;
+    padding: 8px 0;
     border-bottom: 1px solid #ddd;
-    font-size: 1rem;
-    color: #444;
-    transition: background 0.3s ease;
+    font-size: 0.95rem;
+    color: #555;
 }
 
 .perfil-datos ul li:last-child {
     border-bottom: none;
-}
-
-.perfil-datos ul li:hover {
-    background: #eef4f8;
-    border-radius: 8px;
 }
 
 .perfil-datos span {
@@ -91,62 +74,22 @@ body {
     color: #2c3e50;
 }
 
-/* ====== Inputs (modo edición JS) ====== */
-.perfil-datos input {
-    border: 1px solid #cfd8dc;
-    border-radius: 8px;
-    padding: 6px 10px;
-    width: 65%;
-    color: #333;
-    font-size: 0.95rem;
-    font-weight: 500;
-    background: #ffffff;
-    transition: all 0.25s ease;
-}
-
-.perfil-datos input:focus {
-    border-color: #4caf50;
-    box-shadow: 0 0 6px rgba(76, 175, 80, 0.3);
-    outline: none;
-    background: #fefefe;
-}
-
-/* ====== Botón Editar/Guardar ====== */
+/* ====== Botón (si luego agregas uno) ====== */
 .editar-btn {
-    margin-top: 30px;
+    margin-top: 25px;
     background: linear-gradient(135deg, #4caf50, #43a047);
-    color: #fff;
-    padding: 12px 32px;
-    border-radius: 12px;
+    color: white;
+    padding: 12px 28px;
+    border-radius: 10px;
     border: none;
     font-weight: 600;
-    font-size: 1rem;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.25);
 }
 
 .editar-btn:hover {
     background: linear-gradient(135deg, #43a047, #388e3c);
     transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba(56, 142, 60, 0.35);
-}
-
-.editar-btn:active {
-    transform: scale(0.97);
-}
-
-/* ====== Notificación visual al guardar ====== */
-.guardado-msg {
-    margin-top: 15px;
-    color: #388e3c;
-    font-weight: 600;
-    opacity: 0;
-    transition: opacity 0.4s ease;
-}
-
-.guardado-msg.show {
-    opacity: 1;
 }
 
 /* ====== Responsivo ====== */
@@ -162,10 +105,6 @@ body {
     }
 
     .nombre {
-        font-size: 1.5rem;
-    }
-
-    .perfil-datos input {
-        width: 55%;
+        font-size: 1.4rem;
     }
 }
