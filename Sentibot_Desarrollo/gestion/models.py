@@ -128,6 +128,10 @@ class EmocionCamara(models.Model):
     fecha = models.DateTimeField(auto_now_add=True)
     probabilidad = models.FloatField()
 
+    # Nuevos campos
+    duracion = models.FloatField(help_text="Duración en segundos de la emoción", null=True, blank=True)
+    fiabilidad = models.FloatField(help_text="Nivel de confianza del modelo (0.0 a 1.0)", null=True, blank=True)
+
     def __str__(self):
         return f"{self.nombre_emocion} - {self.sesion.usuario.username}"
 
@@ -162,25 +166,7 @@ class Actividad(models.Model):
 
 from django.db import models
 
-class School(models.Model):
-    name = models.CharField(max_length=200)
-    sede = models.CharField(max_length=100, blank=True)
-    description = models.TextField(blank=True)
-
-    def __str__(self):
-        return self.name
-
-class Student(models.Model):
-    rut = models.CharField(max_length=20, unique=True)
-    nombre = models.CharField(max_length=200)
-    sede = models.CharField(max_length=100)
-    edad = models.PositiveIntegerField(null=True, blank=True)
-    correo = models.EmailField(blank=True)
-    telefono = models.CharField(max_length=50, blank=True)
-    school = models.ForeignKey(School, related_name='students', on_delete=models.SET_NULL, null=True, blank=True)
-
-    def __str__(self):
-        return f"{self.nombre} ({self.rut})"
+<<<<<<<<< Temporary merge branch 1
     class Meta:
         managed = False  # Django no crea ni modifica esta tabla
         db_table = 'vw_emociones_camara'

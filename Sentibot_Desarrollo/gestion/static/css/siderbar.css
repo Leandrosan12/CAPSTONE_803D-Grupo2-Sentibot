@@ -1,4 +1,7 @@
+
+
 /* ------------------ Sidebar Base ------------------ */
+
 .sidebar {
     margin-top: 1%;
     margin-left: 2%;
@@ -14,19 +17,67 @@
     height: 96vh;
     z-index: 21;
     transition: transform 0.3s ease, opacity 0.3s ease;
+
+    overflow-y: auto;       /* agrega scroll vertical si hay muchos enlaces */
+    overflow-x: hidden;     /* evita scroll horizontal */
+}
+
     overflow-y: auto;
     overflow-x: hidden;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
 }
 
+<<<<<<< HEAD
+/* ------------------ Sidebar Colapsada ------------------ */
+>>>>>>> origin/LeandroFabio
+=======
 /* Sidebar Oculta */
+>>>>>>> main
 .sidebar.collapsed {
     transform: translateX(-120%);
     opacity: 0;
     pointer-events: none;
+<<<<<<< HEAD
+<<<<<<< HEAD
+}
+
+.sidebar h2 {
+    margin-top: 0;
+    margin-bottom: 30px;
+    font-weight: normal;
+    color: #757880;
+}
+
+.sidebar a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: rgb(1, 1, 1);
+    text-decoration: none;
+    margin-bottom: 15px;
+    padding: 10px 15px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.sidebar a:hover {
+    background-color: #34495e;
+    color: #fff;
+}
+
+.sidebar a img {
+    width: 43px;
+    height: 43px;
+=======
+>>>>>>> origin/LeandroFabio
+}
+
+/* ------------------ Título de Sidebar ------------------ */
+=======
 }
 
 /* ------------------ Título ------------------ */
+>>>>>>> main
 .titulo-sidebar {
     display: flex;
     align-items: center;
