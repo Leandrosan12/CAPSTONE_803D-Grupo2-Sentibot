@@ -114,6 +114,7 @@ def escuelas(request):
     ]
     return render(request, 'escuelas.html', {'escuelas': escuelas})
 
+
 # ------------------------------
 # Actividades
 # ------------------------------

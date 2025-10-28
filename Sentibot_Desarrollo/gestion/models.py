@@ -160,6 +160,7 @@ class Actividad(models.Model):
 # Modulos
 # ------------------------------
 
+<<<<<<< HEAD
 from django.db import models
 
 class School(models.Model):
@@ -186,6 +187,8 @@ class Student(models.Model):
         db_table = 'vw_emociones_camara'
     
 
+=======
+>>>>>>> 148daa39fb48e5a198859b58ea1eb016512e1507
 from django.db import models
 from django.contrib.auth.models import User
 
