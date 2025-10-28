@@ -159,18 +159,7 @@ class Actividad(models.Model):
     
 
 
- 
-# ------------------------------
-# Modulos
-# ------------------------------
-
-from django.db import models
-
-<<<<<<<<< Temporary merge branch 1
-    class Meta:
-        managed = False  # Django no crea ni modifica esta tabla
-        db_table = 'vw_emociones_camara'
-    
+    #prueba vista dashboard
 
 from django.db import models
 from django.contrib.auth.models import User
