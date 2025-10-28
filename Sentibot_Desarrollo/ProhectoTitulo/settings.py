@@ -83,6 +83,8 @@ DATABASES = {
         'NAME': 'sentibot',
         'USER': 'admin',
         'PASSWORD': 'admin',
+        'USER': 'root',
+        'PASSWORD': 'lilo1309',
         'HOST': 'localhost',
         'PORT': '3306',
     }
