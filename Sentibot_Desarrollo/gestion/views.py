@@ -1,82 +1,128 @@
 from django.shortcuts import render, redirect
-from django.contrib import messages
+from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout, get_user_model
+from django.http import HttpResponse, JsonResponse
 from django.template.loader import get_template
-from django.http import HttpResponse
-from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
-from gestion.models import Usuario  
-from django.shortcuts import render, redirect
-from django.contrib.auth import get_user_model
+from django.db.models import Count
+from django.db import connection
+from .models import Usuario, Emocion, EmocionReal, Sesion
+
+import json
+import base64
+from io import BytesIO
+from PIL import Image
 
 User = get_user_model()
 
+# ------------------------------
+# Vistas de autenticación
+# ------------------------------
+def home(request):
+    if not request.user.is_authenticated:
+        return redirect("login")
+    return render(request, "home.html", {"user": request.user})
 
 def registro(request):
     if request.method == "POST":
         email = request.POST.get('correo')
         password = request.POST.get('contrasena')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
 
         if User.objects.filter(email=email).exists():
             return render(request, 'registro.html', {'error': 'El email ya está registrado'})
 
         User.objects.create_user(
-            username=email, 
+            username=email,
             email=email,
-            password=password
+            password=password,
+            first_name=first_name,
+            last_name=last_name
         )
-        return redirect('login') 
+        return redirect('login')
 
     return render(request, 'registro.html')
 
-
 def login(request):
     if request.method == "POST":
-        email = request.POST.get('correo')      # coincide con tu formulario
+        email = request.POST.get('correo')
         password = request.POST.get('contrasena')
-
-        # Autenticar usando email como USERNAME_FIELD
         user = authenticate(request, email=email, password=password)
-
         if user is not None and user.is_active:
             auth_login(request, user)
-            return redirect('camara')  # redirección exitosa
+            return redirect('camara')
         else:
             return render(request, 'login.html', {'error': 'Correo o contraseña incorrectos'})
-
     return render(request, 'login.html')
 
-
-
-
-# Logout
 def logout_view(request):
     auth_logout(request)
     return redirect('login')
 
-# Home
-def home(request):
-    if not request.user.is_authenticated:
-        return redirect('login')
-    return render(request, 'home.html', {'user': request.user})
-
-    
+# ------------------------------
+# Vistas principales
+# ------------------------------
 def perfil(request):
     return render(request, 'perfil.html')
+
 def camara(request):
     return render(request, 'camara.html')
 
+def extra(request):
+    return render(request, 'extra.html')
 
+def agenda_view(request):
+    return render(request, 'agenda.html')
 
-def seguimiento(request):
-    return render(request, 'seguimiento.html')
+# ------------------------------
+# Módulos principales
+# ------------------------------
+def modulo(request):
+    return render(request, 'modulo/modulo.html')
+
+def modulo_profesor(request):
+    profesores = [
+        {'id': 1, 'nombre': 'Juan Torres', 'rut': '18.234.567-9', 'correo': 'juan.torres@duocuc.cl', 'telefono': '+569 87654321', 'sede': 'Santiago'},
+        {'id': 2, 'nombre': 'María Rojas', 'rut': '17.123.456-0', 'correo': 'maria.rojas@duocuc.cl', 'telefono': '+569 91234567', 'sede': 'Melipilla'},
+    ]
+    return render(request, 'modulo_profesor.html', {'profesores': profesores})
+
+# ------------------------------
+# Módulo Alumnos y Escuelas
+# ------------------------------
+def alumnos(request):
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT id, first_name, last_name, email, sede FROM gestion_usuario")
+        columnas = [col[0] for col in cursor.description]
+        alumnos = [dict(zip(columnas, fila)) for fila in cursor.fetchall()]
+    return render(request, 'alumnos.html', {'alumnos': alumnos})
+
 def dashboard(request):
-    return render(request, 'dashboard.html')
+    return render(request, "dashboard.html")
 
+def detalle_alumno(request, alumno_id):
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT * FROM gestion_usuario WHERE id = %s", [alumno_id])
+        columnas = [col[0] for col in cursor.description]
+        alumno = dict(zip(columnas, cursor.fetchone()))
+    return render(request, 'detalle_alumno.html', {'alumno': alumno})
 
+def escuelas(request):
+    escuelas = [
+        {'id': 1, 'nombre': 'Escuela de Ingeniería', 'carreras': ['Informática', 'Civil', 'Industrial'], 'sede': 'Santiago'},
+        {'id': 2, 'nombre': 'Escuela de Construcción', 'carreras': ['Construcción', 'Arquitectura'], 'sede': 'Quilpué'},
+        {'id': 3, 'nombre': 'Escuela de Medicina', 'carreras': ['Medicina', 'Enfermería'], 'sede': 'Concepción'},
+    ]
+    return render(request, 'escuelas.html', {'escuelas': escuelas})
 
+# ------------------------------
+# Actividades
+# ------------------------------
+def actividades(request):
+    return render(request, 'actividades.html')
 
-from django.http import JsonResponse
-from django.db import connection
-
+# ------------------------------
+# Datos y seguimiento
+# ------------------------------
 def emociones_data(request):
     with connection.cursor() as cursor:
         cursor.execute("""
@@ -85,10 +131,68 @@ def emociones_data(request):
             GROUP BY nombre_emocion;
         """)
         rows = cursor.fetchall()
-    
     data = {
         "labels": [row[0] for row in rows],
-        "values": [row[1] for row in rows]
+        "values": [row[1] for row in rows],
     }
     return JsonResponse(data)
 
+def predict_emotion_view(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        image_base64 = data.get("image")
+
+        if not image_base64:
+            return JsonResponse({"label": "Null", "confidence": 0})
+
+        if "," in image_base64:
+            image_base64 = image_base64.split(",")[1]
+
+        try:
+            image_bytes = base64.b64decode(image_base64)
+            image = Image.open(BytesIO(image_bytes)).convert("L")  # Escala de grises
+        except Exception as e:
+            return JsonResponse({"label": "Null", "confidence": 0, "error": str(e)})
+
+        label, confidence = predict_emotion(image)
+        return JsonResponse({"label": label, "confidence": confidence})
+
+# ------------------------------
+# Seguimiento Emociones
+# ------------------------------
+def seguimiento(request):
+    datos = EmocionReal.objects.values('emocion').annotate(total=Count('emocion'))
+    etiquetas = [d['emocion'] for d in datos]
+    valores = [d['total'] for d in datos]
+    return render(request, 'seguimiento.html', {
+        'emociones_labels': etiquetas,
+        'emociones_counts': valores,
+    })
+
+# ------------------------------
+# Nueva vista: Dashboard Emociones
+# ------------------------------
+def dashboard_emociones(request):
+    datos = EmocionReal.objects.values('emocion__nombre_emocion').annotate(total=Count('emocion'))
+    etiquetas = [d['emocion__nombre_emocion'] for d in datos]
+    valores = [d['total'] for d in datos]
+    return render(request, 'dashboard_emociones.html', {
+        'emociones_labels': etiquetas,
+        'emociones_counts': valores,
+    })
+
+# ------------------------------
+# Lista de usuarios
+# ------------------------------
+def lista_usuarios(request):
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT * FROM gestion_usuario")
+        columnas = [col[0] for col in cursor.description]
+        datos = [dict(zip(columnas, row)) for row in cursor.fetchall()]
+    return render(request, 'lista_usuarios.html', {'usuarios': datos})
+
+# ------------------------------
+# Mantenimiento
+# ------------------------------
+def mantenimiento(request):
+    return render(request, 'mantenimiento.html')
