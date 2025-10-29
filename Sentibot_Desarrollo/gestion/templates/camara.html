@@ -1,9 +1,8 @@
 {% extends "base.html" %}
-{% block title %}{% endblock %}
+{% block title %}Dashboard Emociones{% endblock %}
 {% block content %}
 {% load static %}
 
-<title>Dashboard Emociones</title>
 <style>
   body {
     font-family: Arial, sans-serif;
@@ -22,7 +21,6 @@
     box-shadow: 0 6px 12px rgba(0,0,0,0.2);
   }
 
-  .camara-container img,
   .camara-container video {
     width: 100%;
     display: block;
@@ -38,7 +36,19 @@
     font-weight: bold;
   }
 
-  button#startBtn {
+  /* Overlay cuadrado de guía */
+  .overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 220px;
+    height: 220px;
+    border: 3px solid #7ED321;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  button {
     background-color: #7ED321;
     color: white;
     border: none;
@@ -47,10 +57,10 @@
     font-weight: bold;
     border-radius: 8px;
     cursor: pointer;
-    margin: 15px 0;
+    margin: 15px 10px 15px 0;
   }
 
-  button#startBtn:hover {
+  button:hover {
     background-color: #52a003;
   }
 
@@ -60,27 +70,12 @@
     margin-bottom: 15px;
   }
 
-  .report-container {
-    display: none;
-    max-width: 900px;
-    margin: 0 auto;
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    flex-wrap: wrap;
-  }
-
   .report-box {
     background-color: #9b5f5f;
     color: white;
     padding: 15px;
     border-radius: 10px;
-    flex: 1 1 200px;
-    min-width: 200px;
-  }
-
-  .report-box h3 {
-    margin-top: 0;
+    margin-bottom: 20px;
   }
 
   .foto-box img {
@@ -89,78 +84,79 @@
     border-radius: 12px;
     object-fit: cover;
   }
+
+  #emocionEnCamara {
+    position: absolute;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.7);
+    color: #fff;
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: bold;
+  }
 </style>
-</head>
-<body>
 
 <h2>Inicio</h2>
 
 <div class="camara-container">
   <video id="videoCamara" autoplay playsinline></video>
+  <div class="overlay"></div>
+  <div id="emocionEnCamara">Sin reconocer — 0%</div>
   <div class="estado">Apagado</div>
 </div>
 
-<button id="startBtn">Iniciar</button>
+<div>
+  <button id="startBtn">Iniciar Cámara</button>
+  <button id="fotoBtn" disabled>Tomar Foto</button>
+</div>
 
 <div id="usuario">Hombre Completo</div>
 
-<div class="report-container" id="reportContainer">
- 
-
-</div>
-
-
-
-</body>
-
- <div class="row g-4"> 
-  <!-- Reporte actual -->
-  <div class="col-12 col-md-6 col-lg-4">
-    <div class="report-box p-3 border rounded">
-      <h3>Reporte actual</h3>
-      <p id="feliz">Feliz: 0 seg</p>
-      <p id="triste">Triste: 0 seg</p>
-      <p id="neutral">Neutral: 0 seg</p>
-      <p id="null">Null: 0 seg</p>
-    </div>
-  </div>
-  
-  <!-- Imagen -->
-  <div class="col-12 col-md-6 col-lg-4">
-    <div class="foto-box text-center p-3 border rounded">
-      <img src="{% static 'img/prueba.jpg' %}" 
-           alt="icono Sentibot" 
-           class="icono img-fluid" 
-           id="fotoCapturada">
-    </div>
+<div class="row g-4">
+  <div class="col-12 col-md-6 col-lg-4 report-box">
+    <h3>Reporte actual</h3>
+    <p id="feliz">Feliz: 0 seg</p>
+    <p id="triste">Triste: 0 seg</p>
+    <p id="neutral">Neutral: 0 seg</p>
+    <p id="enojado">Enojado: 0 seg</p>
+    <p id="sorprendido">Sorprendido: 0 seg</p>
+    <p id="sinreconocer">Sin reconocer: 0 seg</p>
   </div>
 
+  <div class="col-12 col-md-6 col-lg-4 foto-box">
+    <img src="{% static 'img/prueba.jpg' %}" id="fotoCapturada" alt="Foto Capturada">
+  </div>
 
-  
-  <!-- Informe básico -->
-  <div class="col-12 col-md-6 col-lg-4">
-    <div class="report-box p-3 border rounded">
-      <h3>Informe básico</h3>
-      <p id="estado">Estado: Neutral</p>
-      <p id="porcentaje">Porcentaje: 0%</p>
-      <p id="rostro">Estado del rostro: No detectado</p>
-      <p id="sujeto">Id: ---</p>
-    </div>
+  <div class="col-12 col-md-6 col-lg-4 report-box">
+    <h3>Informe básico</h3>
+    <p id="estado">Estado: Neutral</p>
+    <p id="porcentaje">Porcentaje: 0%</p>
+    <p id="rostro">Estado del rostro: No detectado</p>
+    <p id="sujeto">Id: ---</p>
   </div>
 </div>
+
+{% csrf_token %}
 
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", () => {
     const startBtn = document.getElementById('startBtn');
+    const fotoBtn = document.getElementById('fotoBtn');
     const videoCamara = document.getElementById('videoCamara');
     const estadoCamara = document.querySelector('.estado');
     const fotoCapturada = document.getElementById('fotoCapturada');
+    const emocionEnCamara = document.getElementById('emocionEnCamara');
 
-    // Referencias a las tarjetas
+    // Elementos del reporte
     const felizEl = document.getElementById('feliz');
     const tristeEl = document.getElementById('triste');
     const neutralEl = document.getElementById('neutral');
-    const nullEl = document.getElementById('null');
+    const enojadoEl = document.getElementById('enojado');
+    const sorprendidoEl = document.getElementById('sorprendido');
+    const sinreconocerEl = document.getElementById('sinreconocer');
 
     const estadoEl = document.getElementById('estado');
     const porcentajeEl = document.getElementById('porcentaje');
@@ -168,76 +164,98 @@
     const sujetoEl = document.getElementById('sujeto');
 
     let stream = null;
-    let fotoInterval = null;
     let camaraEncendida = false;
+    let segundos = {
+      Feliz: 0,
+      Triste: 0,
+      Neutral: 0,
+      Enojado: 0,
+      Sorprendido: 0,
+      SinReconocer: 0
+    };
 
-    // Simulador de segundos para emociones
-    let segundosFeliz = 0;
-    let segundosTriste = 0;
-    let segundosNeutral = 0;
-    let segundosNull = 0;
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
     startBtn.addEventListener('click', async () => {
-      if (!camaraEncendida) {
-        try {
-          stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-          videoCamara.srcObject = stream;
-          estadoCamara.textContent = 'Cámara activa';
-          camaraEncendida = true;
-          startBtn.textContent = 'Apagar';
+        if (!camaraEncendida) {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                videoCamara.srcObject = stream;
+                estadoCamara.textContent = 'Cámara activa';
+                camaraEncendida = true;
+                startBtn.textContent = 'Apagar Cámara';
+                fotoBtn.disabled = false;
 
-          // Tomar foto cada 10 segundos
-          fotoInterval = setInterval(() => {
-            const canvas = document.createElement('canvas');
-            canvas.width = videoCamara.videoWidth;
-            canvas.height = videoCamara.videoHeight;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(videoCamara, 0, 0, canvas.width, canvas.height);
-            const fotoBase64 = canvas.toDataURL('image/png');
-            fotoCapturada.src = fotoBase64;
+                // Llamar predicción cada 2 segundos
+                setInterval(() => {
+                    if (camaraEncendida) capturarYPredecir();
+                }, 1000);
 
-            // Simular valores de prueba
-            const emociones = ["Feliz", "Triste", "Neutral", "Null"];
-            const emocionRandom = emociones[Math.floor(Math.random() * emociones.length)];
-            const porcentajeRandom = Math.floor(Math.random() * 100) + 1;
+            } catch (err) {
+                console.error(err);
+                estadoCamara.textContent = 'Error al iniciar cámara';
+            }
+        } else {
+            stream.getTracks().forEach(track => track.stop());
+            videoCamara.srcObject = null;
+            estadoCamara.textContent = 'Apagado';
+            camaraEncendida = false;
+            startBtn.textContent = 'Iniciar Cámara';
+            fotoBtn.disabled = true;
+        }
+    });
 
-            // Aumentar contadores de ejemplo
-            if (emocionRandom === "Feliz") segundosFeliz += 10;
-            if (emocionRandom === "Triste") segundosTriste += 10;
-            if (emocionRandom === "Neutral") segundosNeutral += 10;
-            if (emocionRandom === "Null") segundosNull += 10;
+    function capturarYPredecir() {
+        const canvas = document.createElement('canvas');
+        const size = 220;
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        const vw = videoCamara.videoWidth;
+        const vh = videoCamara.videoHeight;
+        const sx = (vw - size) / 2;
+        const sy = (vh - size) / 2;
+        ctx.drawImage(videoCamara, sx, sy, size, size, 0, 0, size, size);
 
-            // Actualizar tarjeta Reporte actual
-            felizEl.textContent = `Feliz: ${segundosFeliz} seg`;
-            tristeEl.textContent = `Triste: ${segundosTriste} seg`;
-            neutralEl.textContent = `Neutral: ${segundosNeutral} seg`;
-            nullEl.textContent = `Null: ${segundosNull} seg`;
+        const fotoBase64 = canvas.toDataURL('image/png');
+        fotoCapturada.src = fotoBase64;
 
-            // Actualizar tarjeta Informe básico
-            estadoEl.textContent = `Estado: ${emocionRandom}`;
-            porcentajeEl.textContent = `Porcentaje: ${porcentajeRandom}%`;
+        fetch("{% url 'predict_emotion' %}", {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrftoken},
+            body: JSON.stringify({ image: fotoBase64 })
+        })
+        .then(res => res.json())
+        .then(data => {
+            let emocion = data.label || "Sin reconocer";
+            const confianza = data.confidence || 0;
+
+            if (!['Feliz','Triste','Neutral','Enojado','Sorprendido'].includes(emocion)) {
+                emocion = "Sin reconocer";
+            }
+
+            // Mostrar emoción + porcentaje sobre la cámara
+            emocionEnCamara.textContent = `${emocion} — ${confianza.toFixed(1)}%`;
+
+            estadoEl.textContent = `Estado: ${emocion}`;
+            porcentajeEl.textContent = `Porcentaje: ${confianza.toFixed(2)}%`;
             rostroEl.textContent = `Estado del rostro: Detectado`;
             sujetoEl.textContent = `Id: 001`;
 
-          }, 5000);
+            // Sumar segundos
+            if (emocion in segundos) segundos[emocion] += 2;
 
-        } catch (err) {
-          console.error("Error al acceder a la cámara: ", err);
-          estadoCamara.textContent = 'Error al iniciar cámara';
-        }
-      } else {
-        // Apagar cámara
-        stream.getTracks().forEach(track => track.stop());
-        videoCamara.srcObject = null;
-        clearInterval(fotoInterval);
-        estadoCamara.textContent = 'Apagado';
-        camaraEncendida = false;
-        startBtn.textContent = 'Iniciar';
-      }
-    });
-  });
+            // Actualizar reporte
+            felizEl.textContent = `Feliz: ${segundos.Feliz} seg`;
+            tristeEl.textContent = `Triste: ${segundos.Triste} seg`;
+            neutralEl.textContent = `Neutral: ${segundos.Neutral} seg`;
+            enojadoEl.textContent = `Enojado: ${segundos.Enojado} seg`;
+            sorprendidoEl.textContent = `Sorprendido: ${segundos.Sorprendido} seg`;
+            sinreconocerEl.textContent = `Sin reconocer: ${segundos.SinReconocer} seg`;
+        })
+        .catch(err => console.error("Error predicción:", err));
+    }
+});
 </script>
-    
- 
 
 {% endblock %}

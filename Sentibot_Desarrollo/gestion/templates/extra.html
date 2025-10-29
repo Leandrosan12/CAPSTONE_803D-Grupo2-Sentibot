@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Emociones Interactivas{% endblock %}
+
+{% block content %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/emociones_extras.css' %}">
+
+
+<div class="container my-5">
+    <h1>🌈 Descubre tu Estado Emocional</h1>
+
+    <div class="row g-4 justify-content-center">
+        <div class="col-md-4 col-lg-2">
+            <div class="emotion-card" onclick="iniciarTest('Alegría')">
+                <div class="emotion-icon">😄</div>
+                <h5 class="card-title">Alegría</h5>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg-2">
+            <div class="emotion-card" onclick="iniciarTest('Tristeza')">
+                <div class="emotion-icon">😢</div>
+                <h5 class="card-title">Tristeza</h5>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg-2">
+            <div class="emotion-card" onclick="iniciarTest('Miedo')">
+                <div class="emotion-icon">😨</div>
+                <h5 class="card-title">Miedo</h5>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg-2">
+            <div class="emotion-card" onclick="iniciarTest('Enojo')">
+                <div class="emotion-icon">😡</div>
+                <h5 class="card-title">Enojo</h5>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg-2">
+            <div class="emotion-card" onclick="iniciarTest('Asco')">
+                <div class="emotion-icon">🤢</div>
+                <h5 class="card-title">Asco</h5>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg-2">
+            <div class="emotion-card" onclick="iniciarTest('Neutral')">
+                <div class="emotion-icon">😐</div>
+                <h5 class="card-title">Neutral</h5>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sección Test -->
+<div id="testSection" class="section container">
+    <div class="question-card text-start">
+        <h4 id="emocionSeleccionada"></h4>
+        <div id="preguntaTexto" class="mb-3 fs-5 fw-semibold"></div>
+        <div id="opcionesContainer" class="d-grid gap-2"></div>
+    </div>
+    <div id="resultadoDiv" class="result-card" style="display:none;">
+        <h4 id="emocionFinal"></h4>
+        <p id="significado"></p>
+        <div class="recommendations" id="recomendaciones"></div>
+    </div>
+</div>
+
+<script src="{% static 'js/emociones_extras.js' %}"></script>
+{% endblock %}

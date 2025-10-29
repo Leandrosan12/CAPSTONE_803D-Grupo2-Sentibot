@@ -1,5 +1,10 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.contrib.auth.models import User
+from django.conf import settings  # 👈 Esto trae el modelo de usuario correcto según AUTH_USER_MODEL
+
+
+    
 
 # ------------------------------
 # Rol
@@ -30,7 +35,7 @@ class Usuario(AbstractUser):
     rol = models.ForeignKey(Rol, on_delete=models.CASCADE, related_name="usuarios", null=True)
     escuela = models.ForeignKey(Escuela, on_delete=models.CASCADE, related_name="usuarios", null=True)
 
-    REQUIRED_FIELDS = []  # email ya será USERNAME_FIELD
+    REQUIRED_FIELDS = []  
     EMAIL_FIELD = 'email'
     USERNAME_FIELD = 'email'
 
@@ -147,6 +152,7 @@ class Actividad(models.Model):
 
     def __str__(self):
         return self.nombre_actividad
+    
 
 
  
@@ -179,7 +185,6 @@ class Student(models.Model):
         managed = False  # Django no crea ni modifica esta tabla
         db_table = 'vw_emociones_camara'
     
-
 
 from django.db import models
 from django.contrib.auth.models import User

@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Seguimiento{% endblock %}
+
+{% block content %}
+<link href="{% static 'css/seguimiento.css' %}" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="container mt-5 mb-5">
+  <h2 class="mb-4 text-center">📊 Seguimiento de Emociones</h2>
+
+  <div class="row g-4">
+    <!-- Gráfico de Barras -->
+    <div class="col-md-6">
+      <div class="card shadow-lg border-0 h-100">
+        <div class="card-header text-center">Gráfico de Barras</div>
+        <div class="card-body d-flex justify-content-center align-items-center">
+          <canvas id="chartBarras" style="max-height:300px; width:100%;"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gráfico de Pastel -->
+    <div class="col-md-6">
+      <div class="card shadow-lg border-0 h-100">
+        <div class="card-header text-center">Gráfico de Pastel</div>
+        <div class="card-body d-flex justify-content-center align-items-center">
+          <canvas id="chartPastel" style="max-height:300px; width:100%;"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mt-2">
+    <!-- Progreso General (Gauge) -->
+    <div class="col-md-6">
+      <div class="card shadow-lg border-0 h-100">
+        <div class="card-header text-center">Progreso General</div>
+        <div class="card-body d-flex justify-content-center align-items-center">
+          <canvas id="chartGauge" style="max-height:300px; width:100%;"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gráfico Radar -->
+    <div class="col-md-6">
+      <div class="card shadow-lg border-0 h-100">
+        <div class="card-header text-center">Gráfico Radar</div>
+        <div class="card-body d-flex justify-content-center align-items-center">
+          <canvas id="chartRadar" style="max-height:300px; width:100%;"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="{% static 'js/seguimiento.js' %}"></script>
+<<<<<<< HEAD
+{% endblock %}
+=======
+{% endblock %}
+>>>>>>> 148daa39fb48e5a198859b58ea1eb016512e1507
