@@ -11,7 +11,6 @@ urlpatterns = [
     path('agenda/', views.agenda_view, name='agenda'),
     path('seguimiento/', views.seguimiento, name='seguimiento'),
     path('actividades/', views.actividades, name='actividades'), 
-    path('lista_usuarios/', views.lista_usuarios, name='lista_usuarios'),
     path('mantenimiento/', views.mantenimiento, name='mantenimiento'),  # actualizado
 
     path('extra/', views.extra, name='extra'),
@@ -22,12 +21,16 @@ urlpatterns = [
     path('modulo/detalle_alumno/<int:alumno_id>/', views.detalle_alumno, name='detalle_alumno'),
 
     # ✅ Ruta para la API externa de predicción de emociones
-    path('predict_emotion/', views.predict_emotion_view, name='predict_emotion'),
-    path('guardar_emocion/', views.registrar_emocion, name='guardar_emocion'),
-    path('emocion_camara/registrar_emocion/', views.registrar_emocion, name='registrar_emocion'),
+
     
 
     path('detalle/<int:id>/', views.detalle_alumno, name='detalle_alumno'),
+
+# verificar correo 
+
+    path('enviar-codigo/', views.enviar_codigo, name='enviar_codigo'),
+    path('validar-codigo/', views.validar_codigo, name='validar_codigo'),
+
 
     
 ]
