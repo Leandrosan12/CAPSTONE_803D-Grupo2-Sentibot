@@ -55,13 +55,5 @@
   </div>
 </div>
 
-<script>
-    // Usamos JSON.parse para asegurarnos que sea un objeto JS válido
-    const emocionesData = JSON.parse('{{ emociones|safe|escapejs }}') || [];
-    const datosUsuarios = JSON.parse('{{ datos_usuarios|safe|escapejs }}') || [];
-</script>
-
 <script src="{% static 'js/seguimiento.js' %}"></script>
-
-
 {% endblock %}

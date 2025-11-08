@@ -1,27 +1,71 @@
-/* Estilos generales para el seguimiento */
+/* ===== Estilos generales para el seguimiento ===== */
 body {
   background: linear-gradient(180deg, #eef3f9 0%, #dbe7f3 100%);
   font-family: 'Poppins', sans-serif;
+  margin: 0;
+  padding: 0;
+  color: #333;
 }
 
-.card-header {
-  background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
-  color: white;
-  font-weight: 500;
-}
-
+/* ===== Tarjetas ===== */
 .card {
   border-radius: 1.2rem;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  border: none;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.12);
+}
+
+/* ===== Encabezado de la tarjeta ===== */
+.card-header {
+  background: linear-gradient(135deg, #7b1dff 0%, #4f8bfd 100%);
+  color: #fff;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-align: center;
+  padding: 1rem 1.5rem;
+  border-bottom: none;
+  font-size: 1.1rem;
+}
+
+/* ===== Cuerpo de la tarjeta ===== */
 .card-body {
   height: 350px;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: #ffffff;
+  transition: background 0.3s ease;
 }
 
+.card-body:hover {
+  background: #f9fbff;
+}
+
+/* ===== Títulos ===== */
 h2 {
   font-weight: 600;
-  color: #333;
+  color: #2a2a2a;
+  margin-bottom: 0;
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+/* ===== Scrollbar suave (si aplica) ===== */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #7b1dff 0%, #4f8bfd 100%);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #e6edf7;
 }
