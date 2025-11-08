@@ -1,46 +1,77 @@
+# Django shortcuts y utilidades
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout, get_user_model
 from django.http import HttpResponse, JsonResponse
 from django.template.loader import get_template
-from django.db.models import Count
-from django.db import connection
-from .models import Usuario, Emocion, EmocionReal, Sesion
+from django.contrib.auth.decorators import login_required
+from django.utils import timezone
 
-import json
-import base64
-from io import BytesIO
-from PIL import Image
-
+# Autenticación
+from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout, get_user_model
 User = get_user_model()
 
-# ------------------------------
-# Vistas de autenticación
-# ------------------------------
+# Modelos y base de datos
+from django.db.models import Count, Avg
+from django.db import connection
+from .models import Sesion, EmocionCamara, Usuario
+from gestion.models import Usuario as GestionUsuario, Emocion, EmocionReal, Sesion as GestionSesion
+
+
 def home(request):
     if not request.user.is_authenticated:
         return redirect("login")
     return render(request, "home.html", {"user": request.user})
+# views.py (asegúrate de tener los imports)
+import random
+import logging
+from datetime import timedelta
+from django.utils import timezone
+from django.contrib.auth.models import User
+from django.core.mail import send_mail
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
 
-def registro(request):
-    if request.method == "POST":
-        email = request.POST.get('correo')
-        password = request.POST.get('contrasena')
-        first_name = request.POST.get('first_name')
-        last_name = request.POST.get('last_name')
+logger = logging.getLogger(__name__)
 
-        if User.objects.filter(email=email).exists():
-            return render(request, 'registro.html', {'error': 'El email ya está registrado'})
 
-        User.objects.create_user(
-            username=email,
-            email=email,
-            password=password,
-            first_name=first_name,
-            last_name=last_name
+@require_GET
+def enviar_codigo(request):
+    email = request.GET.get('correo')
+    if not email:
+        return JsonResponse({'error': 'Correo no proporcionado'}, status=400)
+
+    # 1) Si el correo ya está registrado, no enviamos código
+    if User.objects.filter(email__iexact=email).exists():
+        return JsonResponse({'error': 'Este correo ya está registrado.'}, status=400)
+
+    # 2) Generar código y guardar en sesión con expiración (10 minutos)
+    codigo = str(random.randint(100000, 999999))
+    request.session['codigo_verificacion'] = codigo
+    request.session['correo_verificacion'] = email
+    # Guardamos la expiración como ISO o timestamp
+    expiracion = timezone.now() + timedelta(minutes=10)
+    request.session['codigo_expira'] = expiracion.isoformat()
+
+    # 3) Intentar enviar correo (capturamos errores)
+    try:
+        send_mail(
+            'Código de verificación',
+            f'Tu código de verificación es: {codigo}',
+            None,               # Dejar None para que use DEFAULT_FROM_EMAIL si lo tienes configurado
+            [email],
+            fail_silently=False,
         )
-        return redirect('login')
+    except Exception as e:
+        logger.exception("Error enviando correo de verificación")
+        # Limpia la sesión para no dejar datos inconsistentes
+        request.session.pop('codigo_verificacion', None)
+        request.session.pop('correo_verificacion', None)
+        request.session.pop('codigo_expira', None)
+        return JsonResponse({
+            'error': 'No se pudo enviar el correo. Verifica la configuración SMTP.'
+        }, status=500)
 
-    return render(request, 'registro.html')
+    return JsonResponse({'mensaje': 'Código enviado correctamente al correo. Revisa tu bandeja de entrada.'})
+
 
 def login(request):
     if request.method == "POST":
@@ -64,8 +95,15 @@ def logout_view(request):
 def perfil(request):
     return render(request, 'perfil.html')
 
+
+
+@login_required(login_url='login')  # ajusta la URL si la llamas distinto
 def camara(request):
-    return render(request, 'camara.html')
+    # Obtener o crear sesión activa solo para usuarios autenticados
+    sesion = Sesion.objects.filter(usuario=request.user, fecha_fin__isnull=True).first()
+    if not sesion:
+        sesion = Sesion.objects.create(usuario=request.user)  # ✅ se elimina "inicio", se llena solo con auto_now_add
+    return render(request, "camara.html", {"sesion_id": sesion.id})
 
 def extra(request):
     return render(request, 'extra.html')
@@ -86,25 +124,21 @@ def modulo_profesor(request):
     ]
     return render(request, 'modulo_profesor.html', {'profesores': profesores})
 
-# ------------------------------
-# Módulo Alumnos y Escuelas
-# ------------------------------
+from django.shortcuts import render
+from .models import Usuario  # o el modelo que uses para usuarios
+
 def alumnos(request):
-    with connection.cursor() as cursor:
-        cursor.execute("SELECT id, first_name, last_name, email, sede FROM gestion_usuario")
-        columnas = [col[0] for col in cursor.description]
-        alumnos = [dict(zip(columnas, fila)) for fila in cursor.fetchall()]
-    return render(request, 'alumnos.html', {'alumnos': alumnos})
+    usuarios = Usuario.objects.all()  # Trae todos los usuarios
+    return render(request, 'modulo/alumnos.html', {'usuarios': usuarios})
 
-def dashboard(request):
-    return render(request, "dashboard.html")
 
-def detalle_alumno(request, alumno_id):
-    with connection.cursor() as cursor:
-        cursor.execute("SELECT * FROM gestion_usuario WHERE id = %s", [alumno_id])
-        columnas = [col[0] for col in cursor.description]
-        alumno = dict(zip(columnas, cursor.fetchone()))
-    return render(request, 'detalle_alumno.html', {'alumno': alumno})
+# views.py
+from django.shortcuts import render, get_object_or_404
+from .models import Usuario  # tu modelo personalizado
+
+def detalle_alumno(request, id):
+    alumno = get_object_or_404(Usuario, id=id)
+    return render(request, 'modulo/detalle_alumno.html', {'alumno': alumno})
 
 def escuelas(request):
     escuelas = [
@@ -120,6 +154,38 @@ def escuelas(request):
 # ------------------------------
 def actividades(request):
     return render(request, 'actividades.html')
+
+def mantenimiento(request):
+    return render(request, 'mantenimiento.html')
+
+
+def seguimiento(request):
+    # Agregamos las emociones totales por nombre
+    emociones_agg = EmocionCamara.objects.values('nombre_emocion').annotate(cantidad=Count('id'))
+    emociones = list(emociones_agg)  # [{'nombre_emocion': 'Feliz', 'cantidad': 5}, ...]
+
+    # Agregamos datos por usuario
+    datos_usuarios = []
+    usuarios = Usuario.objects.all()
+    for u in usuarios:
+        sesiones = Sesion.objects.filter(usuario=u)
+        emociones_usuario = EmocionCamara.objects.filter(sesion__in=sesiones)
+        emociones_count = emociones_usuario.values('nombre_emocion').annotate(cantidad=Count('id'))
+        datos_usuarios.append({
+            'usuario': u.username,
+            'emociones': list(emociones_count)
+        })
+
+    return render(request, 'seguimiento.html', {
+        'emociones': emociones,
+        'datos_usuarios': datos_usuarios
+    })
+
+
+
+
+
+
 
 # ------------------------------
 # Datos y seguimiento
@@ -197,3 +263,8 @@ def lista_usuarios(request):
 # ------------------------------
 def mantenimiento(request):
     return render(request, 'mantenimiento.html')
+# ------------------------------
+#registro
+# ------------------------------
+def registro(request):
+    return render(request, 'registro.html')

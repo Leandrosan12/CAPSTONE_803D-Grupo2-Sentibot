@@ -1,21 +1,21 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}👩‍🎓 Alumnos{% endblock %}
+{% block title %}👩‍🎓 Usuarios{% endblock %}
 
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/estilos_modulo.css' %}">
 
 <div class="modulo-header">
-  <h2>👩‍🎓 Módulo de Alumnos</h2>
-  <p>Gestiona la información de los alumnos registrados</p>
+  <h2>👩‍🎓 Módulo de Usuarios</h2>
+  <p>Gestiona la información de los usuarios registrados</p>
 </div>
 
 <div class="container table-container">
-  <h3 class="mb-4">Listado de Alumnos</h3>
+  <h3 class="mb-4">Listado de Usuarios</h3>
 
   <form class="search-bar mb-3" method="get">
-    <input type="text" name="rut" placeholder="Buscar por RUT" />
+    <input type="text" name="email" placeholder="Buscar por email" />
     <button type="submit">Buscar</button>
   </form>
 
@@ -26,25 +26,27 @@
         <th>Nombre</th>
         <th>Apellido</th>
         <th>Email</th>
-        <th>Sede</th>
+        {% comment %} Si tienes campo sede en Usuario, descomenta la siguiente línea {% endcomment %}
+        <!-- <th>Sede</th> -->
         <th>Acción</th>
       </tr>
     </thead>
     <tbody>
-      {% for alumno in alumnos %}
+      {% for z in usuarios %}
       <tr>
-        <td>{{ alumno.id }}</td>
-        <td>{{ alumno.first_name }}</td>
-        <td>{{ alumno.last_name }}</td>
-        <td>{{ alumno.email }}</td>
-        <td>{{ alumno.sede }}</td>
+        <td>{{ z.id }}</td>
+        <td>{{ z.first_name }}</td>
+        <td>{{ z.last_name }}</td>
+        <td>{{ z.email }}</td>
+        {% comment %} Si tienes sede {% endcomment %}
+        <!-- <td>{{ z.sede }}</td> -->
         <td>
-          <a href="{% url 'detalle_alumno' alumno.id %}" class="btn btn-success btn-sm">Ver</a>
+          <a href="{% url 'detalle_alumno' z.id %}" class="btn btn-success btn-sm">Ver</a>
         </td>
       </tr>
       {% empty %}
       <tr>
-        <td colspan="6" class="text-center text-muted">No hay alumnos registrados.</td>
+        <td colspan="5" class="text-center text-muted">No hay usuarios registrados.</td>
       </tr>
       {% endfor %}
     </tbody>
@@ -55,5 +57,5 @@
   </div>
 </div>
 
-<footer>© 2025 Sistema de Módulos</footer>
+<footer>© 2025 Sistema de Usuarios</footer>
 {% endblock %}

@@ -21,7 +21,6 @@ urlpatterns = [
     path('modulo/alumnos/', views.alumnos, name='alumnos'),
     path('modulo/detalle_alumno/<int:alumno_id>/', views.detalle_alumno, name='detalle_alumno'),
     path("emociones-data/", views.emociones_data, name="emociones_data"),
-    path("dashboard/", views.dashboard, name="dashboard"),
     path('emociones_data/', views.emociones_data, name='emociones_data'),
     path('predict_emotion/', views.predict_emotion_view, name='predict_emotion'),
     path('actividades/', views.actividades, name='actividades'), 
