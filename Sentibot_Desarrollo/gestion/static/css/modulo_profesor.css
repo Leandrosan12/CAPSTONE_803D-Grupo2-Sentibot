@@ -7,7 +7,7 @@ body {
 /* Encabezado sin fondo azul */
 .encabezado-escuelas {
   background: none;
-  color: #0d47a1;
+  color: #ffff;
   padding-top: 40px;
   padding-bottom: 10px;
 }
@@ -61,7 +61,7 @@ body {
 }
 
 .btn-ingresar:hover {
-  background-color: #08306b;
+  background-color: #ffff;
   transform: translateY(-2px);
 }
 
