@@ -204,7 +204,6 @@ def emociones_data(request):
     }
     return JsonResponse(data)
 
-<<<<<<< HEAD
 # gestion/views.py
 import json
 import base64
@@ -215,13 +214,9 @@ from PIL import Image
 
 FASTAPI_URL = "https://negational-kerry-untoward.ngrok-free.dev/predict_emotion/"
 
-=======
->>>>>>> dfebbc25729eec6fa73775de26b91c69c8d30550
 def predict_emotion_view(request):
     """Proxy que recibe la imagen desde el front y la envía a FastAPI"""
     if request.method == "POST":
-<<<<<<< HEAD
-=======
         data = json.loads(request.body)
         image_base64 = data.get("image")
 
@@ -231,7 +226,6 @@ def predict_emotion_view(request):
         if "," in image_base64:
             image_base64 = image_base64.split(",")[1]
 
->>>>>>> dfebbc25729eec6fa73775de26b91c69c8d30550
         try:
             data = json.loads(request.body)
             image_base64 = data.get("image")
