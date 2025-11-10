@@ -126,33 +126,45 @@ def emociones_data(request):
     }
     return JsonResponse(data)
 
+# gestion/views.py
 import json
 import base64
+import requests
 from io import BytesIO
-from PIL import Image
 from django.http import JsonResponse
-from .ml_model import predict_emotion
+from PIL import Image
+
+FASTAPI_URL = "https://negational-kerry-untoward.ngrok-free.dev/predict_emotion/"
 
 def predict_emotion_view(request):
+    """Proxy que recibe la imagen desde el front y la envía a FastAPI"""
     if request.method == "POST":
-        data = json.loads(request.body)
-        image_base64 = data.get("image")
-
-        if not image_base64:
-            return JsonResponse({"label": "Null", "confidence": 0})
-
-        # Quitar encabezado data:image/png;base64,
-        if "," in image_base64:
-            image_base64 = image_base64.split(",")[1]
-
         try:
-            image_bytes = base64.b64decode(image_base64)
-            image = Image.open(BytesIO(image_bytes)).convert("L")  # Escala de grises
-        except Exception as e:
-            return JsonResponse({"label": "Null", "confidence": 0, "error": str(e)})
+            data = json.loads(request.body)
+            image_base64 = data.get("image")
 
-        label, confidence = predict_emotion(image)
-        return JsonResponse({"label": label, "confidence": confidence})
+            if not image_base64:
+                return JsonResponse({"emotion": "sin_reconocer", "confidence": 0})
+
+            # Limpiar el encabezado base64
+            if "," in image_base64:
+                image_base64 = image_base64.split(",")[1]
+
+            # Convertir base64 a bytes
+            image_bytes = base64.b64decode(image_base64)
+
+            # Enviar al servidor FastAPI
+            files = {"file": ("frame.jpg", image_bytes, "image/jpeg")}
+            response = requests.post(FASTAPI_URL, files=files, timeout=10)
+
+            if response.status_code == 200:
+                return JsonResponse(response.json())
+            else:
+                return JsonResponse({"emotion": "error_api", "confidence": 0})
+        except Exception as e:
+            return JsonResponse({"emotion": "error", "confidence": 0, "detail": str(e)})
+
+    return JsonResponse({"error": "Método no permitido"}, status=405)
 
 # gestion/views.py
 from django.shortcuts import render
