@@ -1,78 +1,18 @@
-# Django shortcuts y utilidades
-from django.shortcuts import render, redirect
-from django.http import HttpResponse, JsonResponse
-from django.template.loader import get_template
-from django.contrib.auth.decorators import login_required
-from django.utils import timezone
+# views.py limpio y funcional
 
-# Autenticación
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout, get_user_model
-User = get_user_model()
-
-# Modelos y base de datos
-from django.db.models import Count, Avg
+from django.contrib.auth.decorators import login_required
+from django.db.models import Count
 from django.db import connection
 from .models import Sesion, EmocionCamara, Usuario
 from gestion.models import Usuario as GestionUsuario, Emocion, EmocionReal, Sesion as GestionSesion
 
+User = get_user_model()
 
-def home(request):
-    if not request.user.is_authenticated:
-        return redirect("login")
-    return render(request, "home.html", {"user": request.user})
-# views.py (asegúrate de tener los imports)
-import random
-import logging
-from datetime import timedelta
-from django.utils import timezone
-from django.contrib.auth.models import User
-from django.core.mail import send_mail
-from django.http import JsonResponse
-from django.views.decorators.http import require_GET
-
-logger = logging.getLogger(__name__)
-
-
-@require_GET
-def enviar_codigo(request):
-    email = request.GET.get('correo')
-    if not email:
-        return JsonResponse({'error': 'Correo no proporcionado'}, status=400)
-
-    # 1) Si el correo ya está registrado, no enviamos código
-    if User.objects.filter(email__iexact=email).exists():
-        return JsonResponse({'error': 'Este correo ya está registrado.'}, status=400)
-
-    # 2) Generar código y guardar en sesión con expiración (10 minutos)
-    codigo = str(random.randint(100000, 999999))
-    request.session['codigo_verificacion'] = codigo
-    request.session['correo_verificacion'] = email
-    # Guardamos la expiración como ISO o timestamp
-    expiracion = timezone.now() + timedelta(minutes=10)
-    request.session['codigo_expira'] = expiracion.isoformat()
-
-    # 3) Intentar enviar correo (capturamos errores)
-    try:
-        send_mail(
-            'Código de verificación',
-            f'Tu código de verificación es: {codigo}',
-            None,               # Dejar None para que use DEFAULT_FROM_EMAIL si lo tienes configurado
-            [email],
-            fail_silently=False,
-        )
-    except Exception as e:
-        logger.exception("Error enviando correo de verificación")
-        # Limpia la sesión para no dejar datos inconsistentes
-        request.session.pop('codigo_verificacion', None)
-        request.session.pop('correo_verificacion', None)
-        request.session.pop('codigo_expira', None)
-        return JsonResponse({
-            'error': 'No se pudo enviar el correo. Verifica la configuración SMTP.'
-        }, status=500)
-
-    return JsonResponse({'mensaje': 'Código enviado correctamente al correo. Revisa tu bandeja de entrada.'})
-
-
+# ------------------------------
+# LOGIN / LOGOUT
+# ------------------------------
 def login(request):
     if request.method == "POST":
         email = request.POST.get('correo')
@@ -85,38 +25,78 @@ def login(request):
             return render(request, 'login.html', {'error': 'Correo o contraseña incorrectos'})
     return render(request, 'login.html')
 
+
 def logout_view(request):
     auth_logout(request)
     return redirect('login')
 
+
 # ------------------------------
-# Vistas principales
+# REGISTRO NORMAL
 # ------------------------------
 @login_required
+def registro(request):
+    if request.method == "POST":
+        email = request.POST.get('correo')
+        password = request.POST.get('contrasena')
+        first_name = request.POST.get('first_name', '')
+        last_name = request.POST.get('last_name', '')
+
+        if User.objects.filter(email=email).exists():
+            return render(request, 'registro.html', {'error': 'Correo ya registrado'})
+
+        # Generar username automático a partir del email
+        username = email.split('@')[0]
+
+        user = User.objects.create_user(
+            username=username,   # ⚡ obligatorio para AbstractUser
+            email=email,
+            password=password,
+            first_name=first_name,
+            last_name=last_name
+        )
+        auth_login(request, user)
+        return redirect('camara')
+
+    return render(request, 'registro.html')
+
+
+
+# ------------------------------
+# VISTAS PRINCIPALES
+# ------------------------------
+@login_required(login_url='login')
+def home(request):
+    return render(request, "home.html", {"user": request.user})
+
+
+@login_required(login_url='login')
 def perfil(request):
     return render(request, 'perfil.html')
 
 
-
-@login_required(login_url='login')  # ajusta la URL si la llamas distinto
+@login_required(login_url='login')
 def camara(request):
-    # Obtener o crear sesión activa solo para usuarios autenticados
     sesion = Sesion.objects.filter(usuario=request.user, fecha_fin__isnull=True).first()
     if not sesion:
-        sesion = Sesion.objects.create(usuario=request.user)  # ✅ se elimina "inicio", se llena solo con auto_now_add
+        sesion = Sesion.objects.create(usuario=request.user)
     return render(request, "camara.html", {"sesion_id": sesion.id})
+
 
 def extra(request):
     return render(request, 'extra.html')
 
+
 def agenda_view(request):
     return render(request, 'agenda.html')
 
+
 # ------------------------------
-# Módulos principales
+# MÓDULOS PRINCIPALES
 # ------------------------------
 def modulo(request):
     return render(request, 'modulo/modulo.html')
+
 
 def modulo_profesor(request):
     profesores = [
@@ -125,21 +105,16 @@ def modulo_profesor(request):
     ]
     return render(request, 'modulo_profesor.html', {'profesores': profesores})
 
-from django.shortcuts import render
-from .models import Usuario  # o el modelo que uses para usuarios
 
 def alumnos(request):
-    usuarios = Usuario.objects.all()  # Trae todos los usuarios
+    usuarios = Usuario.objects.all()
     return render(request, 'modulo/alumnos.html', {'usuarios': usuarios})
 
-
-# views.py
-from django.shortcuts import render, get_object_or_404
-from .models import Usuario  # tu modelo personalizado
 
 def detalle_alumno(request, id):
     alumno = get_object_or_404(Usuario, id=id)
     return render(request, 'modulo/detalle_alumno.html', {'alumno': alumno})
+
 
 def escuelas(request):
     escuelas = [
@@ -151,22 +126,24 @@ def escuelas(request):
 
 
 # ------------------------------
-# Actividades
+# ACTIVIDADES
 # ------------------------------
 @login_required
 def actividades(request):
     return render(request, 'actividades.html')
 
+
 def mantenimiento(request):
     return render(request, 'mantenimiento.html')
 
 
+# ------------------------------
+# SEGUIMIENTO / EMOCIONES
+# ------------------------------
 def seguimiento(request):
-    # Agregamos las emociones totales por nombre
-    emociones_agg = EmocionCamara.objects.values('nombre_emocion').annotate(cantidad=Count('id'))
-    emociones = list(emociones_agg)  # [{'nombre_emocion': 'Feliz', 'cantidad': 5}, ...]
+    emociones = EmocionCamara.objects.values('nombre_emocion').annotate(cantidad=Count('id'))
+    emociones = list(emociones)
 
-    # Agregamos datos por usuario
     datos_usuarios = []
     usuarios = Usuario.objects.all()
     for u in usuarios:
@@ -184,14 +161,6 @@ def seguimiento(request):
     })
 
 
-
-
-
-
-
-# ------------------------------
-# Datos y seguimiento
-# ------------------------------
 def emociones_data(request):
     with connection.cursor() as cursor:
         cursor.execute("""
@@ -217,43 +186,34 @@ from PIL import Image
 FASTAPI_URL = "https://negational-kerry-untoward.ngrok-free.dev/predict_emotion/"
 
 def predict_emotion_view(request):
-    """Proxy que recibe la imagen desde el front y la envía a FastAPI"""
-    if request.method == "POST":
+    if request.method != "POST":
+        return JsonResponse({"error": "Método no permitido"}, status=405)
+
+    try:
         data = json.loads(request.body)
         image_base64 = data.get("image")
 
         if not image_base64:
-            return JsonResponse({"label": "Null", "confidence": 0})
+            return JsonResponse({"emotion": "sin_reconocer", "confidence": 0})
 
+        # Limpiar el encabezado base64 si viene tipo "data:image/jpeg;base64,..."
         if "," in image_base64:
             image_base64 = image_base64.split(",")[1]
 
-        try:
-            data = json.loads(request.body)
-            image_base64 = data.get("image")
+        # Convertir base64 a bytes
+        image_bytes = base64.b64decode(image_base64)
 
-            if not image_base64:
-                return JsonResponse({"emotion": "sin_reconocer", "confidence": 0})
+        # Enviar al servidor FastAPI
+        files = {"file": ("frame.jpg", image_bytes, "image/jpeg")}
+        response = requests.post(FASTAPI_URL, files=files, timeout=10)
 
-            # Limpiar el encabezado base64
-            if "," in image_base64:
-                image_base64 = image_base64.split(",")[1]
+        if response.status_code == 200:
+            return JsonResponse(response.json())
+        else:
+            return JsonResponse({"emotion": "error_api", "confidence": 0})
 
-            # Convertir base64 a bytes
-            image_bytes = base64.b64decode(image_base64)
-
-            # Enviar al servidor FastAPI
-            files = {"file": ("frame.jpg", image_bytes, "image/jpeg")}
-            response = requests.post(FASTAPI_URL, files=files, timeout=10)
-
-            if response.status_code == 200:
-                return JsonResponse(response.json())
-            else:
-                return JsonResponse({"emotion": "error_api", "confidence": 0})
-        except Exception as e:
-            return JsonResponse({"emotion": "error", "confidence": 0, "detail": str(e)})
-
-    return JsonResponse({"error": "Método no permitido"}, status=405)
+    except Exception as e:
+        return JsonResponse({"emotion": "error", "confidence": 0, "detail": str(e)})
 
 # ------------------------------
 # Seguimiento Emociones
@@ -279,23 +239,10 @@ def dashboard_emociones(request):
         'emociones_counts': valores,
     })
 
-# ------------------------------
-# Lista de usuarios
-# ------------------------------
+
 def lista_usuarios(request):
     with connection.cursor() as cursor:
         cursor.execute("SELECT * FROM gestion_usuario")
         columnas = [col[0] for col in cursor.description]
         datos = [dict(zip(columnas, row)) for row in cursor.fetchall()]
     return render(request, 'lista_usuarios.html', {'usuarios': datos})
-
-# ------------------------------
-# Mantenimiento
-# ------------------------------
-def mantenimiento(request):
-    return render(request, 'mantenimiento.html')
-# ------------------------------
-#registro
-# ------------------------------
-def registro(request):
-    return render(request, 'registro.html')
