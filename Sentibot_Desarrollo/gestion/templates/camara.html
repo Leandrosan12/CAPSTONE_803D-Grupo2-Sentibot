@@ -6,7 +6,17 @@
 
 <link href="{% static '/css/camara.css' %}" rel="stylesheet">
 
-<h2>Inicio</h2>
+
+
+
+<!-- <div class="header-emociones">
+  <h2>Inicio</h2>
+  <div class="api-status">
+    <span class="circle" id="apiCircle"></span>
+    <span class="status-text" id="apiStatusText">API desconectada</span>
+  </div>
+</div>
+ -->
 
 <!-- Contenedor cámara -->
 <div class="camara-container">
@@ -26,7 +36,6 @@
      data-sesion="{{ sesion_id|default:0 }}">
     {{ request.user.username }}
 </div>
-
 
 <div class="row g-4">
   <div class="col-12 col-md-6 col-lg-4 report-box">

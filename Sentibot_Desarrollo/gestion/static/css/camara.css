@@ -1,10 +1,10 @@
-
   body {
     font-family: Arial, sans-serif;
     background: #f0f2f5;
     margin: 20px;
     text-align: center;
   }
+
   .camara-container {
     position: relative;
     width: 100%;
@@ -14,10 +14,12 @@
     overflow: hidden;
     box-shadow: 0 6px 12px rgba(0,0,0,0.2);
   }
+
   .camara-container video {
     width: 100%;
     display: block;
   }
+
   .estado {
     position: absolute;
     bottom: 0;
@@ -27,6 +29,7 @@
     padding: 8px 0;
     font-weight: bold;
   }
+
   .overlay {
     position: absolute;
     top: 50%;
@@ -37,6 +40,7 @@
     transform: translate(-50%, -50%);
     pointer-events: none;
   }
+
   button {
     background-color: #7ED321;
     color: white;
@@ -48,8 +52,17 @@
     cursor: pointer;
     margin: 15px 10px 15px 0;
   }
-  button:hover { background-color: #52a003; }
-  #usuario { font-size: 20px; font-weight: bold; margin-bottom: 15px; }
+
+  button:hover { 
+    background-color: #52a003; 
+  }
+
+  #usuario { 
+    font-size: 20px; 
+    font-weight: bold; 
+    margin-bottom: 15px; 
+  }
+
   .report-box {
     background-color: #9b5f5f;
     color: white;
@@ -57,12 +70,14 @@
     border-radius: 10px;
     margin-bottom: 20px;
   }
+
   .foto-box img {
     width: 200px;
     height: 200px;
     border-radius: 12px;
     object-fit: cover;
   }
+
   #emocionEnCamara {
     position: absolute;
     top: 15px;
@@ -74,4 +89,52 @@
     border-radius: 8px;
     font-size: 18px;
     font-weight: bold;
+  }
+
+  /* 🟢🔴 Indicador de estado de la API */
+  .header-emociones {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+  }
+
+  .api-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: bold;
+  }
+
+  .api-status .circle {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background-color: #cc2e2e; /* rojo por defecto */
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .api-status.online .circle {
+    background-color: #2ecc71; /* verde cuando está activa */
+    box-shadow: 0 0 8px rgba(46, 204, 113, 0.7);
+  }
+
+  .api-status.online .status-text {
+    color: #2ecc71;
+  }
+
+  .api-status.offline .status-text {
+    color: #cc2e2e;
+  }
+
+  /* ✨ Animación opcional: parpadeo suave si la API está desconectada */
+  .api-status.offline .circle {
+    animation: parpadeo 1.5s infinite alternate;
+  }
+
+  @keyframes parpadeo {
+    from { opacity: 1; }
+    to { opacity: 0.4; }
   }

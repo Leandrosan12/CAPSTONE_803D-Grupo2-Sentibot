@@ -1,6 +1,10 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const API_URL = "https://apisentibot-production.up.railway.app/predict_emotion"; // API externa
-    const BACKEND_URL = "/emocion_camara/registrar_emocion/"; // Ruta Django para guardar emoción
+    // 🔹 URL de la API LOCAL (FastAPI)
+    const API_URL = "http://127.0.0.1:8001/predict/";
+
+    // 🔹 URL de tu backend Django
+    const BACKEND_URL = "http://127.0.0.1:8000/emocion_camara/registrar_emocion/";
+
     const startBtn = document.getElementById('startBtn');
     const videoCamara = document.getElementById('videoCamara');
     const estadoCamara = document.querySelector('.estado');
@@ -11,7 +15,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const tristeEl = document.getElementById('triste');
     const neutralEl = document.getElementById('neutral');
     const enojadoEl = document.getElementById('enojado');
-    const sorprendidoEl = document.getElementById('sorprendido');
     const sinreconocerEl = document.getElementById('sinreconocer');
 
     const estadoEl = document.getElementById('estado');
@@ -19,21 +22,65 @@ document.addEventListener("DOMContentLoaded", () => {
     const rostroEl = document.getElementById('rostro');
     const sujetoEl = document.getElementById('sujeto');
 
-    // CSRF token desde meta
+    // 🔴🟢 Indicador de estado de la API
+    const apiStatusCircle = document.createElement('div');
+    apiStatusCircle.classList.add('circle');
+    const apiStatusText = document.createElement('span');
+    apiStatusText.classList.add('status-text');
+    apiStatusText.textContent = "API";
+
+    const apiStatusDiv = document.createElement('div');
+    apiStatusDiv.classList.add('api-status', 'offline'); // inicial offline
+    apiStatusDiv.appendChild(apiStatusCircle);
+    apiStatusDiv.appendChild(apiStatusText);
+
+    // Insertamos el indicador arriba del video
+    const camaraContainer = document.querySelector('.camara-container');
+    camaraContainer.parentNode.insertBefore(apiStatusDiv, camaraContainer);
+
     const csrftokenMeta = document.querySelector('meta[name="csrf-token"]');
     const csrftoken = csrftokenMeta ? csrftokenMeta.content : "";
 
     let stream = null;
     let camaraEncendida = false;
-    let segundos = { Feliz: 0, Triste: 0, Neutral: 0, Enojado: 0, Sorprendido: 0, SinReconocer: 0 };
 
-    // Tomamos el ID de sesión desde el div de usuario
+    let segundos = { 
+        Feliz: 0, 
+        Triste: 0, 
+        Neutral: 0, 
+        Enojado: 0, 
+        SinReconocer: 0 
+    };
+
     const usuarioDiv = document.getElementById('usuario');
     const SESION_ID = usuarioDiv ? usuarioDiv.dataset.sesion : null;
 
     if (!SESION_ID) {
         console.error("SESION_ID no definido. No se guardarán emociones.");
-        }
+    }
+
+function verificarAPI() {
+    // Ping a la API con GET rápido (o POST con body vacío si GET no existe)
+    fetch(API_URL, { method: 'GET', cache: 'no-store' })
+        .then(res => {
+            if (res.ok) {
+                apiStatusDiv.classList.remove('offline');
+                apiStatusDiv.classList.add('online');
+            } else {
+                apiStatusDiv.classList.remove('online');
+                apiStatusDiv.classList.add('offline');
+            }
+        })
+        .catch(() => {
+            apiStatusDiv.classList.remove('online');
+            apiStatusDiv.classList.add('offline');
+        });
+}
+
+
+    // verificar API cada 5s
+    verificarAPI();
+    setInterval(verificarAPI, 5000);
 
     startBtn.addEventListener('click', async () => {
         if (!camaraEncendida) {
@@ -54,7 +101,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 estadoCamara.textContent = 'Error al iniciar cámara';
             }
         } else {
-            stream.getTracks().forEach(track => track.stop());
+            if (stream) stream.getTracks().forEach(track => track.stop());
             videoCamara.srcObject = null;
             estadoCamara.textContent = 'Apagado';
             camaraEncendida = false;
@@ -77,38 +124,39 @@ document.addEventListener("DOMContentLoaded", () => {
         const fotoBase64 = canvas.toDataURL('image/png');
         fotoCapturada.src = fotoBase64;
 
-        // Predicción emoción
+        const blob = dataURLtoBlob(fotoBase64);
+        const formData = new FormData();
+        formData.append("file", blob, "frame.png");
+
         fetch(API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ image: fotoBase64 })
+            method: "POST",
+            body: formData
         })
         .then(res => res.json())
         .then(data => {
-            let emocion = data.label || "SinReconocer";
-            const confianza = data.confidence || 0;
+            let emocion = (data.emotion || data.dominant_emotion || "SinReconocer");
+            let confianza = (data.confidence || data.score || 0);
+            if (confianza > 1) confianza = confianza / 100;
+            confianza = Math.min(Math.max(confianza, 0), 1);
+            const confianzaPorcentaje = (confianza * 100).toFixed(2);
 
-            if (!['Feliz','Triste','Neutral','Enojado','Sorprendido'].includes(emocion)) {
+            if (!['Feliz','Triste','Neutral','Enojado'].includes(emocion)) {
                 emocion = "SinReconocer";
             }
 
-            // Actualizamos UI
-            emocionEnCamara.textContent = `${emocion} — ${confianza.toFixed(1)}%`;
+            emocionEnCamara.textContent = `${emocion} — ${confianzaPorcentaje}%`;
             estadoEl.textContent = `Estado: ${emocion}`;
-            porcentajeEl.textContent = `Porcentaje: ${confianza.toFixed(2)}%`;
+            porcentajeEl.textContent = `Porcentaje: ${confianzaPorcentaje}%`;
             rostroEl.textContent = `Estado del rostro: Detectado`;
             sujetoEl.textContent = `Id: 001`;
 
             segundos[emocion] += 2;
-
             felizEl.textContent = `Feliz: ${segundos.Feliz} seg`;
             tristeEl.textContent = `Triste: ${segundos.Triste} seg`;
             neutralEl.textContent = `Neutral: ${segundos.Neutral} seg`;
             enojadoEl.textContent = `Enojado: ${segundos.Enojado} seg`;
-            sorprendidoEl.textContent = `Sorprendido: ${segundos.Sorprendido} seg`;
             sinreconocerEl.textContent = `Sin reconocer: ${segundos.SinReconocer} seg`;
 
-            // Guardar en backend solo si tenemos sesión y CSRF
             if (csrftoken && SESION_ID) {
                 fetch(BACKEND_URL, {
                     method: "POST",
@@ -119,18 +167,25 @@ document.addEventListener("DOMContentLoaded", () => {
                     body: JSON.stringify({
                         sesion_id: SESION_ID,
                         nombre_emocion: emocion,
-                        probabilidad: confianza,
+                        probabilidad: confianzaPorcentaje,
                         duracion: 2,
-                        fiabilidad: confianza / 100
+                        fiabilidad: confianza
                     })
                 })
                 .then(res => res.json())
-                .then(resp => console.log("Emoción guardada:", resp))
+                .then(resp => console.log("✅ Emoción guardada:", resp))
                 .catch(err => console.error("Error al guardar emoción:", err));
-            } else {
-                console.warn("No se puede guardar la emoción. Faltan CSRF o SESION_ID.");
             }
         })  
-        .catch(err => console.error("Error predicción:", err));
+        .catch(err => console.error("❌ Error predicción:", err));
+    }
+
+    function dataURLtoBlob(dataURL) {
+        const byteString = atob(dataURL.split(',')[1]);
+        const mimeString = dataURL.split(',')[0].split(':')[1].split(';')[0];
+        const ab = new ArrayBuffer(byteString.length);
+        const ia = new Uint8Array(ab);
+        for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
+        return new Blob([ab], { type: mimeString });
     }
 });
