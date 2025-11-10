@@ -1,68 +1,110 @@
+/* ------------------ Sidebar Principal ------------------ */
 .sidebar {
-    margin-top: 1%;
-    margin-left: 2%;
-    border-radius: 1.8vh;
-    width: 18.5%;
-    background-color: #ffffff;
-    color: rgb(3, 3, 3);
-    padding: 20px;
-    box-sizing: border-box;
     position: fixed;
     top: 0;
     left: 0;
-    height: 96vh;           /* altura casi completa */
+    width: 20%; /* 🔹 más ancha */
+    height: 100vh; /* 🔹 cubre toda la altura */
+    margin: 0; /* 🔹 sin margen superior o lateral */
+    padding: 30px 22px;
+    background: #ffffff;
+    color: #222;
+    border-top-right-radius: 25px;
+    border-bottom-right-radius: 25px;
+    box-shadow: 4px 0 18px rgba(0, 0, 0, 0.12);
+    box-sizing: border-box;
     z-index: 21;
-    transition: transform 0.3s ease, opacity 0.3s ease;
-
-    overflow-y: auto;       /* agrega scroll vertical si hay muchos enlaces */
-    overflow-x: hidden;     /* evita scroll horizontal */
+    transition: all 0.3s ease;
+    overflow-y: auto;
+    font-family: 'Poppins', sans-serif;
 }
 
+/* ------------------ Sidebar Colapsada ------------------ */
 .sidebar.collapsed {
     transform: translateX(-120%);
     opacity: 0;
     pointer-events: none;
 }
 
-.sidebar h2 {
-    margin-top: 0;
-    margin-bottom: 30px;
-    font-weight: normal;
-    color: #757880;
-}
-
-.sidebar a {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: rgb(1, 1, 1);
-    text-decoration: none;
-    margin-bottom: 15px;
-    padding: 10px 15px;
-    border-radius: 4px;
-    transition: background-color 0.2s ease;
-}
-
-.sidebar a:hover {
-    background-color: #34495e;
-    color: #fff;
-}
-
-.sidebar a img {
-    width: 43px;
-    height: 43px;
-}
-
+/* ------------------ Título de Sidebar ------------------ */
 .titulo-sidebar {
     display: flex;
     align-items: center;
-    font-size: 24px;
-    color: #333;
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: #34495e;
+    margin-bottom: 35px;
 }
 
 .titulo-sidebar .icono {
-    width: 60px;
-    height: 60px;
-    margin-right: 10px;
-    border-radius: 6px;
+    width: 54px;
+    height: 54px;
+    margin-right: 12px;
+    object-fit: contain;
+    border-radius: 14px;
+    transition: transform 0.3s ease;
+}
+
+.titulo-sidebar:hover .icono {
+    transform: scale(1.08);
+}
+
+/* ------------------ Links ------------------ */
+.sidebar a {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+    margin-bottom: 12px;
+    border-radius: 12px;
+    color: #222;
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.25s ease;
+}
+
+.sidebar a:hover {
+    background: linear-gradient(90deg, #34495e, #5d6d7e);
+    color: #ffffff;
+    transform: translateX(5px);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+}
+
+/* ------------------ Iconos dentro de Links ------------------ */
+.sidebar a img {
+    width: 38px;
+    height: 38px;
+    object-fit: contain;
+    border-radius: 8px;
+    transition: transform 0.2s ease;
+}
+
+.sidebar a:hover img {
+    transform: scale(1.1);
+}
+
+/* ------------------ Scrollbar Estética ------------------ */
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+.sidebar::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.25);
+    border-radius: 3px;
+}
+.sidebar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* ------------------ Responsividad ------------------ */
+@media (max-width: 1024px) {
+    .sidebar {
+        width: 230px;
+    }
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-120%);
+    }
 }

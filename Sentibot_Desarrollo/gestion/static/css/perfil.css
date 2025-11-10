@@ -1,72 +1,171 @@
-.perfil-card {
-    max-width: 500px;
-    margin: 60px auto;
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
-    text-align: center;
-    padding: 30px 20px;
-}
-
-/* Imagen de perfil */
-.perfil-card .foto-perfil {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    border: 4px solid #4CAF50;
-    object-fit: cover;
-    margin-bottom: 15px;
-}
-
-.perfil-card .nombre {
-    font-size: 1.6rem;
-    font-weight: bold;
+/* ====== Tarjeta de Perfil ====== */
+body {
+    background: linear-gradient(180deg, #e9eff4 0%, #dbe7f3 100%);
+    font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
     color: #2c3e50;
-    margin-bottom: 10px;
 }
 
-/* Datos */
+.perfil-card {
+    max-width: 420px;
+    margin: 80px auto;
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    padding: 40px 30px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.perfil-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+}
+
+/* ====== Imagen de perfil ====== */
+.foto-perfil {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #4caf50;
+    box-shadow: 0 0 20px rgba(76, 175, 80, 0.3);
+    margin-bottom: 20px;
+    background-color: #f9f9f9;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.foto-perfil:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 25px rgba(76, 175, 80, 0.45);
+}
+
+/* ====== Nombre ====== */
+.nombre {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 20px;
+    letter-spacing: 0.5px;
+}
+
+/* ====== Sección de datos ====== */
 .perfil-datos {
-    margin-top: 15px;
     text-align: left;
-    padding: 0 15px;
+    background: #f8f9fa;
+    border-radius: 14px;
+    padding: 18px 22px;
+    margin-top: 20px;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.05);
 }
 
 .perfil-datos ul {
     list-style: none;
-    padding: 0;
     margin: 0;
+    padding: 0;
 }
 
 .perfil-datos ul li {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     padding: 10px 0;
     border-bottom: 1px solid #ddd;
-    font-size: 0.95rem;
-}
-
-.perfil-datos ul li span {
-    font-weight: bold;
-    color: #333;
-}
-
-/* Botón Editar */
-.editar-btn {
-    margin-top: 20px;
-    background: #4CAF50;
-    color: white;
-    padding: 10px 25px;
-    border-radius: 10px;
     font-size: 1rem;
-    font-weight: bold;
+    color: #444;
+    transition: background 0.3s ease;
+}
+
+.perfil-datos ul li:last-child {
+    border-bottom: none;
+}
+
+.perfil-datos ul li:hover {
+    background: #eef4f8;
+    border-radius: 8px;
+}
+
+.perfil-datos span {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+/* ====== Inputs (modo edición JS) ====== */
+.perfil-datos input {
+    border: 1px solid #cfd8dc;
+    border-radius: 8px;
+    padding: 6px 10px;
+    width: 65%;
+    color: #333;
+    font-size: 0.95rem;
+    font-weight: 500;
+    background: #ffffff;
+    transition: all 0.25s ease;
+}
+
+.perfil-datos input:focus {
+    border-color: #4caf50;
+    box-shadow: 0 0 6px rgba(76, 175, 80, 0.3);
+    outline: none;
+    background: #fefefe;
+}
+
+/* ====== Botón Editar/Guardar ====== */
+.editar-btn {
+    margin-top: 30px;
+    background: linear-gradient(135deg, #4caf50, #43a047);
+    color: #fff;
+    padding: 12px 32px;
+    border-radius: 12px;
     border: none;
+    font-weight: 600;
+    font-size: 1rem;
     cursor: pointer;
-    transition: background 0.3s, transform 0.2s;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.25);
 }
 
 .editar-btn:hover {
-    background: #43a047;
-    transform: scale(1.05);
+    background: linear-gradient(135deg, #43a047, #388e3c);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(56, 142, 60, 0.35);
+}
+
+.editar-btn:active {
+    transform: scale(0.97);
+}
+
+/* ====== Notificación visual al guardar ====== */
+.guardado-msg {
+    margin-top: 15px;
+    color: #388e3c;
+    font-weight: 600;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.guardado-msg.show {
+    opacity: 1;
+}
+
+/* ====== Responsivo ====== */
+@media (max-width: 480px) {
+    .perfil-card {
+        margin: 40px 15px;
+        padding: 30px 20px;
+    }
+
+    .foto-perfil {
+        width: 120px;
+        height: 120px;
+    }
+
+    .nombre {
+        font-size: 1.5rem;
+    }
+
+    .perfil-datos input {
+        width: 55%;
+    }
 }

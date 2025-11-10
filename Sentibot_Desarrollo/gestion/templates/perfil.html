@@ -9,7 +9,7 @@
     <div class="col-12 col-md-8 col-lg-6">
       <div class="card shadow-lg text-center p-4">
         <!-- Foto -->
-        <img src="{% static 'Icon/gente.gif' %}" alt="Foto de perfil"
+        <img src="{% static 'Icon/user.png' %}" alt="Foto de perfil"
              class="rounded-circle border border-4 border-success mb-3"
              style="width: 150px; height: 150px; object-fit: cover;">
         
@@ -18,10 +18,10 @@
 
         <!-- Datos -->
         <ul class="list-group list-group-flush text-start mb-3">
-                    <li class="list-group-item d-flex justify-content-between">
+          <li class="list-group-item d-flex justify-content-between">
             <span class="fw-bold">Nombre:</span> <span>{{ user.first_name }}</span>
           </li>
-            <li class="list-group-item d-flex justify-content-between">
+          <li class="list-group-item d-flex justify-content-between">
             <span class="fw-bold">Apellido:</span> <span>{{ user.last_name }}</span>
           </li>
           <li class="list-group-item d-flex justify-content-between">
@@ -38,10 +38,13 @@
           </li>
         </ul>
 
-        <!-- Botón Editar -->
-        <a href="#" class="btn btn-success btn-lg">Editar</a>
+        <!-- Botón Editar (cambiado a <button>) -->
+        <button type="button" id="editProfileBtn" class="btn btn-success btn-lg">Editar</button>
       </div>
     </div>
   </div>
 </div>
+
+<!-- Enlace al script JS -->
+<script src="{% static 'js/perfil.js' %}"></script>
 {% endblock %}
