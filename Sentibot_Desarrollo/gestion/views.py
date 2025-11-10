@@ -92,6 +92,7 @@ def logout_view(request):
 # ------------------------------
 # Vistas principales
 # ------------------------------
+@login_required
 def perfil(request):
     return render(request, 'perfil.html')
 
@@ -152,6 +153,7 @@ def escuelas(request):
 # ------------------------------
 # Actividades
 # ------------------------------
+@login_required
 def actividades(request):
     return render(request, 'actividades.html')
 

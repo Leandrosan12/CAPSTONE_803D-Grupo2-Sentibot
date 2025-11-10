@@ -39,6 +39,7 @@ class Usuario(AbstractUser):
     EMAIL_FIELD = 'email'
     USERNAME_FIELD = 'email'
 
+    
     def __str__(self):
         return self.email
 
