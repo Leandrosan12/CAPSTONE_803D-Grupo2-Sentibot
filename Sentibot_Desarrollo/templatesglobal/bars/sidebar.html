@@ -11,7 +11,7 @@
     {% if user.is_authenticated %}
         <!-- Enlaces para todos los usuarios -->
         <a href="{% url 'perfil' %}"><img src="{% static 'Icon/user.png' %}" alt="Perfil"> Perfil</a>
-        <a href="{% url 'actividades' %}"><img src="{% static 'Icon/ejercicio.png' %}" alt="Actividades"> Actividades</a>
+        <a href="{% url 'opciones' %}"><img src="{% static 'Icon/ejercicio.png' %}" alt="Actividades"> Actividades</a>
 
         <!-- Enlaces solo para admins -->
         {% if user.is_staff %}

@@ -1,14 +1,15 @@
-# views.py limpio y funcional
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout, get_user_model
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count
+from django.db.models import Count, Avg
 from django.db import connection
-from .models import Sesion, EmocionCamara, Usuario
-from gestion.models import Usuario as GestionUsuario, Emocion, EmocionReal, Sesion as GestionSesion
+from django.utils import timezone
+from django.http import JsonResponse
+import json, base64, requests
+from .models import Usuario, Sesion, Emocion, EmocionCamara, EmocionReal, Actividad
 
 User = get_user_model()
+FASTAPI_URL = "https://negational-kerry-untoward.ngrok-free.dev/predict_emotion/"
 
 # ------------------------------
 # LOGIN / LOGOUT
@@ -18,11 +19,10 @@ def login(request):
         email = request.POST.get('correo')
         password = request.POST.get('contrasena')
         user = authenticate(request, email=email, password=password)
-        if user is not None and user.is_active:
+        if user and user.is_active:
             auth_login(request, user)
-            return redirect('camara')
-        else:
-            return render(request, 'login.html', {'error': 'Correo o contraseña incorrectos'})
+            return redirect('opciones')
+        return render(request, 'login.html', {'error': 'Correo o contraseña incorrectos'})
     return render(request, 'login.html')
 
 
@@ -31,10 +31,13 @@ def logout_view(request):
     return redirect('login')
 
 
+def opciones(request):
+    return render(request, 'opciones.html')
+
+
 # ------------------------------
-# REGISTRO NORMAL
+# REGISTRO
 # ------------------------------
-@login_required
 def registro(request):
     if request.method == "POST":
         email = request.POST.get('correo')
@@ -45,11 +48,9 @@ def registro(request):
         if User.objects.filter(email=email).exists():
             return render(request, 'registro.html', {'error': 'Correo ya registrado'})
 
-        # Generar username automático a partir del email
         username = email.split('@')[0]
-
         user = User.objects.create_user(
-            username=username,   # ⚡ obligatorio para AbstractUser
+            username=username,
             email=email,
             password=password,
             first_name=first_name,
@@ -57,9 +58,7 @@ def registro(request):
         )
         auth_login(request, user)
         return redirect('camara')
-
     return render(request, 'registro.html')
-
 
 
 # ------------------------------
@@ -87,12 +86,12 @@ def extra(request):
     return render(request, 'extra.html')
 
 
-def agenda_view(request):
+def agenda(request):
     return render(request, 'agenda.html')
 
 
 # ------------------------------
-# MÓDULOS PRINCIPALES
+# MODULOS
 # ------------------------------
 def modulo(request):
     return render(request, 'modulo/modulo.html')
@@ -111,8 +110,8 @@ def alumnos(request):
     return render(request, 'modulo/alumnos.html', {'usuarios': usuarios})
 
 
-def detalle_alumno(request, id):
-    alumno = get_object_or_404(Usuario, id=id)
+def detalle_alumno(request, alumno_id):
+    alumno = get_object_or_404(Usuario, id=alumno_id)
     return render(request, 'modulo/detalle_alumno.html', {'alumno': alumno})
 
 
@@ -138,111 +137,92 @@ def mantenimiento(request):
 
 
 # ------------------------------
-# SEGUIMIENTO / EMOCIONES
+# EMOCIONES
 # ------------------------------
-def seguimiento(request):
-    emociones = EmocionCamara.objects.values('nombre_emocion').annotate(cantidad=Count('id'))
-    emociones = list(emociones)
-
-    datos_usuarios = []
-    usuarios = Usuario.objects.all()
-    for u in usuarios:
-        sesiones = Sesion.objects.filter(usuario=u)
-        emociones_usuario = EmocionCamara.objects.filter(sesion__in=sesiones)
-        emociones_count = emociones_usuario.values('nombre_emocion').annotate(cantidad=Count('id'))
-        datos_usuarios.append({
-            'usuario': u.username,
-            'emociones': list(emociones_count)
-        })
-
-    return render(request, 'seguimiento.html', {
-        'emociones': emociones,
-        'datos_usuarios': datos_usuarios
-    })
-
-
 def emociones_data(request):
     with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT nombre_emocion, COUNT(*) as total 
-            FROM gestion_emocion 
-            GROUP BY nombre_emocion;
-        """)
+        cursor.execute("SELECT nombre_emocion, COUNT(*) FROM gestion_emocion GROUP BY nombre_emocion")
         rows = cursor.fetchall()
-    data = {
-        "labels": [row[0] for row in rows],
-        "values": [row[1] for row in rows],
-    }
+    data = {"labels": [r[0] for r in rows], "values": [r[1] for r in rows]}
     return JsonResponse(data)
 
-# gestion/views.py
-import json
-import base64
-import requests
-from io import BytesIO
-from django.http import JsonResponse
-from PIL import Image
 
-FASTAPI_URL = "https://negational-kerry-untoward.ngrok-free.dev/predict_emotion/"
-
-def predict_emotion_view(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "Método no permitido"}, status=405)
-
-    try:
-        data = json.loads(request.body)
-        image_base64 = data.get("image")
-
-        if not image_base64:
-            return JsonResponse({"emotion": "sin_reconocer", "confidence": 0})
-
-        # Limpiar el encabezado base64 si viene tipo "data:image/jpeg;base64,..."
-        if "," in image_base64:
-            image_base64 = image_base64.split(",")[1]
-
-        # Convertir base64 a bytes
-        image_bytes = base64.b64decode(image_base64)
-
-        # Enviar al servidor FastAPI
-        files = {"file": ("frame.jpg", image_bytes, "image/jpeg")}
-        response = requests.post(FASTAPI_URL, files=files, timeout=10)
-
-        if response.status_code == 200:
-            return JsonResponse(response.json())
-        else:
-            return JsonResponse({"emotion": "error_api", "confidence": 0})
-
-    except Exception as e:
-        return JsonResponse({"emotion": "error", "confidence": 0, "detail": str(e)})
-
-# ------------------------------
-# Seguimiento Emociones
-# ------------------------------
 def seguimiento(request):
-    datos = EmocionReal.objects.values('emocion').annotate(total=Count('emocion'))
-    etiquetas = [d['emocion'] for d in datos]
+    datos = EmocionReal.objects.values('emocion__nombre_emocion').annotate(total=Count('emocion'))
+    etiquetas = [d['emocion__nombre_emocion'] for d in datos]
     valores = [d['total'] for d in datos]
-    return render(request, 'seguimiento.html', {
-        'emociones_labels': etiquetas,
-        'emociones_counts': valores,
-    })
+    return render(request, 'seguimiento.html', {'emociones_labels': etiquetas, 'emociones_counts': valores})
 
-# ------------------------------
-# Nueva vista: Dashboard Emociones
-# ------------------------------
+
 def dashboard_emociones(request):
     datos = EmocionReal.objects.values('emocion__nombre_emocion').annotate(total=Count('emocion'))
     etiquetas = [d['emocion__nombre_emocion'] for d in datos]
     valores = [d['total'] for d in datos]
-    return render(request, 'dashboard_emociones.html', {
-        'emociones_labels': etiquetas,
-        'emociones_counts': valores,
-    })
+    return render(request, 'dashboard_emociones.html', {'emociones_labels': etiquetas, 'emociones_counts': valores})
 
 
-def lista_usuarios(request):
-    with connection.cursor() as cursor:
-        cursor.execute("SELECT * FROM gestion_usuario")
-        columnas = [col[0] for col in cursor.description]
-        datos = [dict(zip(columnas, row)) for row in cursor.fetchall()]
-    return render(request, 'lista_usuarios.html', {'usuarios': datos})
+# ------------------------------
+# PROCESAR EMOCIÓN CÁMARA
+# ------------------------------
+import json
+from django.views.decorators.csrf import csrf_exempt  
+@login_required
+def procesar_emocion_camara(request, sesion_id):
+    sesion = get_object_or_404(Sesion, id=sesion_id, usuario=request.user)
+
+    # Parsear JSON del request
+    data = json.loads(request.body)
+    emocion_dominante = data.get("emocion", "Neutral")
+    porcentaje = data.get("porcentaje", 0.0)
+
+    # Buscar emoción en tabla Emocion
+    emocion_obj = Emocion.objects.filter(nombre_emocion__iexact=emocion_dominante).first()
+
+    if emocion_obj:
+        EmocionReal.objects.create(
+            sesion=sesion,
+            emocion=emocion_obj,
+            tipo_emocion=emocion_dominante,
+            porcentaje=round(porcentaje, 2)
+        )
+
+    sesion.fecha_fin = timezone.now()
+    sesion.save()
+
+    return redirect("mostrar_actividades", emocion_nombre=emocion_dominante)
+
+
+@login_required
+def seleccionar_emocion(request, emocion_nombre):
+    emocion = get_object_or_404(Emocion, nombre_emocion__iexact=emocion_nombre)
+    sesion, _ = Sesion.objects.get_or_create(usuario=request.user, fecha_fin__isnull=True)
+    EmocionReal.objects.create(sesion=sesion, emocion=emocion, tipo_emocion=emocion.nombre_emocion)
+    return redirect('mostrar_actividades', emocion_nombre=emocion.nombre_emocion)
+
+
+@login_required
+def mostrar_actividades(request, emocion_nombre):
+    emocion = get_object_or_404(Emocion, nombre_emocion__iexact=emocion_nombre)
+    actividades = Actividad.objects.filter(emocion=emocion)
+    return render(request, 'actividades.html', {'emocion': emocion, 'actividades': actividades})
+
+
+# ------------------------------
+# PREDICT EMOTION (API)
+# ------------------------------
+def predict_emotion_view(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "Método no permitido"}, status=405)
+    try:
+        data = json.loads(request.body)
+        image_base64 = data.get("image")
+        if not image_base64:
+            return JsonResponse({"emotion": "sin_reconocer", "confidence": 0})
+        if "," in image_base64:
+            image_base64 = image_base64.split(",")[1]
+        image_bytes = base64.b64decode(image_base64)
+        files = {"file": ("frame.jpg", image_bytes, "image/jpeg")}
+        response = requests.post(FASTAPI_URL, files=files, timeout=10)
+        return JsonResponse(response.json() if response.status_code == 200 else {"emotion": "error_api", "confidence": 0})
+    except Exception as e:
+        return JsonResponse({"emotion": "error", "confidence": 0, "detail": str(e)})

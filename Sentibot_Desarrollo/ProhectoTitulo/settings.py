@@ -5,13 +5,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-=y*i=7%+exa36nc9)w$d4r*4%@ux$1vco@5lwfn_zcxpclw4vr'
 DEBUG = True
-
-ALLOWED_HOSTS = [
-    "localhost",
-    "127.0.0.1",
-    "[::1]",
-    ".ngrok-free.dev",
-]
 ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
@@ -24,6 +17,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 ]
 
+AUTH_USER_MODEL = 'gestion.Usuario'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -54,14 +48,28 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ProhectoTitulo.wsgi.application'
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "[::1]",
+    ".ngrok-free.dev",
+]
 
 AUTH_USER_MODEL = 'gestion.Usuario'
+
+# Database
+# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'sentibot',
+        'USER': 'root',
+        'PASSWORD': 'lilo1309',
+        'HOST': 'localhost',
+        'PORT': '3306',
+    }
+}
 
 
 
