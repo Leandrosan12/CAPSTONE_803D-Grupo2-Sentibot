@@ -55,6 +55,7 @@ ALLOWED_HOSTS = [
     ".ngrok-free.dev",
 ]
 
+
 AUTH_USER_MODEL = 'gestion.Usuario'
 
 # Database
