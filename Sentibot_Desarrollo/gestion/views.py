@@ -5,7 +5,6 @@ from django.template.loader import get_template
 from django.db.models import Count
 from django.db import connection
 from .models import Usuario, Emocion, EmocionReal, Sesion
-
 import json
 import base64
 from io import BytesIO
@@ -20,6 +19,7 @@ def home(request):
     if not request.user.is_authenticated:
         return redirect("login")
     return render(request, "home.html", {"user": request.user})
+
 
 def registro(request):
     if request.method == "POST":
@@ -42,6 +42,7 @@ def registro(request):
 
     return render(request, 'registro.html')
 
+
 def login(request):
     if request.method == "POST":
         email = request.POST.get('correo')
@@ -54,9 +55,11 @@ def login(request):
             return render(request, 'login.html', {'error': 'Correo o contraseña incorrectos'})
     return render(request, 'login.html')
 
+
 def logout_view(request):
     auth_logout(request)
     return redirect('login')
+
 
 # ------------------------------
 # Vistas principales
@@ -64,14 +67,18 @@ def logout_view(request):
 def perfil(request):
     return render(request, 'perfil.html')
 
+
 def camara(request):
     return render(request, 'camara.html')
+
 
 def extra(request):
     return render(request, 'extra.html')
 
+
 def agenda_view(request):
     return render(request, 'agenda.html')
+
 
 # ------------------------------
 # Módulos principales
@@ -79,12 +86,14 @@ def agenda_view(request):
 def modulo(request):
     return render(request, 'modulo/modulo.html')
 
+
 def modulo_profesor(request):
     profesores = [
         {'id': 1, 'nombre': 'Juan Torres', 'rut': '18.234.567-9', 'correo': 'juan.torres@duocuc.cl', 'telefono': '+569 87654321', 'sede': 'Santiago'},
         {'id': 2, 'nombre': 'María Rojas', 'rut': '17.123.456-0', 'correo': 'maria.rojas@duocuc.cl', 'telefono': '+569 91234567', 'sede': 'Melipilla'},
     ]
     return render(request, 'modulo_profesor.html', {'profesores': profesores})
+
 
 # ------------------------------
 # Módulo Alumnos y Escuelas
@@ -96,8 +105,10 @@ def alumnos(request):
         alumnos = [dict(zip(columnas, fila)) for fila in cursor.fetchall()]
     return render(request, 'alumnos.html', {'alumnos': alumnos})
 
+
 def dashboard(request):
     return render(request, "dashboard.html")
+
 
 def detalle_alumno(request, alumno_id):
     with connection.cursor() as cursor:
@@ -106,11 +117,13 @@ def detalle_alumno(request, alumno_id):
         alumno = dict(zip(columnas, cursor.fetchone()))
     return render(request, 'detalle_alumno.html', {'alumno': alumno})
 
+
 def escuelas(request):
     escuelas = [
-        {'id': 1, 'nombre': 'Escuela de Ingeniería', 'carreras': ['Informática', 'Civil', 'Industrial'], 'sede': 'Santiago'},
-        {'id': 2, 'nombre': 'Escuela de Construcción', 'carreras': ['Construcción', 'Arquitectura'], 'sede': 'Quilpué'},
-        {'id': 3, 'nombre': 'Escuela de Medicina', 'carreras': ['Medicina', 'Enfermería'], 'sede': 'Concepción'},
+        {'id': 1, 'nombre': 'Informática y Telecomunicación', 'carreras': ['Programación', 'Redes'], 'sede': 'Melipilla'},
+        {'id': 2, 'nombre': 'Construcción', 'carreras': ['Edificación', 'Arquitectura'], 'sede': 'Melipilla'},
+        {'id': 3, 'nombre': 'Gastronomía', 'carreras': ['Cocina Profesional', 'Pastelería'], 'sede': 'Melipilla'},
+        {'id': 4, 'nombre': 'Otra Escuela', 'carreras': ['Diseño', 'Administración'], 'sede': 'Melipilla'},
     ]
     return render(request, 'escuelas.html', {'escuelas': escuelas})
 
@@ -120,6 +133,7 @@ def escuelas(request):
 # ------------------------------
 def actividades(request):
     return render(request, 'actividades.html')
+
 
 # ------------------------------
 # Datos y seguimiento
@@ -137,6 +151,7 @@ def emociones_data(request):
         "values": [row[1] for row in rows],
     }
     return JsonResponse(data)
+
 
 def predict_emotion_view(request):
     if request.method == "POST":
@@ -158,6 +173,7 @@ def predict_emotion_view(request):
         label, confidence = predict_emotion(image)
         return JsonResponse({"label": label, "confidence": confidence})
 
+
 # ------------------------------
 # Seguimiento Emociones
 # ------------------------------
@@ -169,6 +185,7 @@ def seguimiento(request):
         'emociones_labels': etiquetas,
         'emociones_counts': valores,
     })
+
 
 # ------------------------------
 # Nueva vista: Dashboard Emociones
@@ -182,6 +199,7 @@ def dashboard_emociones(request):
         'emociones_counts': valores,
     })
 
+
 # ------------------------------
 # Lista de usuarios
 # ------------------------------
@@ -192,8 +210,56 @@ def lista_usuarios(request):
         datos = [dict(zip(columnas, row)) for row in cursor.fetchall()]
     return render(request, 'lista_usuarios.html', {'usuarios': datos})
 
+
 # ------------------------------
 # Mantenimiento
 # ------------------------------
 def mantenimiento(request):
     return render(request, 'mantenimiento.html')
+
+
+# ------------------------------
+# Detalle de Escuela (simulación)
+# ------------------------------
+def detalle_escuela(request, nombre_escuela):
+    """
+    Simula los detalles de cada escuela.
+    En el futuro, esto se conectará con la base de datos.
+    """
+    detalles = {
+        "Informática y Telecomunicación": {
+            "nombre": "Informática y Telecomunicación",
+            "sede": "Melipilla",
+            "director": "Juan Torres",
+            "correo": "juan.torres@duocuc.cl",
+            "telefono": "+569 87654321",
+            "descripcion": "Escuela enfocada en formar profesionales en programación, redes y tecnologías emergentes."
+        },
+        "Construcción": {
+            "nombre": "Construcción",
+            "sede": "Melipilla",
+            "director": "María Rojas",
+            "correo": "maria.rojas@duocuc.cl",
+            "telefono": "+569 91234567",
+            "descripcion": "Escuela especializada en proyectos de edificación y obras civiles."
+        },
+        "Gastronomía": {
+            "nombre": "Gastronomía",
+            "sede": "Melipilla",
+            "director": "Pedro López",
+            "correo": "pedro.lopez@duocuc.cl",
+            "telefono": "+569 99999999",
+            "descripcion": "Formación profesional en cocina nacional e internacional."
+        },
+        "Otra Escuela": {
+            "nombre": "Otra Escuela",
+            "sede": "Melipilla",
+            "director": "Ana Díaz",
+            "correo": "ana.diaz@duocuc.cl",
+            "telefono": "+569 88888888",
+            "descripcion": "Centro académico con múltiples áreas de conocimiento."
+        }
+    }
+
+    escuela = detalles.get(nombre_escuela, None)
+    return render(request, "detalle_escuela.html", {"escuela": escuela})
