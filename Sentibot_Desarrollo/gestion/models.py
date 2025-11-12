@@ -1,7 +1,6 @@
-from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.contrib.auth.models import User
-from django.conf import settings  # 👈 Esto trae el modelo de usuario correcto según AUTH_USER_MODEL
+from django.contrib.auth.models import AbstractUser
+from django.conf import settings
 
 
 # ------------------------------
@@ -33,8 +32,8 @@ class Escuela(models.Model):
 class Usuario(AbstractUser):
     email = models.EmailField(unique=True)
     telefono = models.CharField(max_length=20, blank=True, null=True)
-    rol = models.ForeignKey(Rol, on_delete=models.CASCADE, related_name="usuarios", null=True)
-    escuela = models.ForeignKey(Escuela, on_delete=models.CASCADE, related_name="usuarios", null=True)
+    rol = models.ForeignKey(Rol, on_delete=models.CASCADE, related_name="usuarios", null=True, blank=True)
+    escuela = models.ForeignKey(Escuela, on_delete=models.CASCADE, related_name="usuarios", null=True, blank=True)
 
     REQUIRED_FIELDS = []
     EMAIL_FIELD = 'email'
@@ -77,7 +76,8 @@ class Sesion(models.Model):
     fecha_fin = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
-        return f"Sesion {self.id} - {self.usuario.username}"
+        return f"Sesión {self.id} - {self.usuario.username}"
+
 
 
 # ------------------------------
@@ -135,6 +135,8 @@ class EmocionCamara(models.Model):
     nombre_emocion = models.CharField(max_length=50)
     fecha = models.DateTimeField(auto_now_add=True)
     probabilidad = models.FloatField()
+    duracion = models.FloatField(help_text="Duración en segundos de la emoción", null=True, blank=True)
+    fiabilidad = models.FloatField(help_text="Nivel de confianza del modelo (0.0 a 1.0)", null=True, blank=True)
 
     def __str__(self):
         return f"{self.nombre_emocion} - {self.sesion.usuario.username}"
@@ -165,8 +167,9 @@ class Actividad(models.Model):
 
 
 # ------------------------------
-# Modulos
+# Prueba Dashboard - Resumen Emociones
 # ------------------------------
+<<<<<<< HEAD
 class School(models.Model):
     name = models.CharField(max_length=200)
     sede = models.CharField(max_length=100, blank=True)
@@ -193,6 +196,8 @@ class Student(models.Model):
         db_table = 'vw_emociones_camara'
 
 
+=======
+>>>>>>> cd578bd98aff33d6b9ff70b0047d7be6d0f735a2
 class EmotionSession(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
