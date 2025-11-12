@@ -1,10 +1,7 @@
-from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.contrib.auth.models import User
-from django.conf import settings  # 👈 Esto trae el modelo de usuario correcto según AUTH_USER_MODEL
+from django.contrib.auth.models import AbstractUser
+from django.conf import settings
 
-
-    
 
 # ------------------------------
 # Rol
@@ -16,6 +13,7 @@ class Rol(models.Model):
     def __str__(self):
         return self.nombre
 
+
 # ------------------------------
 # Escuela
 # ------------------------------
@@ -26,16 +24,17 @@ class Escuela(models.Model):
     def __str__(self):
         return self.nombre
 
+
 # ------------------------------
 # Usuario (extendemos AbstractUser)
 # ------------------------------
 class Usuario(AbstractUser):
-    email = models.EmailField(unique=True)  # <- ahora es único
+    email = models.EmailField(unique=True)
     telefono = models.CharField(max_length=20, blank=True, null=True)
-    rol = models.ForeignKey(Rol, on_delete=models.CASCADE, related_name="usuarios", null=True)
-    escuela = models.ForeignKey(Escuela, on_delete=models.CASCADE, related_name="usuarios", null=True)
+    rol = models.ForeignKey(Rol, on_delete=models.CASCADE, related_name="usuarios", null=True, blank=True)
+    escuela = models.ForeignKey(Escuela, on_delete=models.CASCADE, related_name="usuarios", null=True, blank=True)
 
-    REQUIRED_FIELDS = []  
+    REQUIRED_FIELDS = []
     EMAIL_FIELD = 'email'
     USERNAME_FIELD = 'email'
 
@@ -55,6 +54,7 @@ class Reporte(models.Model):
     def __str__(self):
         return f"Reporte {self.tipo_reporte} - {self.usuario.username}"
 
+
 # ------------------------------
 # Emociones
 # ------------------------------
@@ -65,6 +65,7 @@ class Emocion(models.Model):
     def __str__(self):
         return self.nombre_emocion
 
+
 # ------------------------------
 # Sesión
 # ------------------------------
@@ -74,7 +75,8 @@ class Sesion(models.Model):
     fecha_fin = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
-        return f"Sesion {self.id} - {self.usuario.username}"
+        return f"Sesión {self.id} - {self.usuario.username}"
+
 
 # ------------------------------
 # Encuesta
@@ -87,6 +89,7 @@ class Encuesta(models.Model):
     def __str__(self):
         return self.nombre
 
+
 # ------------------------------
 # Preguntas
 # ------------------------------
@@ -96,6 +99,7 @@ class Pregunta(models.Model):
 
     def __str__(self):
         return self.texto[:50]
+
 
 # ------------------------------
 # Respuesta Encuesta
@@ -108,6 +112,7 @@ class RespuestaEncuesta(models.Model):
     def __str__(self):
         return f"Respuesta Encuesta {self.encuesta.nombre} - {self.usuario.username}"
 
+
 # ------------------------------
 # Respuesta Pregunta
 # ------------------------------
@@ -119,6 +124,7 @@ class RespuestaPregunta(models.Model):
     def __str__(self):
         return f"{self.usuario.username} - {self.pregunta.texto[:30]}"
 
+
 # ------------------------------
 # Emoción Cámara
 # ------------------------------
@@ -127,13 +133,12 @@ class EmocionCamara(models.Model):
     nombre_emocion = models.CharField(max_length=50)
     fecha = models.DateTimeField(auto_now_add=True)
     probabilidad = models.FloatField()
-
-    # Nuevos campos
     duracion = models.FloatField(help_text="Duración en segundos de la emoción", null=True, blank=True)
     fiabilidad = models.FloatField(help_text="Nivel de confianza del modelo (0.0 a 1.0)", null=True, blank=True)
 
     def __str__(self):
         return f"{self.nombre_emocion} - {self.sesion.usuario.username}"
+
 
 # ------------------------------
 # Emoción Real
@@ -146,6 +151,7 @@ class EmocionReal(models.Model):
     def __str__(self):
         return f"{self.tipo_emocion} - {self.sesion.usuario.username}"
 
+
 # ------------------------------
 # Actividad
 # ------------------------------
@@ -156,32 +162,24 @@ class Actividad(models.Model):
 
     def __str__(self):
         return self.nombre_actividad
-    
 
 
-    #prueba vista dashboard
-
-from django.db import models
-from django.contrib.auth.models import User
-
+# ------------------------------
+# Prueba Dashboard - Resumen Emociones
+# ------------------------------
 class EmotionSession(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     feliz_seg = models.IntegerField(default=0)
     feliz_pct = models.FloatField(default=0.0)
-
     triste_seg = models.IntegerField(default=0)
     triste_pct = models.FloatField(default=0.0)
-
     neutral_seg = models.IntegerField(default=0)
     neutral_pct = models.FloatField(default=0.0)
-
     enojado_seg = models.IntegerField(default=0)
     enojado_pct = models.FloatField(default=0.0)
-
     sorprendido_seg = models.IntegerField(default=0)
     sorprendido_pct = models.FloatField(default=0.0)
-
     sinreconocer_seg = models.IntegerField(default=0)
     sinreconocer_pct = models.FloatField(default=0.0)
 

@@ -48,6 +48,17 @@
       <div class="mb-3" id="wrap-confirmar" style="display: none;">
         <button type="button" id="btn-confirmar" class="btn btn-outline-success w-100">Confirmar — Todo en orden</button>
       </div>
+      <!-- escuela -->
+      <div class="mb-3">
+  <label for="escuela" class="form-label">Selecciona tu escuela</label>
+  <select class="form-select" id="escuela" name="escuela" required>
+    <option value="">-- Selecciona una escuela --</option>
+    {% for escuela in escuelas %}
+      <option value="{{ escuela.id }}">{{ escuela.nombre }}</option>
+    {% endfor %}
+  </select>
+</div>
+
 
       <div class="mb-3">
         <label for="contrasena" class="form-label">Contraseña</label>

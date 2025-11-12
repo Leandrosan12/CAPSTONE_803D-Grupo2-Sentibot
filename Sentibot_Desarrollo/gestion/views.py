@@ -377,6 +377,12 @@ def validar_codigo(request):
 
     return JsonResponse({"ok": True})
 
+from django.shortcuts import render, redirect
+from django.utils import timezone
+from django.utils.dateparse import parse_datetime
+from gestion.models import Escuela, Usuario  # ✅ usamos Usuario, no Perfil
+
+
 def registro(request):
     if request.method == "POST":
         email = (request.POST.get('correo') or '').strip()
@@ -384,109 +390,122 @@ def registro(request):
         first_name = (request.POST.get('first_name') or '').strip()
         last_name = (request.POST.get('last_name') or '').strip()
         codigo = (request.POST.get('codigo') or '').strip()
+        escuela_id = request.POST.get('escuela')  # ✅ capturamos la escuela seleccionada
 
+        # 🔹 Datos de sesión para verificación
         codigo_sesion = request.session.get('codigo_verificacion')
         correo_sesion = request.session.get('correo_verificacion')
         codigo_expira_iso = request.session.get('codigo_expira')
 
+        # Validaciones básicas
         if not (codigo_sesion and correo_sesion and codigo_expira_iso):
-            return render(request, 'registro.html', {'error': 'No hay un código de verificación válido. Verifica tu correo primero.'})
+            return render(request, 'registro.html', {
+                'error': 'No hay un código de verificación válido. Verifica tu correo primero.',
+                'escuelas': Escuela.objects.all()
+            })
 
         if email.lower() != correo_sesion.lower():
-            return render(request, 'registro.html', {'error': 'El correo no coincide con el que se verificó.'})
+            return render(request, 'registro.html', {
+                'error': 'El correo no coincide con el que se verificó.',
+                'escuelas': Escuela.objects.all()
+            })
 
+        # 🔹 Validar expiración del código
         try:
             expiracion = parse_datetime(codigo_expira_iso)
-            if expiracion is None:
-                s = codigo_expira_iso
-                if isinstance(s, str) and s.endswith('Z'):
-                    s = s[:-1] + '+00:00'
-                    expiracion = parse_datetime(s)
+            if expiracion is None and isinstance(codigo_expira_iso, str):
+                if codigo_expira_iso.endswith('Z'):
+                    expiracion = parse_datetime(codigo_expira_iso[:-1] + '+00:00')
             if expiracion is None:
                 raise ValueError("No se pudo parsear la fecha de expiración")
+
             if timezone.is_naive(expiracion):
                 expiracion = timezone.make_aware(expiracion, timezone.get_current_timezone())
+
             now = timezone.now()
             if timezone.is_naive(now):
                 now = timezone.make_aware(now, timezone.get_current_timezone())
-        except Exception as e:
-            request.session.pop('codigo_verificacion', None)
-            request.session.pop('correo_verificacion', None)
-            request.session.pop('codigo_expira', None)
-            return render(request, 'registro.html', {'error': 'Error en el proceso de verificación. Solicita un nuevo código.'})
+
+        except Exception:
+            for key in ['codigo_verificacion', 'correo_verificacion', 'codigo_expira']:
+                request.session.pop(key, None)
+            return render(request, 'registro.html', {
+                'error': 'Error en el proceso de verificación. Solicita un nuevo código.',
+                'escuelas': Escuela.objects.all()
+            })
 
         if now > expiracion:
-            request.session.pop('codigo_verificacion', None)
-            request.session.pop('correo_verificacion', None)
-            request.session.pop('codigo_expira', None)
-            return render(request, 'registro.html', {'error': 'El código ha expirado. Solicita uno nuevo.'})
+            for key in ['codigo_verificacion', 'correo_verificacion', 'codigo_expira']:
+                request.session.pop(key, None)
+            return render(request, 'registro.html', {
+                'error': 'El código ha expirado. Solicita uno nuevo.',
+                'escuelas': Escuela.objects.all()
+            })
 
         if codigo != codigo_sesion:
-            return render(request, 'registro.html', {'error': 'Código de verificación inválido.'})
+            return render(request, 'registro.html', {
+                'error': 'Código de verificación inválido.',
+                'escuelas': Escuela.objects.all()
+            })
 
-        try:
-            exists = User.objects.filter(email__iexact=email).exists()
-        except Exception:
+        # 🔹 Verificar si el email ya existe
+        if Usuario.objects.filter(email__iexact=email).exists():
+            for key in ['codigo_verificacion', 'correo_verificacion', 'codigo_expira']:
+                request.session.pop(key, None)
+            return render(request, 'registro.html', {
+                'error': 'El email ya está registrado',
+                'escuelas': Escuela.objects.all()
+            })
+
+        # 🔹 Crear usuario
+        user = Usuario.objects.create_user(
+            email=email,
+            password=password,
+            first_name=first_name,
+            last_name=last_name,
+            username=email
+        )
+
+        # 🔹 Asignar escuela elegida (o detectar automáticamente)
+        escuela = None
+        if escuela_id:
             try:
-                exists = User.objects.filter(**{User.USERNAME_FIELD + "__iexact": email}).exists()
-            except Exception:
-                exists = False
+                escuela = Escuela.objects.get(id=escuela_id)
+            except Escuela.DoesNotExist:
+                pass
 
-        if exists:
-            request.session.pop('codigo_verificacion', None)
-            request.session.pop('correo_verificacion', None)
-            request.session.pop('codigo_expira', None)
-            return render(request, 'registro.html', {'error': 'El email ya está registrado'})
+        if not escuela:  # Si no seleccionó, intentamos deducir por correo
+            dominio = email.split('@')[-1].lower()
+            if "admin" in dominio or "negocios" in email.lower():
+                escuela = Escuela.objects.filter(nombre__icontains="Administración y Negocios").first()
+            elif "comunicacion" in email.lower():
+                escuela = Escuela.objects.filter(nombre__icontains="Comunicación").first()
+            elif "construccion" in email.lower():
+                escuela = Escuela.objects.filter(nombre__icontains="Construcción").first()
+            elif "diseno" in email.lower():
+                escuela = Escuela.objects.filter(nombre__icontains="Diseño").first()
+            elif "gastronomia" in email.lower():
+                escuela = Escuela.objects.filter(nombre__icontains="Gastronomía").first()
+            elif "informatica" in email.lower() or "telecom" in email.lower():
+                escuela = Escuela.objects.filter(nombre__icontains="Informática").first()
+            elif "ingenieria" in email.lower() or "recursos" in email.lower():
+                escuela = Escuela.objects.filter(nombre__icontains="Ingeniería").first()
+            elif "salud" in email.lower():
+                escuela = Escuela.objects.filter(nombre__icontains="Salud").first()
+            elif "turismo" in email.lower() or "hospitalidad" in email.lower():
+                escuela = Escuela.objects.filter(nombre__icontains="Turismo").first()
 
-        username_field = getattr(User, 'USERNAME_FIELD', 'username')
-        create_kwargs = {}
-        create_kwargs[username_field] = email
-        field_names = [f.name for f in User._meta.get_fields() if hasattr(f, 'name')]
-        if 'email' in field_names and username_field != 'email':
-            create_kwargs['email'] = email
-        if 'first_name' in field_names:
-            create_kwargs['first_name'] = first_name
-        if 'last_name' in field_names:
-            create_kwargs['last_name'] = last_name
+        if escuela:
+            user.escuela = escuela
+            user.save()
 
-        user = None
-        try:
-            create_kwargs['password'] = password
-            user = User.objects.create_user(**create_kwargs)
-        except TypeError:
-            try:
-                pos_args = [create_kwargs.pop(username_field)]
-                user = User.objects.create_user(*pos_args, password=password, **create_kwargs)
-            except Exception as e:
-                try:
-                    manual_kwargs = {k: v for k, v in create_kwargs.items() if k in field_names}
-                    manual_kwargs[username_field] = manual_kwargs.get(username_field, email)
-                    user = User(**manual_kwargs)
-                    user.set_password(password)
-                    user.save()
-                except Exception as e2:
-                    request.session.pop('codigo_verificacion', None)
-                    request.session.pop('correo_verificacion', None)
-                    request.session.pop('codigo_expira', None)
-                    return render(request, 'registro.html', {'error': 'No se pudo crear el usuario. Revisa la configuración del modelo de usuario.'})
-
-        try:
-            changed = False
-            if first_name and getattr(user, 'first_name', None) != first_name:
-                user.first_name = first_name
-                changed = True
-            if last_name and getattr(user, 'last_name', None) != last_name:
-                user.last_name = last_name
-                changed = True
-            if changed:
-                user.save()
-        except Exception:
-            pass
-
-        request.session.pop('codigo_verificacion', None)
-        request.session.pop('correo_verificacion', None)
-        request.session.pop('codigo_expira', None)
+        # 🔹 Limpiar sesión
+        for key in ['codigo_verificacion', 'correo_verificacion', 'codigo_expira']:
+            request.session.pop(key, None)
 
         return redirect('login')
 
-    return render(request, 'registro.html')
+    # ✅ Cargar escuelas para el formulario GET
+    escuelas = Escuela.objects.all()
+    return render(request, 'registro.html', {'escuelas': escuelas})
+
