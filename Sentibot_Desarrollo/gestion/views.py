@@ -200,11 +200,47 @@ def seleccionar_emocion(request, emocion_nombre):
     return redirect('mostrar_actividades', emocion_nombre=emocion.nombre_emocion)
 
 
+from random import randint, sample
+
 @login_required
 def mostrar_actividades(request, emocion_nombre):
     emocion = get_object_or_404(Emocion, nombre_emocion__iexact=emocion_nombre)
-    actividades = Actividad.objects.filter(emocion=emocion)
-    return render(request, 'actividades.html', {'emocion': emocion, 'actividades': actividades})
+    
+    # Actividades de la emoción detectada
+    actividades_principal = list(Actividad.objects.filter(emocion=emocion))
+    
+    # Actividades de otras emociones (máx. 2)
+    otras_actividades = list(Actividad.objects.exclude(emocion=emocion))
+    otras_actividades = sample(otras_actividades, min(2, len(otras_actividades)))
+    
+    recomendaciones = []
+
+    # Actividades principales (80-100%)
+    for act in actividades_principal:
+        recomendaciones.append({
+            'actividad': act,
+            'porcentaje': randint(80, 100),
+        })
+    
+    # Actividades secundarias (30-50%)
+    for act in otras_actividades:
+        recomendaciones.append({
+            'actividad': act,
+            'porcentaje': randint(30, 50),
+        })
+
+    # Ordenar por porcentaje descendente
+    recomendaciones.sort(key=lambda x: x['porcentaje'], reverse=True)
+
+    # Calcular el porcentaje máximo
+    max_porcentaje = max([rec['porcentaje'] for rec in recomendaciones]) if recomendaciones else 0
+
+    return render(request, 'actividades.html', {
+        'emocion': emocion,
+        'recomendaciones': recomendaciones,
+        'max_porcentaje': max_porcentaje,  # para usar en el template
+    })
+
 
 
 # ------------------------------
@@ -226,3 +262,25 @@ def predict_emotion_view(request):
         return JsonResponse(response.json() if response.status_code == 200 else {"emotion": "error_api", "confidence": 0})
     except Exception as e:
         return JsonResponse({"emotion": "error", "confidence": 0, "detail": str(e)})
+    
+from django.shortcuts import render, redirect
+from .models import EncuestaSatisfaccion
+
+from django.shortcuts import render, redirect
+from .models import EncuestaSatisfaccion
+
+def encuesta_satisfaccion(request):
+    if request.method == 'POST':
+        utilidad = request.POST.get('utilidad')
+        recomendacion = request.POST.get('recomendacion')
+        comentario = request.POST.get('comentario', '')
+
+        if utilidad and recomendacion:
+            EncuestaSatisfaccion.objects.create(
+                utilidad=utilidad,
+                recomendacion=int(recomendacion),
+                comentario=comentario
+            )
+            return redirect('opciones')
+
+    return render(request, 'encuesta_satisfaccion.html')

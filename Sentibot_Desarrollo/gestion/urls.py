@@ -25,4 +25,5 @@ urlpatterns = [
     path("seleccionar_emocion/<str:emocion_nombre>/", views.seleccionar_emocion, name="seleccionar_emocion"),
     path("actividades/<str:emocion_nombre>/", views.mostrar_actividades, name="mostrar_actividades"),
     path('dashboard_emociones/', views.dashboard_emociones, name='dashboard_emociones'),
+    path('encuesta_satisfaccion/', views.encuesta_satisfaccion, name='encuesta_satisfaccion'),
 ]

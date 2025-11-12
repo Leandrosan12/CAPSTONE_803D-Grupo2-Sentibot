@@ -97,10 +97,14 @@ class EmocionReal(models.Model):
 class Actividad(models.Model):
     nombre_actividad = models.CharField(max_length=100)
     descripcion = models.TextField(blank=True, null=True)
+    importancia = models.TextField(blank=True, null=True)
+    como_realizarla = models.TextField(blank=True, null=True)
+    recurso = models.TextField(blank=True, null=True)
     emocion = models.ForeignKey(Emocion, on_delete=models.CASCADE, related_name="actividades")
 
     def __str__(self):
         return self.nombre_actividad
+
 
 
 # ------------------------------
@@ -205,3 +209,15 @@ class Student(models.Model):
 
     def __str__(self):
         return f"{self.nombre} ({self.rut})"
+
+from django.db import models
+
+class EncuestaSatisfaccion(models.Model):
+    utilidad = models.IntegerField()  # Guarda 0 o 1 directamente
+    recomendacion = models.IntegerField(default=0)  # Escala del 1 al 5
+    comentario = models.TextField(blank=True, null=True)
+    fecha = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Encuesta {self.id} - Utilidad: {self.utilidad} / Recomendación: {self.recomendacion}"
+
