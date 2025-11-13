@@ -6,14 +6,17 @@ from django.db import connection
 from django.utils import timezone
 from django.http import JsonResponse
 import json, base64, requests
-from .models import Usuario, Sesion, Emocion, EmocionCamara, EmocionReal, Actividad
+from random import randint, sample
+
+from .models import Usuario, Sesion, Emocion, EmocionCamara, EmocionReal, Actividad, EncuestaSatisfaccion
 
 User = get_user_model()
 FASTAPI_URL = "https://negational-kerry-untoward.ngrok-free.dev/predict_emotion/"
 
-# ------------------------------
+
+# ============================================================
 # LOGIN / LOGOUT
-# ------------------------------
+# ============================================================
 def login(request):
     if request.method == "POST":
         email = request.POST.get('correo')
@@ -35,9 +38,9 @@ def opciones(request):
     return render(request, 'opciones.html')
 
 
-# ------------------------------
+# ============================================================
 # REGISTRO
-# ------------------------------
+# ============================================================
 def registro(request):
     if request.method == "POST":
         email = request.POST.get('correo')
@@ -61,9 +64,9 @@ def registro(request):
     return render(request, 'registro.html')
 
 
-# ------------------------------
+# ============================================================
 # VISTAS PRINCIPALES
-# ------------------------------
+# ============================================================
 @login_required(login_url='login')
 def home(request):
     return render(request, "home.html", {"user": request.user})
@@ -76,23 +79,37 @@ def perfil(request):
 
 @login_required(login_url='login')
 def camara(request):
-    sesion = Sesion.objects.filter(usuario=request.user, fecha_fin__isnull=True).first()
-    if not sesion:
-        sesion = Sesion.objects.create(usuario=request.user)
+    # Cerrar sesiones previas abiertas
+    Sesion.objects.filter(usuario=request.user, activa=True).update(activa=False, fecha_fin=timezone.now())
+
+    # Crear una nueva sesión activa
+    sesion = Sesion.objects.create(usuario=request.user, activa=True)
+
     return render(request, "camara.html", {"sesion_id": sesion.id})
 
 
+
+
+@login_required
 def extra(request):
-    return render(request, 'extra.html')
+    # Cerrar sesiones previas abiertas
+    Sesion.objects.filter(usuario=request.user, activa=True).update(activa=False, fecha_fin=timezone.now())
+
+    # Crear nueva sesión activa
+    sesion = Sesion.objects.create(usuario=request.user, activa=True)
+
+    emociones = Emocion.objects.all()
+    return render(request, 'extra.html', {'emociones': emociones, 'sesion_id': sesion.id})
+
 
 
 def agenda(request):
     return render(request, 'agenda.html')
 
 
-# ------------------------------
-# MODULOS
-# ------------------------------
+# ============================================================
+# MÓDULOS
+# ============================================================
 def modulo(request):
     return render(request, 'modulo/modulo.html')
 
@@ -124,9 +141,9 @@ def escuelas(request):
     return render(request, 'escuelas.html', {'escuelas': escuelas})
 
 
-# ------------------------------
+# ============================================================
 # ACTIVIDADES
-# ------------------------------
+# ============================================================
 @login_required
 def actividades(request):
     return render(request, 'actividades.html')
@@ -136,9 +153,9 @@ def mantenimiento(request):
     return render(request, 'mantenimiento.html')
 
 
-# ------------------------------
-# EMOCIONES
-# ------------------------------
+# ============================================================
+# EMOCIONES Y DASHBOARD
+# ============================================================
 def emociones_data(request):
     with connection.cursor() as cursor:
         cursor.execute("SELECT nombre_emocion, COUNT(*) FROM gestion_emocion GROUP BY nombre_emocion")
@@ -161,21 +178,16 @@ def dashboard_emociones(request):
     return render(request, 'dashboard_emociones.html', {'emociones_labels': etiquetas, 'emociones_counts': valores})
 
 
-# ------------------------------
-# PROCESAR EMOCIÓN CÁMARA
-# ------------------------------
-import json
-from django.views.decorators.csrf import csrf_exempt  
+# ============================================================
+# PROCESAR EMOCIÓN (CÁMARA)
+# ============================================================
 @login_required
 def procesar_emocion_camara(request, sesion_id):
     sesion = get_object_or_404(Sesion, id=sesion_id, usuario=request.user)
-
-    # Parsear JSON del request
     data = json.loads(request.body)
+
     emocion_dominante = data.get("emocion", "Neutral")
     porcentaje = data.get("porcentaje", 0.0)
-
-    # Buscar emoción en tabla Emocion
     emocion_obj = Emocion.objects.filter(nombre_emocion__iexact=emocion_dominante).first()
 
     if emocion_obj:
@@ -186,66 +198,84 @@ def procesar_emocion_camara(request, sesion_id):
             porcentaje=round(porcentaje, 2)
         )
 
-    sesion.fecha_fin = timezone.now()
-    sesion.save()
-
+ 
     return redirect("mostrar_actividades", emocion_nombre=emocion_dominante)
+
+
+
+# ============================================================
+# PROCESAR EMOCIÓN (EMOTICONES MANUALES)
+# ============================================================
+@login_required
+def registrar_emocion_manual(request):
+    if request.method == 'POST':
+        emocion_nombre = request.POST.get('emocion_nombre')
+        porcentaje = float(request.POST.get('porcentaje', 0))
+        emocion = get_object_or_404(Emocion, nombre_emocion__iexact=emocion_nombre)
+
+        sesion = Sesion.objects.filter(usuario=request.user, activa=True).order_by('-fecha_inicio').first()
+        if not sesion:
+            sesion = Sesion.objects.create(usuario=request.user, activa=True)
+
+        emocion_real, _ = EmocionReal.objects.get_or_create(
+            sesion=sesion,
+            emocion=emocion,
+            tipo_emocion=emocion.nombre_emocion,
+            defaults={'porcentaje': porcentaje}
+        )
+        emocion_real.porcentaje = porcentaje
+        emocion_real.save()
+
+        
+        return redirect('mostrar_actividades', emocion_nombre=emocion.nombre_emocion)
+
+    return redirect('extra')
+
+
+
 
 
 @login_required
 def seleccionar_emocion(request, emocion_nombre):
+    """Versión simple sin porcentaje (en desuso si usas el slider)."""
     emocion = get_object_or_404(Emocion, nombre_emocion__iexact=emocion_nombre)
     sesion, _ = Sesion.objects.get_or_create(usuario=request.user, fecha_fin__isnull=True)
     EmocionReal.objects.create(sesion=sesion, emocion=emocion, tipo_emocion=emocion.nombre_emocion)
     return redirect('mostrar_actividades', emocion_nombre=emocion.nombre_emocion)
 
 
-from random import randint, sample
-
+# ============================================================
+# MOSTRAR ACTIVIDADES
+# ============================================================
 @login_required
 def mostrar_actividades(request, emocion_nombre):
     emocion = get_object_or_404(Emocion, nombre_emocion__iexact=emocion_nombre)
     
-    # Actividades de la emoción detectada
     actividades_principal = list(Actividad.objects.filter(emocion=emocion))
-    
-    # Actividades de otras emociones (máx. 2)
     otras_actividades = list(Actividad.objects.exclude(emocion=emocion))
     otras_actividades = sample(otras_actividades, min(2, len(otras_actividades)))
     
     recomendaciones = []
 
-    # Actividades principales (80-100%)
     for act in actividades_principal:
-        recomendaciones.append({
-            'actividad': act,
-            'porcentaje': randint(80, 100),
-        })
+        recomendaciones.append({'actividad': act, 'porcentaje': randint(80, 100)})
     
-    # Actividades secundarias (30-50%)
     for act in otras_actividades:
-        recomendaciones.append({
-            'actividad': act,
-            'porcentaje': randint(30, 50),
-        })
+        recomendaciones.append({'actividad': act, 'porcentaje': randint(30, 50)})
 
-    # Ordenar por porcentaje descendente
     recomendaciones.sort(key=lambda x: x['porcentaje'], reverse=True)
-
-    # Calcular el porcentaje máximo
     max_porcentaje = max([rec['porcentaje'] for rec in recomendaciones]) if recomendaciones else 0
 
     return render(request, 'actividades.html', {
         'emocion': emocion,
         'recomendaciones': recomendaciones,
-        'max_porcentaje': max_porcentaje,  # para usar en el template
+        'max_porcentaje': max_porcentaje,
     })
 
 
-
-# ------------------------------
-# PREDICT EMOTION (API)
-# ------------------------------
+# ============================================================
+# PREDICCIÓN DE EMOCIONES (FASTAPI)
+# ============================================================
 def predict_emotion_view(request):
     if request.method != "POST":
         return JsonResponse({"error": "Método no permitido"}, status=405)
@@ -262,25 +292,59 @@ def predict_emotion_view(request):
         return JsonResponse(response.json() if response.status_code == 200 else {"emotion": "error_api", "confidence": 0})
     except Exception as e:
         return JsonResponse({"emotion": "error", "confidence": 0, "detail": str(e)})
-    
-from django.shortcuts import render, redirect
-from .models import EncuestaSatisfaccion
 
-from django.shortcuts import render, redirect
-from .models import EncuestaSatisfaccion
 
+# ============================================================
+# ENCUESTA DE SATISFACCIÓN
+# ============================================================
+from django.contrib import messages
+
+@login_required
 def encuesta_satisfaccion(request):
+    sesion = Sesion.objects.filter(usuario=request.user).order_by('-fecha_inicio').first()
+
     if request.method == 'POST':
         utilidad = request.POST.get('utilidad')
         recomendacion = request.POST.get('recomendacion')
         comentario = request.POST.get('comentario', '')
 
         if utilidad and recomendacion:
-            EncuestaSatisfaccion.objects.create(
+            encuesta = EncuestaSatisfaccion.objects.create(
+                sesion=sesion,  # 🔗 se asocia a la sesión actual o más reciente
                 utilidad=utilidad,
                 recomendacion=int(recomendacion),
                 comentario=comentario
             )
+
+            # Cerrar la sesión si aún está activa
+            if sesion and sesion.activa:
+                sesion.cerrar()
+
             return redirect('opciones')
 
-    return render(request, 'encuesta_satisfaccion.html')
+    return render(request, 'encuesta_satisfaccion.html', {'sesion': sesion})
+
+
+
+@login_required
+def procesar_encuesta(request):
+    if request.method == "POST":
+        # Aquí procesas las respuestas de la encuesta
+        respuestas = request.POST
+
+        # Cerrar la sesión activa si existe
+        sesion = Sesion.objects.filter(usuario=request.user, activa=True).first()
+        if sesion:
+            sesion.cerrar()
+
+        messages.success(request, "Gracias por completar la encuesta.")
+        return redirect("inicio")  # o a tus recomendaciones
+
+from django.shortcuts import redirect
+from .models import Sesion
+
+def finalizar_y_encuesta(request):
+    sesion = Sesion.objects.filter(usuario=request.user, activa=True).order_by('-fecha_inicio').first()
+    if sesion:
+        sesion.cerrar()  # ✅ aquí se registra fecha_fin correctamente
+    return redirect('encuesta_satisfaccion')

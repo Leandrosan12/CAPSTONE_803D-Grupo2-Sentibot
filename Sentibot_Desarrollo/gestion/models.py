@@ -1,7 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
-
+from django.db import models
+from django.contrib.auth.models import AbstractUser
+from django.conf import settings
+from django.utils import timezone
 # ------------------------------
 # Roles y Escuelas
 # ------------------------------
@@ -44,9 +47,20 @@ class Sesion(models.Model):
     usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name="sesiones")
     fecha_inicio = models.DateTimeField(auto_now_add=True)
     fecha_fin = models.DateTimeField(blank=True, null=True)
+    activa = models.BooleanField(default=True)
+
+    def cerrar(self):
+        """Cierra la sesión si sigue activa."""
+        if self.activa:
+            self.fecha_fin = timezone.now()
+            self.activa = False
+            self.save()
 
     def __str__(self):
-        return f"Sesion {self.id} - {self.usuario.email}"
+        estado = "Activa" if self.activa else "Cerrada"
+        return f"Sesión {self.id} - {self.usuario.email} ({estado})"
+
+
 
 
 class Emocion(models.Model):
@@ -213,11 +227,18 @@ class Student(models.Model):
 from django.db import models
 
 class EncuestaSatisfaccion(models.Model):
-    utilidad = models.IntegerField()  # Guarda 0 o 1 directamente
-    recomendacion = models.IntegerField(default=0)  # Escala del 1 al 5
+    sesion = models.OneToOneField(  # 🔗 relación 1 a 1 con la sesión
+        'Sesion',
+        on_delete=models.CASCADE,
+        related_name='encuesta',
+        null=True,
+        blank=True
+    )
+    utilidad = models.CharField(max_length=50)
+    recomendacion = models.IntegerField()
     comentario = models.TextField(blank=True, null=True)
     fecha = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Encuesta {self.id} - Utilidad: {self.utilidad} / Recomendación: {self.recomendacion}"
+        return f"Encuesta sesión {self.sesion.id if self.sesion else 'sin sesión'} - {self.utilidad}"
 

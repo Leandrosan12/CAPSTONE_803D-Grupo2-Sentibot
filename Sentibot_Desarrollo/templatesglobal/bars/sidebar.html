@@ -12,7 +12,10 @@
         <!-- Enlaces para todos los usuarios -->
         <a href="{% url 'perfil' %}"><img src="{% static 'Icon/user.png' %}" alt="Perfil"> Perfil</a>
         <a href="{% url 'opciones' %}"><img src="{% static 'Icon/ejercicio.png' %}" alt="Actividades"> Actividades</a>
-
+        <!-- Nuevo enlace: Psicóloga -->
+        <a href="https://psicologia.geasa.cl/login" target="_blank">
+            <img src="{% static 'Icon/reserva.png' %}" alt="Psicóloga"> Psicóloga
+        </a>
         <!-- Enlaces solo para admins -->
         {% if user.is_staff %}
             <a href="{% url 'modulo_psicologa' %}"><img src="{% static 'Icon/lupa.png' %}" alt="Módulo Psicóloga"> Módulo Psicóloga</a>
