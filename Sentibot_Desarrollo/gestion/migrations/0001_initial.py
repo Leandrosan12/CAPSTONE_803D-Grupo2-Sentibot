@@ -18,6 +18,22 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
+            name='Student',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('rut', models.CharField(max_length=20, unique=True)),
+                ('nombre', models.CharField(max_length=200)),
+                ('sede', models.CharField(max_length=100)),
+                ('edad', models.PositiveIntegerField(blank=True, null=True)),
+                ('correo', models.EmailField(blank=True, max_length=254)),
+                ('telefono', models.CharField(blank=True, max_length=50)),
+            ],
+            options={
+                'db_table': 'vw_emociones_camara',
+                'managed': False,
+            },
+        ),
+        migrations.CreateModel(
             name='Usuario',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
@@ -81,6 +97,15 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('nombre', models.CharField(max_length=100)),
                 ('descripcion', models.TextField(blank=True, null=True)),
+            ],
+        ),
+        migrations.CreateModel(
+            name='School',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('name', models.CharField(max_length=200)),
+                ('sede', models.CharField(blank=True, max_length=100)),
+                ('description', models.TextField(blank=True)),
             ],
         ),
         migrations.CreateModel(
@@ -154,10 +179,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('nombre_emocion', models.CharField(max_length=50)),
-                ('fecha', models.DateTimeField(auto_now_add=True)),
                 ('probabilidad', models.FloatField()),
-                ('duracion', models.FloatField(blank=True, help_text='Duración en segundos de la emoción', null=True)),
-                ('fiabilidad', models.FloatField(blank=True, help_text='Nivel de confianza del modelo (0.0 a 1.0)', null=True)),
+                ('fecha', models.DateTimeField(auto_now_add=True)),
                 ('sesion', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='emociones_camara', to='gestion.sesion')),
             ],
         ),
@@ -173,7 +196,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='usuario',
             name='escuela',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='usuarios', to='gestion.escuela'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='usuarios', to='gestion.escuela'),
         ),
         migrations.AddField(
             model_name='usuario',
@@ -183,7 +206,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='usuario',
             name='rol',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='usuarios', to='gestion.rol'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='usuarios', to='gestion.rol'),
         ),
         migrations.AddField(
             model_name='usuario',

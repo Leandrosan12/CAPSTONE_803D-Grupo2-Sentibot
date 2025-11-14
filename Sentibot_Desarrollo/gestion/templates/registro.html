@@ -17,9 +17,9 @@
       <div class="alert alert-danger text-center">{{ error }}</div>
     {% endif %}
 
-    <form method="post" id="form-registro">
+    <form method="post" id="form-registro" novalidate>
       {% csrf_token %}
-      
+
       <div class="mb-3">
         <label for="first_name" class="form-label">Nombre</label>
         <input type="text" class="form-control" id="first_name" name="first_name" required>
@@ -30,23 +30,9 @@
         <input type="text" class="form-control" id="last_name" name="last_name" required>
       </div>
 
-      <!-- Correo + verificación -->
       <div class="mb-3">
         <label for="correo" class="form-label">Correo electrónico</label>
         <input type="email" class="form-control" id="correo" name="correo" required>
-        <button type="button" id="btn-verificar" class="btn btn-primary mt-2 w-100">Verificar correo</button>
-        <div id="mensaje-verificacion" class="form-text mt-2 text-success"></div>
-      </div>
-
-      <!-- Campo de código oculto hasta que se envíe -->
-      <div class="mb-3" id="campo-codigo" style="display: none;">
-        <label for="codigo" class="form-label">Código de verificación</label>
-        <input type="text" class="form-control" id="codigo" name="codigo" placeholder="Ingresa el código recibido">
-      </div>
-
-      <!-- Botón de confirmación adicional -->
-      <div class="mb-3" id="wrap-confirmar" style="display: none;">
-        <button type="button" id="btn-confirmar" class="btn btn-outline-success w-100">Confirmar — Todo en orden</button>
       </div>
       <!-- escuela -->
       <div class="mb-3">
@@ -65,7 +51,7 @@
         <input type="password" class="form-control" id="contrasena" name="contrasena" required>
       </div>
 
-      <button type="submit" id="btn-registrar" class="btn btn-primary w-100" disabled>Registrar</button>
+      <button type="submit" id="btn-registrar" class="btn btn-primary w-100">Registrar</button>
 
       <div class="mt-3 text-center">
         <a href="{% url 'login' %}">¿Ya tienes cuenta?</a>
@@ -73,8 +59,4 @@
     </form>
   </div>
 
-
-<script src="{% static 'js/verificacion.js' %}"></script>
-
 </body>
-
