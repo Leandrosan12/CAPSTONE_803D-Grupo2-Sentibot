@@ -12,7 +12,12 @@ urlpatterns = [
     path('agenda/', views.agenda, name='agenda'),
     path('emociones-data/', views.emociones_data, name='emociones_data'),
     path('seguimiento/', views.seguimiento, name='seguimiento'),
-    path('actividades/', views.actividades, name='actividades'), 
+
+    # Actividades usando query param (ya no necesitas path param)
+    path('actividades/', views.actividades, name='actividades'),  # primero la ruta sin parámetro
+    path('actividades/<str:emocion_nombre>/', views.mostrar_actividades, name='mostrar_actividades'),  # luego la con parámetro
+
+
     path('opciones/', views.opciones, name='opciones'),
     path('mantenimiento/', views.mantenimiento, name='mantenimiento'),
     path('extra/', views.extra, name='extra'),
@@ -24,10 +29,11 @@ urlpatterns = [
     path("predict_emotion/", views.predict_emotion_view, name="predict_emotion"),
     path("procesar_emocion_camara/<int:sesion_id>/", views.procesar_emocion_camara, name="procesar_emocion_camara"),
     path("seleccionar_emocion/<str:emocion_nombre>/", views.seleccionar_emocion, name="seleccionar_emocion"),
-    path("actividades/<str:emocion_nombre>/", views.mostrar_actividades, name="mostrar_actividades"),
+
+
     path('dashboard_emociones/', views.dashboard_emociones, name='dashboard_emociones'),
     path('encuesta_satisfaccion/', views.encuesta_satisfaccion, name='encuesta_satisfaccion'),
- 
+    path('preguntas/', views.preguntas, name='preguntas'),
     path('finalizar_y_encuesta/', views.finalizar_y_encuesta, name='finalizar_y_encuesta'),
-
+    path('resultado/', views.mostrar_resultado, name='mostrar_resultado'),
 ]

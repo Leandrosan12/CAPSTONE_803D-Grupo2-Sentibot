@@ -18,7 +18,8 @@
         </a>
         <!-- Enlaces solo para admins -->
         {% if user.is_staff %}
-            <a href="{% url 'modulo_psicologa' %}"><img src="{% static 'Icon/lupa.png' %}" alt="Módulo Psicóloga"> Módulo Psicóloga</a>
+            
+            <a href="{% url 'modulo' %}"><img src="{% static 'Icon/lupa.png' %}" alt="Módulo Psicóloga"> Módulo Psicóloga</a>
             <a href="{% url 'modulo_profesor' %}"><img src="{% static 'Icon/lupa.png' %}" alt="Módulo Profesor"> Módulo Profesor</a>
             <a href="{% url 'agenda' %}"><img src="{% static 'Icon/calendario.png' %}" alt="Agenda"> Agenda</a>
             <a href="{% url 'extra' %}"><img src="{% static 'Icon/feliz.png' %}" alt="Extras"> Emociones</a>

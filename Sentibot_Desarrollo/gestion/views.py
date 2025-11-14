@@ -144,9 +144,45 @@ def escuelas(request):
 # ============================================================
 # ACTIVIDADES
 # ============================================================
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from .models import Actividad, Emocion
+
 @login_required
 def actividades(request):
-    return render(request, 'actividades.html')
+    # Obtener la emoción de la query string
+    emocion_param = request.GET.get('emocion', 'Neutral')
+
+    # Opcional: mapear nombres de emoción si tus modelos usan nombres distintos
+    emocion_map = {
+        "Felicidad": "Alegría",
+        "Tristeza": "Tristeza",
+        "Miedo": "Miedo",
+        "Enojo": "Enojo"
+    }
+    nombre_emocion = emocion_map.get(emocion_param, "Neutral")
+
+    # Obtener la emoción
+    emocion = get_object_or_404(Emocion, nombre_emocion__iexact=nombre_emocion)
+
+    # Filtrar actividades según la emoción
+    actividades = Actividad.objects.filter(emocion=emocion)
+
+    # Crear recomendaciones "ficticias" para usar barra de porcentaje
+    recomendaciones = [
+        {"actividad": act, "porcentaje": 100}  # Puedes ajustar el porcentaje según tu lógica
+        for act in actividades
+    ]
+
+    contexto = {
+        "emocion": emocion,
+        "recomendaciones": recomendaciones,
+        "max_porcentaje": 100  # Para tu template de barras
+    }
+
+    return render(request, "actividades.html", contexto)
+
+
 
 
 def mantenimiento(request):
@@ -578,3 +614,34 @@ def finalizar_y_encuesta(request):
     if sesion:
         sesion.cerrar()  # ✅ aquí se registra fecha_fin correctamente
     return redirect('encuesta_satisfaccion')
+def preguntas(request):
+    return render(request, 'preguntas.html')
+
+
+def mostrar_resultado(request):
+    emocion = request.GET.get('emocion', 'Neutral')
+    return render(request, "resultado.html", {"emocion": emocion})
+
+def resultado(request):
+    # Obtener emoción de query param
+    nombre_emocion = request.GET.get("emocion", "Neutral")
+
+    # Buscar la emoción
+    emocion = get_object_or_404(Emocion, nombre_emocion__iexact=nombre_emocion)
+
+    # Filtrar actividades según emoción
+    actividades = Actividad.objects.filter(emocion=emocion)
+
+    # Crear recomendaciones ficticias
+    recomendaciones = [
+        {"actividad": act, "porcentaje": 100}  # Aquí puedes calcular porcentaje real si quieres
+        for act in actividades
+    ]
+
+    contexto = {
+        "emocion": emocion,
+        "recomendaciones": recomendaciones,
+        "max_porcentaje": 100,
+    }
+
+    return render(request, "resultado.html", contexto)
