@@ -34,6 +34,17 @@
         <label for="correo" class="form-label">Correo electrónico</label>
         <input type="email" class="form-control" id="correo" name="correo" required>
       </div>
+      <!-- escuela -->
+      <div class="mb-3">
+  <label for="escuela" class="form-label">Selecciona tu escuela</label>
+  <select class="form-select" id="escuela" name="escuela" required>
+    <option value="">-- Selecciona una escuela --</option>
+    {% for escuela in escuelas %}
+      <option value="{{ escuela.id }}">{{ escuela.nombre }}</option>
+    {% endfor %}
+  </select>
+</div>
+
 
       <div class="mb-3">
         <label for="contrasena" class="form-label">Contraseña</label>

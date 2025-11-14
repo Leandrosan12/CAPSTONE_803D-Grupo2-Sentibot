@@ -25,10 +25,10 @@ urlpatterns = [
     path('predict_emotion/', views.predict_emotion_view, name='predict_emotion'),
     path('actividades/', views.actividades, name='actividades'), 
     path('dashboard_emociones/', views.dashboard_emociones, name='dashboard_emociones'),
-    path('lista_usuarios/', views.lista_usuarios, name='lista_usuarios'),
     path('mantenimiento/', views.mantenimiento, name='mantenimiento'),
     path('agenda/', views.agenda_view, name='agenda'),
     path('extra/', views.extra, name='extra'),
+
 
     
 ]
