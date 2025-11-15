@@ -169,7 +169,6 @@ class Actividad(models.Model):
 # ------------------------------
 # Prueba Dashboard - Resumen Emociones
 # ------------------------------
-<<<<<<< HEAD
 class School(models.Model):
     name = models.CharField(max_length=200)
     sede = models.CharField(max_length=100, blank=True)
@@ -196,8 +195,6 @@ class Student(models.Model):
         db_table = 'vw_emociones_camara'
 
 
-=======
->>>>>>> cd578bd98aff33d6b9ff70b0047d7be6d0f735a2
 class EmotionSession(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 

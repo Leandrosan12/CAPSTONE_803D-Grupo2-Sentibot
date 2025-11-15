@@ -1,0 +1,181 @@
+/* 🎯 ===== ESTILOS GENERALES ===== */
+body {
+  background: linear-gradient(to bottom, #1a1f36 40%, #f3f4f6 40%);
+  min-height: 100vh;
+  font-family: "Poppins", sans-serif;
+  margin: 0;
+  padding: 0;
+  color: #222;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 📊 ===== CONTENEDOR PRINCIPAL ===== */
+.dashboard-wrapper {
+  width: 95%;
+  max-width: 1300px;
+  margin: 60px auto 40px auto;
+  text-align: center;
+}
+
+/* 🏷️ ===== ENCABEZADO ===== */
+.dashboard-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.dashboard-header h2 {
+  color: #ffffff;
+  font-size: 2.1rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-bottom: 25px;
+  text-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* 🔘 ===== BOTONES SUPERIORES ===== */
+.acciones {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.btn-volver,
+.btn-descargar {
+  background-color: #5b73e8;
+  color: #fff;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(91, 115, 232, 0.3);
+}
+
+.btn-volver:hover,
+.btn-descargar:hover {
+  background-color: #3c5bd8;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(60, 91, 216, 0.4);
+}
+
+/* 🧱 ===== CONTENEDOR DE GRÁFICOS ===== */
+.grafico-contenedor {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 45px;
+  margin-top: 25px;
+}
+
+/* 💡 ===== TARJETAS ===== */
+.card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 28px 25px;
+  width: 380px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  transition: all 0.35s ease-in-out;
+}
+
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* 🏫 ===== GRILLA DE TARJETAS ===== */
+.cards-dinamicas {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 35px;
+  margin-top: 35px;
+}
+
+/* 🩵 ===== TÍTULOS DE TARJETAS ===== */
+.card h4 {
+  color: #1a1f36;
+  font-weight: 600;
+  font-size: 1.15rem;
+  margin-bottom: 18px;
+  border-bottom: 3px solid #5b73e8;
+  display: inline-block;
+  padding-bottom: 6px;
+  letter-spacing: 0.3px;
+}
+
+/* 📈 ===== CANVAS ===== */
+canvas {
+  max-width: 100%;
+  height: auto;
+  margin-top: 15px;
+}
+
+/* 📱 ===== RESPONSIVO ===== */
+@media (max-width: 992px) {
+  .dashboard-header h2 {
+    font-size: 1.8rem;
+  }
+
+  .card {
+    width: 90%;
+    max-width: 420px;
+  }
+
+  .acciones {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .btn-volver,
+  .btn-descargar {
+    width: 85%;
+  }
+}
+
+@media (max-width: 600px) {
+  .dashboard-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .card {
+    padding: 20px 15px;
+  }
+
+  .btn-volver,
+  .btn-descargar {
+    font-size: 0.95rem;
+    padding: 10px 18px;
+  }
+}
+
+/* 🖨️ ===== MODO IMPRESIÓN / PDF ===== */
+@media print {
+  body {
+    background: #fff !important;
+    color: #000;
+  }
+
+  .btn-volver,
+  .btn-descargar,
+  .acciones {
+    display: none !important;
+  }
+
+  .card {
+    box-shadow: none !important;
+    border: 1px solid #ccc;
+    page-break-inside: avoid;
+  }
+
+  .dashboard-header h2 {
+    color: #000;
+  }
+}

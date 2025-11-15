@@ -1,238 +1,223 @@
-# Django shortcuts y utilidades
-from django.shortcuts import render, redirect
-from django.http import HttpResponse, JsonResponse
-from django.template.loader import get_template
-<<<<<<< HEAD
-from django.db.models import Count
-from django.db import connection
-from .models import Usuario, Emocion, EmocionReal, Sesion
+# gestion/views.py
+# ------------------------------
+# Imports
+# ------------------------------
 import json
+import logging
+import random
 import base64
 from io import BytesIO
-from PIL import Image
-=======
-from django.contrib.auth.decorators import login_required
-from django.utils import timezone
->>>>>>> cd578bd98aff33d6b9ff70b0047d7be6d0f735a2
+from datetime import timedelta
 
-# Autenticación
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse
+from django.db.models import Count, Sum
+from django.db import connection
+from django.utils import timezone
+from django.utils.dateparse import parse_datetime
+from django.views.decorators.http import require_GET, require_POST
+from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout, get_user_model
+from django.contrib.auth.decorators import login_required
+from django.core.mail import send_mail
+from django.conf import settings
+
+from PIL import Image
+import requests
+
+# Modelos
+from .models import (
+    Usuario, Emocion, EmocionReal, EmocionCamara,
+    Sesion, Escuela, EmotionSession
+)
+
+logger = logging.getLogger(__name__)
 User = get_user_model()
 
-# Modelos y base de datos
-from django.db.models import Count, Avg
-from django.db import connection
-from .models import Sesion, EmocionCamara, Usuario
-from gestion.models import Usuario as GestionUsuario, Emocion, EmocionReal, Sesion as GestionSesion
-
-
+# ------------------------------
+# HOME / AUTENTICACIÓN
+# ------------------------------
 def home(request):
     if not request.user.is_authenticated:
         return redirect("login")
     return render(request, "home.html", {"user": request.user})
-# views.py (asegúrate de tener los imports)
-import random
-import logging
-from datetime import timedelta
-from django.utils import timezone
-from django.contrib.auth.models import User
-from django.core.mail import send_mail
-from django.http import JsonResponse
-from django.views.decorators.http import require_GET
-
-<<<<<<< HEAD
-
-def registro(request):
-    if request.method == "POST":
-        email = request.POST.get('correo')
-        password = request.POST.get('contrasena')
-        first_name = request.POST.get('first_name')
-        last_name = request.POST.get('last_name')
-=======
-logger = logging.getLogger(__name__)
->>>>>>> cd578bd98aff33d6b9ff70b0047d7be6d0f735a2
-
-
-@require_GET
-def enviar_codigo(request):
-    email = request.GET.get('correo')
-    if not email:
-        return JsonResponse({'error': 'Correo no proporcionado'}, status=400)
-
-    # 1) Si el correo ya está registrado, no enviamos código
-    if User.objects.filter(email__iexact=email).exists():
-        return JsonResponse({'error': 'Este correo ya está registrado.'}, status=400)
-
-    # 2) Generar código y guardar en sesión con expiración (10 minutos)
-    codigo = str(random.randint(100000, 999999))
-    request.session['codigo_verificacion'] = codigo
-    request.session['correo_verificacion'] = email
-    # Guardamos la expiración como ISO o timestamp
-    expiracion = timezone.now() + timedelta(minutes=10)
-    request.session['codigo_expira'] = expiracion.isoformat()
-
-    # 3) Intentar enviar correo (capturamos errores)
-    try:
-        send_mail(
-            'Código de verificación',
-            f'Tu código de verificación es: {codigo}',
-            None,               # Dejar None para que use DEFAULT_FROM_EMAIL si lo tienes configurado
-            [email],
-            fail_silently=False,
-        )
-    except Exception as e:
-        logger.exception("Error enviando correo de verificación")
-        # Limpia la sesión para no dejar datos inconsistentes
-        request.session.pop('codigo_verificacion', None)
-        request.session.pop('correo_verificacion', None)
-        request.session.pop('codigo_expira', None)
-        return JsonResponse({
-            'error': 'No se pudo enviar el correo. Verifica la configuración SMTP.'
-        }, status=500)
-
-    return JsonResponse({'mensaje': 'Código enviado correctamente al correo. Revisa tu bandeja de entrada.'})
-
-
-
 
 def login(request):
     if request.method == "POST":
         email = request.POST.get('correo')
         password = request.POST.get('contrasena')
-
         user = authenticate(request, email=email, password=password)
-
         if user is not None and user.is_active:
             auth_login(request, user)
             return redirect('camara')
-        else:
-            return render(request, 'login.html', {'error': 'Correo o contraseña incorrectos'})
-
+        return render(request, 'login.html', {'error': 'Correo o contraseña incorrectos'})
     return render(request, 'login.html')
-
 
 def logout_view(request):
     auth_logout(request)
     return redirect('login')
 
-
 # ------------------------------
-# Páginas principales
+# PERFIL
 # ------------------------------
 def perfil(request):
     return render(request, 'perfil.html')
 
+# ------------------------------
+# ENVÍO / VALIDACIÓN DE CÓDIGO
+# ------------------------------
+@require_GET
+def enviar_codigo(request):
+    correo = request.GET.get('correo')
+    if not correo:
+        return JsonResponse({'error': 'Correo requerido'}, status=400)
 
-<<<<<<< HEAD
-=======
+    if Usuario.objects.filter(email__iexact=correo).exists():
+        return JsonResponse({'error': 'Este correo ya está registrado.'}, status=400)
 
-@login_required(login_url='login')  # ajusta la URL si la llamas distinto
->>>>>>> cd578bd98aff33d6b9ff70b0047d7be6d0f735a2
+    codigo = f"{random.randint(100000, 999999):06d}"
+    expiracion = timezone.now() + timedelta(minutes=10)
+
+    request.session['codigo_verificacion'] = codigo
+    request.session['correo_verificacion'] = correo
+    request.session['codigo_expira'] = expiracion.isoformat()
+    request.session.save()
+
+    subject = 'Código de verificación'
+    message = f'Tu código de verificación es: {codigo}\n\nExpira en 10 minutos.'
+    from_email = getattr(settings, 'EMAIL_HOST_USER', None)
+
+    try:
+        send_mail(subject, message, from_email, [correo], fail_silently=False)
+        logger.info("Código %s enviado a %s", codigo, correo)
+        return JsonResponse({'mensaje': 'Código enviado al correo.'})
+    except Exception as e:
+        logger.exception("Error enviando correo a %s: %s", correo, e)
+        for key in ['codigo_verificacion', 'correo_verificacion', 'codigo_expira']:
+            request.session.pop(key, None)
+        return JsonResponse({'error': 'No se pudo enviar el correo.'}, status=500)
+
+@require_POST
+def validar_codigo(request):
+    try:
+        payload = json.loads(request.body)
+        correo = (payload.get('correo') or '').strip().lower()
+        codigo = (payload.get('codigo') or '').strip()
+    except Exception:
+        return JsonResponse({"ok": False, "error": "JSON inválido"}, status=400)
+
+    codigo_sesion = request.session.get('codigo_verificacion')
+    correo_sesion = (request.session.get('correo_verificacion') or '').lower()
+    codigo_expira_iso = request.session.get('codigo_expira')
+
+    if not (codigo_sesion and correo_sesion and codigo_expira_iso):
+        return JsonResponse({"ok": False, "error": "No hay un código de verificación válido."}, status=400)
+
+    if correo != correo_sesion:
+        return JsonResponse({"ok": False, "error": "El correo no coincide con el verificado."}, status=400)
+
+    try:
+        expiracion = parse_datetime(codigo_expira_iso)
+        if timezone.is_naive(expiracion):
+            expiracion = timezone.make_aware(expiracion, timezone.get_current_timezone())
+        now = timezone.now()
+        if timezone.is_naive(now):
+            now = timezone.make_aware(now, timezone.get_current_timezone())
+    except Exception:
+        for key in ['codigo_verificacion', 'correo_verificacion', 'codigo_expira']:
+            request.session.pop(key, None)
+        return JsonResponse({"ok": False, "error": "Error en el proceso de verificación."}, status=400)
+
+    if now > expiracion:
+        for key in ['codigo_verificacion', 'correo_verificacion', 'codigo_expira']:
+            request.session.pop(key, None)
+        return JsonResponse({"ok": False, "error": "El código ha expirado."}, status=400)
+
+    if codigo != codigo_sesion:
+        return JsonResponse({"ok": False, "error": "Código inválido."}, status=400)
+
+    return JsonResponse({"ok": True})
+
+# ------------------------------
+# REGISTRO
+# ------------------------------
+def registro(request):
+    if request.method == "POST":
+        email = (request.POST.get('correo') or '').strip()
+        password = request.POST.get('contrasena')
+        first_name = (request.POST.get('first_name') or '').strip()
+        last_name = (request.POST.get('last_name') or '').strip()
+        codigo = (request.POST.get('codigo') or '').strip()
+        escuela_id = request.POST.get('escuela')
+
+        codigo_sesion = request.session.get('codigo_verificacion')
+        correo_sesion = request.session.get('correo_verificacion')
+        codigo_expira_iso = request.session.get('codigo_expira')
+
+        if not (codigo_sesion and correo_sesion and codigo_expira_iso):
+            return render(request, 'registro.html', {
+                'error': 'No hay un código de verificación válido.',
+                'escuelas': Escuela.objects.all()
+            })
+
+        if email.lower() != correo_sesion.lower():
+            return render(request, 'registro.html', {
+                'error': 'El correo no coincide con el verificado.',
+                'escuelas': Escuela.objects.all()
+            })
+
+        expiracion = parse_datetime(codigo_expira_iso)
+        if timezone.is_naive(expiracion):
+            expiracion = timezone.make_aware(expiracion, timezone.get_current_timezone())
+
+        if timezone.now() > expiracion:
+            for key in ['codigo_verificacion', 'correo_verificacion', 'codigo_expira']:
+                request.session.pop(key, None)
+            return render(request, 'registro.html', {'error': 'Código expirado', 'escuelas': Escuela.objects.all()})
+
+        if codigo != codigo_sesion:
+            return render(request, 'registro.html', {'error': 'Código inválido', 'escuelas': Escuela.objects.all()})
+
+        if Usuario.objects.filter(email__iexact=email).exists():
+            return render(request, 'registro.html', {'error': 'El email ya está registrado', 'escuelas': Escuela.objects.all()})
+
+        user = Usuario.objects.create_user(
+            email=email, password=password, first_name=first_name, last_name=last_name, username=email
+        )
+
+        if escuela_id:
+            try:
+                escuela = Escuela.objects.get(id=escuela_id)
+                user.escuela = escuela
+                user.save()
+            except Escuela.DoesNotExist:
+                pass
+
+        for key in ['codigo_verificacion', 'correo_verificacion', 'codigo_expira']:
+            request.session.pop(key, None)
+
+        return redirect('login')
+
+    return render(request, 'registro.html', {'escuelas': Escuela.objects.all()})
+
+# ------------------------------
+# MÓDULOS PRINCIPALES
+# ------------------------------
+def modulo(request):
+    return render(request, 'modulo/modulo.html')
+
+@login_required(login_url='login')
 def camara(request):
-    # Obtener o crear sesión activa solo para usuarios autenticados
     sesion = Sesion.objects.filter(usuario=request.user, fecha_fin__isnull=True).first()
     if not sesion:
-        sesion = Sesion.objects.create(usuario=request.user)  # ✅ se elimina "inicio", se llena solo con auto_now_add
+        sesion = Sesion.objects.create(usuario=request.user)
     return render(request, "camara.html", {"sesion_id": sesion.id})
-
 
 def extra(request):
     return render(request, 'extra.html')
 
-
 def agenda_view(request):
     return render(request, 'agenda.html')
-
-<<<<<<< HEAD
-
-# ------------------------------
-# Módulos principales
-# ------------------------------
-=======
->>>>>>> cd578bd98aff33d6b9ff70b0047d7be6d0f735a2
-def modulo(request):
-    return render(request, 'modulo/modulo.html')
-
-
-def modulo_profesor(request):
-    return render(request, 'modulo_profesor.html')
-
-from django.shortcuts import render
-from .models import Usuario  # o el modelo que uses para usuarios
-
-<<<<<<< HEAD
-
-# ------------------------------
-# Módulo Alumnos y Escuelas
-# ------------------------------
-=======
->>>>>>> cd578bd98aff33d6b9ff70b0047d7be6d0f735a2
-def alumnos(request):
-    usuarios = Usuario.objects.all()  # Trae todos los usuarios
-    return render(request, 'modulo/alumnos.html', {'usuarios': usuarios})
-
-<<<<<<< HEAD
-
-def dashboard(request):
-    return render(request, "dashboard.html")
-
-
-def detalle_alumno(request, alumno_id):
-    with connection.cursor() as cursor:
-        cursor.execute("SELECT * FROM gestion_usuario WHERE id = %s", [alumno_id])
-        columnas = [col[0] for col in cursor.description]
-        alumno = dict(zip(columnas, cursor.fetchone()))
-    return render(request, 'detalle_alumno.html', {'alumno': alumno})
-=======
-
-# views.py
-from django.shortcuts import render, get_object_or_404
-from .models import Usuario  # tu modelo personalizado
-
-def detalle_alumno(request, id):
-    alumno = get_object_or_404(Usuario, id=id)
-    return render(request, 'modulo/detalle_alumno.html', {'alumno': alumno})
->>>>>>> cd578bd98aff33d6b9ff70b0047d7be6d0f735a2
-
-
-def escuelas(request):
-<<<<<<< HEAD
-    escuelas = [
-        {'id': 1, 'nombre': 'Informática y Telecomunicación', 'carreras': ['Programación', 'Redes'], 'sede': 'Melipilla'},
-        {'id': 2, 'nombre': 'Construcción', 'carreras': ['Edificación', 'Arquitectura'], 'sede': 'Melipilla'},
-        {'id': 3, 'nombre': 'Gastronomía', 'carreras': ['Cocina Profesional', 'Pastelería'], 'sede': 'Melipilla'},
-        {'id': 4, 'nombre': 'Otra Escuela', 'carreras': ['Diseño', 'Administración'], 'sede': 'Melipilla'},
-    ]
-    return render(request, 'escuelas.html', {'escuelas': escuelas})
-
-
-# ------------------------------
-# Actividades
-# ------------------------------
-def actividades(request):
-    return render(request, 'actividades.html')
-
-
-# ------------------------------
-# Datos y seguimiento
-# ------------------------------
-def emociones_data(request):
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT nombre_emocion, COUNT(*) as total 
-            FROM gestion_emocion 
-            GROUP BY nombre_emocion;
-        """)
-        rows = cursor.fetchall()
-    data = {
-        "labels": [row[0] for row in rows],
-        "values": [row[1] for row in rows],
-    }
-    return JsonResponse(data)
-
-
-=======
-    return render(request, 'modulo/escuelas.html')
 
 def actividades(request):
     return render(request, 'actividades.html')
@@ -240,98 +225,13 @@ def actividades(request):
 def mantenimiento(request):
     return render(request, 'mantenimiento.html')
 
-
-def seguimiento(request):
-    # Agregamos las emociones totales por nombre
-    emociones_agg = EmocionCamara.objects.values('nombre_emocion').annotate(cantidad=Count('id'))
-    emociones = list(emociones_agg)  # [{'nombre_emocion': 'Feliz', 'cantidad': 5}, ...]
-
-    # Agregamos datos por usuario
-    datos_usuarios = []
+# ------------------------------
+# ALUMNOS / ESCUELAS / DETALLES
+# ------------------------------
+def alumnos(request):
     usuarios = Usuario.objects.all()
-    for u in usuarios:
-        sesiones = Sesion.objects.filter(usuario=u)
-        emociones_usuario = EmocionCamara.objects.filter(sesion__in=sesiones)
-        emociones_count = emociones_usuario.values('nombre_emocion').annotate(cantidad=Count('id'))
-        datos_usuarios.append({
-            'usuario': u.username,
-            'emociones': list(emociones_count)
-        })
+    return render(request, 'modulo/alumnos.html', {'usuarios': usuarios})
 
-    return render(request, 'seguimiento.html', {
-        'emociones': emociones,
-        'datos_usuarios': datos_usuarios
-    })
-
-
-
-
-
-
-
-# ------------------------------
-# API de predicción de emociones
-# ------------------------------
->>>>>>> cd578bd98aff33d6b9ff70b0047d7be6d0f735a2
-def predict_emotion_view(request):
-    if request.method == "POST":
-        data = json.loads(request.body)
-        image_base64 = data.get("image")
-
-        if not image_base64:
-            return JsonResponse({"label": "Null", "confidence": 0})
-
-        if "," in image_base64:
-            image_base64 = image_base64.split(",")[1]
-
-        try:
-            image_bytes = base64.b64decode(image_base64)
-            Image.open(BytesIO(image_bytes))
-        except Exception as e:
-            return JsonResponse({"label": "Null", "confidence": 0, "error": str(e)})
-
-        API_URL = "http://127.0.0.1:5000/predict_emotion"
-        try:
-            response = requests.post(API_URL, json={"image": image_base64}, timeout=5)
-            result = response.json()
-            label = result.get("label", "Sin reconocer")
-            confidence = result.get("confidence", 0)
-        except Exception as e:
-            return JsonResponse({"label": "Null", "confidence": 0, "error": str(e)})
-
-        return JsonResponse({"label": label, "confidence": confidence})
-
-<<<<<<< HEAD
-
-# ------------------------------
-# Seguimiento Emociones
-# ------------------------------
-def seguimiento(request):
-    datos = EmocionReal.objects.values('emocion').annotate(total=Count('emocion'))
-    etiquetas = [d['emocion'] for d in datos]
-    valores = [d['total'] for d in datos]
-    return render(request, 'seguimiento.html', {
-        'emociones_labels': etiquetas,
-        'emociones_counts': valores,
-    })
-
-
-# ------------------------------
-# Nueva vista: Dashboard Emociones
-# ------------------------------
-def dashboard_emociones(request):
-    datos = EmocionReal.objects.values('emocion__nombre_emocion').annotate(total=Count('emocion'))
-    etiquetas = [d['emocion__nombre_emocion'] for d in datos]
-    valores = [d['total'] for d in datos]
-    return render(request, 'dashboard_emociones.html', {
-        'emociones_labels': etiquetas,
-        'emociones_counts': valores,
-    })
-
-
-# ------------------------------
-# Lista de usuarios
-# ------------------------------
 def lista_usuarios(request):
     with connection.cursor() as cursor:
         cursor.execute("SELECT * FROM gestion_usuario")
@@ -339,80 +239,165 @@ def lista_usuarios(request):
         datos = [dict(zip(columnas, row)) for row in cursor.fetchall()]
     return render(request, 'lista_usuarios.html', {'usuarios': datos})
 
+def detalle_alumno(request, alumno_id):
+    alumno = get_object_or_404(Usuario, id=alumno_id)
+    return render(request, 'modulo/detalle_alumno.html', {'alumno': alumno})
+
+def escuelas(request):
+    # Datos simulados de ejemplo
+    escuelas_sim = [
+        {'id': 1, 'nombre': 'Informática y Telecomunicación', 'carreras': ['Programación', 'Redes'], 'sede': 'Melipilla'},
+        {'id': 2, 'nombre': 'Construcción', 'carreras': ['Edificación', 'Arquitectura'], 'sede': 'Melipilla'},
+        {'id': 3, 'nombre': 'Gastronomía', 'carreras': ['Cocina Profesional', 'Pastelería'], 'sede': 'Melipilla'},
+        {'id': 4, 'nombre': 'Otra Escuela', 'carreras': ['Diseño', 'Administración'], 'sede': 'Melipilla'},
+    ]
+    # Cambié el template al nombre correcto
+    return render(request, 'modulo/escuela.html', {'escuelas': escuelas_sim})
+
 
 # ------------------------------
-# Mantenimiento
+# SEGUIMIENTO / DASHBOARD
 # ------------------------------
-def mantenimiento(request):
-    return render(request, 'mantenimiento.html')
+def seguimiento(request):
+    emociones_agg = EmocionCamara.objects.values('nombre_emocion').annotate(cantidad=Count('id'))
+    emociones = list(emociones_agg)
+
+    datos_usuarios = []
+    for u in Usuario.objects.all():
+        sesiones = Sesion.objects.filter(usuario=u)
+        emociones_usuario = EmocionCamara.objects.filter(sesion__in=sesiones)
+        emociones_count = emociones_usuario.values('nombre_emocion').annotate(cantidad=Count('id'))
+        datos_usuarios.append({'usuario': u.username, 'emociones': list(emociones_count)})
+
+    return render(request, 'seguimiento.html', {'emociones': emociones, 'datos_usuarios': datos_usuarios})
+
+def dashboard_emociones(request):
+    datos = EmocionReal.objects.values('emocion__nombre_emocion').annotate(total=Count('emocion'))
+    etiquetas = [d['emocion__nombre_emocion'] for d in datos]
+    valores = [d['total'] for d in datos]
+    return render(request, 'dashboard_emociones.html', {'emociones_labels': etiquetas, 'emociones_counts': valores})
+
+# ------------------------------ #
+# MÓDULO PROFESOR (Dashboard)
+# ------------------------------ #
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.db.models import Sum, Avg, F, ExpressionWrapper, FloatField
+from .models import Escuela, EmotionSession, Encuesta, RespuestaEncuesta
+import json
 
 
-# ------------------------------
-# Detalle de Escuela (simulación)
-# ------------------------------
-def detalle_escuela(request, nombre_escuela):
-    """
-    Simula los detalles de cada escuela.
-    En el futuro, esto se conectará con la base de datos.
-    """
-    detalles = {
-        "Informática y Telecomunicación": {
-            "nombre": "Informática y Telecomunicación",
-            "sede": "Melipilla",
-            "director": "Juan Torres",
-            "correo": "juan.torres@duocuc.cl",
-            "telefono": "+569 87654321",
-            "descripcion": "Escuela enfocada en formar profesionales en programación, redes y tecnologías emergentes."
-        },
-        "Construcción": {
-            "nombre": "Construcción",
-            "sede": "Melipilla",
-            "director": "María Rojas",
-            "correo": "maria.rojas@duocuc.cl",
-            "telefono": "+569 91234567",
-            "descripcion": "Escuela especializada en proyectos de edificación y obras civiles."
-        },
-        "Gastronomía": {
-            "nombre": "Gastronomía",
-            "sede": "Melipilla",
-            "director": "Pedro López",
-            "correo": "pedro.lopez@duocuc.cl",
-            "telefono": "+569 99999999",
-            "descripcion": "Formación profesional en cocina nacional e internacional."
-        },
-        "Otra Escuela": {
-            "nombre": "Otra Escuela",
-            "sede": "Melipilla",
-            "director": "Ana Díaz",
-            "correo": "ana.diaz@duocuc.cl",
-            "telefono": "+569 88888888",
-            "descripcion": "Centro académico con múltiples áreas de conocimiento."
-        }
+@login_required(login_url='login')
+def modulo_profesor(request):
+    return render(request, "modulo_profesor.html")
+
+
+@login_required(login_url='login')
+def grafico_profesor(request):
+
+    profesor = request.user
+
+    # ============================================================
+    # 1) Escuelas visibles según el profesor
+    # ============================================================
+    if getattr(profesor, "escuela", None):
+        escuelas = [profesor.escuela]
+    else:
+        escuelas = Escuela.objects.all()
+
+    datos_emociones = []
+    datos_duracion = []
+    datos_satisfaccion = []
+
+    # ============================================================
+    # 2) Recorrer escuelas y calcular estadísticas
+    
+    for escuela in escuelas:
+
+        sesiones = EmotionSession.objects.filter(user__escuela=escuela)
+
+        # ---------- 1️⃣ Totales de emociones ----------
+        emociones = sesiones.aggregate(
+            feliz=Sum('feliz_seg'),
+            triste=Sum('triste_seg'),
+            neutral=Sum('neutral_seg'),
+            enojado=Sum('enojado_seg'),
+            sorprendido=Sum('sorprendido_seg'),
+            sinreconocer=Sum('sinreconocer_seg')
+        )
+        emociones = {k: v or 0 for k, v in emociones.items()}
+
+        datos_emociones.append({
+            "escuela": escuela.nombre,
+            "emociones": emociones
+        })
+
+        # ---------- 2️⃣ Duración promedio ----------
+        sesiones_dur = sesiones.annotate(
+            dur_total=(
+                F("feliz_seg") + F("triste_seg") + F("neutral_seg") +
+                F("enojado_seg") + F("sorprendido_seg") + F("sinreconocer_seg")
+            )
+        )
+
+        dur_prom = sesiones_dur.aggregate(
+            promedio=Avg('dur_total')
+        )["promedio"] or 0
+
+        datos_duracion.append({
+            "escuela": escuela.nombre,
+            "promedio": round(dur_prom, 2)
+        })
+
+        # ---------- 3️⃣ Nivel de satisfacción ----------
+        respuestas = RespuestaEncuesta.objects.filter(
+            usuario__escuela=escuela
+        )
+
+        # Se asume que la respuesta contiene "si" o "no"
+        gusto = respuestas.filter(respuesta__icontains="si").count()
+        no_gusto = respuestas.filter(respuesta__icontains="no").count()
+
+        datos_satisfaccion.append({
+            "escuela": escuela.nombre,
+            "si": gusto,
+            "no": no_gusto
+        })
+
+    # ============================================================
+    # 3) Totales globales de emociones
+    # ============================================================
+    emociones_globales = EmotionSession.objects.aggregate(
+        feliz=Sum('feliz_seg'),
+        triste=Sum('triste_seg'),
+        neutral=Sum('neutral_seg'),
+        enojado=Sum('enojado_seg'),
+        sorprendido=Sum('sorprendido_seg'),
+        sinreconocer=Sum('sinreconocer_seg')
+    )
+    emociones_globales = {k: v or 0 for k, v in emociones_globales.items()}
+
+    # ============================================================
+    # 4) Enviar datos al template
+    # ============================================================
+    context = {
+        "datos_emociones": json.dumps(datos_emociones),
+        "datos_duracion": json.dumps(datos_duracion),
+        "datos_satisfaccion": json.dumps(datos_satisfaccion),
+        "emociones_globales": json.dumps(emociones_globales),
     }
 
-    escuela = detalles.get(nombre_escuela, None)
-    return render(request, "detalle_escuela.html", {"escuela": escuela})
-=======
+    return render(request, "grafico_profesor.html", context)
 
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
-import json
-from .models import EmocionCamara, Sesion
 
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
-import json
-from .models import EmocionCamara, Sesion
-
+# ------------------------------
+# API / REGISTRO DE EMOCIONES
+# ------------------------------
 @csrf_exempt
 @require_POST
 def registrar_emocion(request):
     try:
         data = json.loads(request.body)
-        print("Datos recibidos:", data)  # 🔹 Para ver qué llega desde JS
-
         sesion_id = data.get("sesion_id")
         nombre_emocion = data.get("nombre_emocion")
         probabilidad = data.get("probabilidad")
@@ -430,269 +415,54 @@ def registrar_emocion(request):
         )
 
         return JsonResponse({"status": "ok", "id": emocion.id, "mensaje": f"Emoción {nombre_emocion} guardada"})
-
     except Sesion.DoesNotExist:
-        print("Sesión no encontrada:", sesion_id)
         return JsonResponse({"status": "error", "mensaje": "Sesión no encontrada"}, status=404)
     except Exception as e:
-        print("Error interno:", str(e))
+        logger.exception("Error registrando emoción: %s", e)
         return JsonResponse({"status": "error", "mensaje": str(e)}, status=500)
 
-
-# gestion/views.py (reemplaza todo el contenido por esto)
-import json
-import logging
-import secrets
-
-from django.shortcuts import render, redirect
-from django.http import JsonResponse
-from django.contrib.auth.models import User
-from django.utils import timezone
-from django.utils.dateparse import parse_datetime
-from django.core.mail import send_mail
-from django.conf import settings
-from django.views.decorators.http import require_POST
-
-logger = logging.getLogger(__name__)
-
-
-def enviar_codigo(request):
-    """
-    Genera y envía un código de 6 dígitos al correo. Guarda en sesión la expiración
-    como ISO de un datetime aware (si USE_TZ=True).
-    """
-    correo = request.GET.get('correo')  # en producción usar POST
-    if not correo:
-        return JsonResponse({'error': 'Correo requerido'}, status=400)
-
-    # Generar código legible: 6 dígitos
-    codigo = f"{secrets.randbelow(1000000):06d}"
-    expiracion = timezone.now() + timezone.timedelta(minutes=10)
-
-    # Guardar en sesión (expiracion como ISO de aware datetime)
-    request.session['codigo_verificacion'] = codigo
-    request.session['correo_verificacion'] = correo
-    request.session['codigo_expira'] = expiracion.isoformat()
-    request.session.save()  # forzar persistencia inmediata
-
-    subject = 'Tu código de verificación'
-    message = f'Hola,\n\nTu código de verificación es: {codigo}\n\nExpira en 10 minutos.'
-    from_email = settings.EMAIL_HOST_USER
+@csrf_exempt
+def predict_emotion_view(request):
+    if request.method != "POST":
+        return JsonResponse({"label": "Null", "confidence": 0, "error": "Método no permitido"}, status=405)
 
     try:
-        send_mail(subject, message, from_email, [correo], fail_silently=False)
-        logger.info("Código %s enviado a %s", codigo, correo)
-        return JsonResponse({'mensaje': 'Código enviado al correo.'})
+        data = json.loads(request.body)
+        image_base64 = data.get("image")
+        if not image_base64:
+            return JsonResponse({"label": "Null", "confidence": 0, "error": "No se proporcionó imagen"}, status=400)
+
+        if "," in image_base64:
+            image_base64 = image_base64.split(",")[1]
+
+        image_bytes = base64.b64decode(image_base64)
+        Image.open(BytesIO(image_bytes))  # Validar imagen
+
+        API_URL = "http://127.0.0.1:5000/predict_emotion"
+        response = requests.post(API_URL, json={"image": image_base64}, timeout=5)
+        result = response.json()
+        label = result.get("label", "Sin reconocer")
+        confidence = result.get("confidence", 0)
+        return JsonResponse({"label": label, "confidence": confidence})
+
     except Exception as e:
-        logger.exception("Error enviando correo a %s: %s", correo, e)
-        # Limpiar sesión si falla el envío
-        request.session.pop('codigo_verificacion', None)
-        request.session.pop('correo_verificacion', None)
-        request.session.pop('codigo_expira', None)
-        return JsonResponse({'error': 'No se pudo enviar el correo. Revisa configuración de correo.'}, status=500)
+        logger.exception("Error prediciendo emoción: %s", e)
+        return JsonResponse({"label": "Null", "confidence": 0, "error": str(e)}, status=500)
 
-
-@require_POST
-def validar_codigo(request):
-    """
-    Espera JSON con { correo, codigo } y valida contra lo guardado en sesión.
-    Responde {"ok": True} o {"ok": False, "error": "..."}
-    """
+# ------------------------------
+# API AUXILIAR: EMOCIONES
+# ------------------------------
+def emociones_data(request):
     try:
-        body_text = request.body.decode('utf-8')
-    except Exception:
-        body_text = '<no body>'
-
-    # DEBUG: mostrar en consola
-    print("DEBUG validar_codigo - request.body:", body_text)
-    print("DEBUG validar_codigo - session keys:", list(request.session.keys()))
-    print("DEBUG validar_codigo - session data:",
-          {k: request.session.get(k) for k in ['codigo_verificacion', 'correo_verificacion', 'codigo_expira']})
-
-    # parsear JSON
-    try:
-        payload = json.loads(body_text)
-        correo = (payload.get('correo') or '').strip().lower()
-        codigo = (payload.get('codigo') or '').strip()
-    except Exception:
-        return JsonResponse({"ok": False, "error": "JSON inválido"}, status=400)
-
-    codigo_sesion = request.session.get('codigo_verificacion')
-    correo_sesion = (request.session.get('correo_verificacion') or '').lower()
-    codigo_expira_iso = request.session.get('codigo_expira')
-
-    if not (codigo_sesion and correo_sesion and codigo_expira_iso):
-        return JsonResponse({"ok": False, "error": "No hay un código de verificación válido. Verifica tu correo."}, status=400)
-
-    if correo != correo_sesion:
-        return JsonResponse({"ok": False, "error": "El correo no coincide con el verificado."}, status=400)
-
-    # parsear fecha y normalizar timezone
-    try:
-        expiracion = parse_datetime(codigo_expira_iso)
-        if expiracion is None:
-            raise ValueError(f"No se pudo parsear la fecha desde sesión: {codigo_expira_iso}")
-
-        # si es naive -> convertir a aware usando tz del proyecto
-        if timezone.is_naive(expiracion):
-            expiracion = timezone.make_aware(expiracion, timezone.get_current_timezone())
-
-        now = timezone.now()
-        if timezone.is_naive(now):
-            now = timezone.make_aware(now, timezone.get_current_timezone())
-
-        print("DEBUG validar_codigo - expiracion tzinfo:", expiracion.tzinfo)
-        print("DEBUG validar_codigo - now tzinfo:", now.tzinfo)
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT nombre_emocion, COUNT(*) as total
+                FROM gestion_emocion
+                GROUP BY nombre_emocion;
+            """)
+            rows = cursor.fetchall()
+        data = {"labels": [r[0] for r in rows], "values": [r[1] for r in rows]}
+        return JsonResponse(data)
     except Exception as e:
-        # limpiar sesión por seguridad
-        request.session.pop('codigo_verificacion', None)
-        request.session.pop('correo_verificacion', None)
-        request.session.pop('codigo_expira', None)
-        logger.exception("Error parseando fecha en validar_codigo: %s", e)
-        return JsonResponse({"ok": False, "error": "Error en el proceso (fecha). Solicita nuevo código."}, status=400)
-
-    # comprobar expiración
-    if now > expiracion:
-        request.session.pop('codigo_verificacion', None)
-        request.session.pop('correo_verificacion', None)
-        request.session.pop('codigo_expira', None)
-        return JsonResponse({"ok": False, "error": "El código ha expirado. Solicita uno nuevo."}, status=400)
-
-    if codigo != codigo_sesion:
-        return JsonResponse({"ok": False, "error": "Código inválido."}, status=400)
-
-    return JsonResponse({"ok": True})
-
-from django.shortcuts import render, redirect
-from django.utils import timezone
-from django.utils.dateparse import parse_datetime
-from gestion.models import Escuela, Usuario  # ✅ usamos Usuario, no Perfil
-
-
-def registro(request):
-    if request.method == "POST":
-        email = (request.POST.get('correo') or '').strip()
-        password = request.POST.get('contrasena')
-        first_name = (request.POST.get('first_name') or '').strip()
-        last_name = (request.POST.get('last_name') or '').strip()
-        codigo = (request.POST.get('codigo') or '').strip()
-        escuela_id = request.POST.get('escuela')  # ✅ capturamos la escuela seleccionada
-
-        # 🔹 Datos de sesión para verificación
-        codigo_sesion = request.session.get('codigo_verificacion')
-        correo_sesion = request.session.get('correo_verificacion')
-        codigo_expira_iso = request.session.get('codigo_expira')
-
-        # Validaciones básicas
-        if not (codigo_sesion and correo_sesion and codigo_expira_iso):
-            return render(request, 'registro.html', {
-                'error': 'No hay un código de verificación válido. Verifica tu correo primero.',
-                'escuelas': Escuela.objects.all()
-            })
-
-        if email.lower() != correo_sesion.lower():
-            return render(request, 'registro.html', {
-                'error': 'El correo no coincide con el que se verificó.',
-                'escuelas': Escuela.objects.all()
-            })
-
-        # 🔹 Validar expiración del código
-        try:
-            expiracion = parse_datetime(codigo_expira_iso)
-            if expiracion is None and isinstance(codigo_expira_iso, str):
-                if codigo_expira_iso.endswith('Z'):
-                    expiracion = parse_datetime(codigo_expira_iso[:-1] + '+00:00')
-            if expiracion is None:
-                raise ValueError("No se pudo parsear la fecha de expiración")
-
-            if timezone.is_naive(expiracion):
-                expiracion = timezone.make_aware(expiracion, timezone.get_current_timezone())
-
-            now = timezone.now()
-            if timezone.is_naive(now):
-                now = timezone.make_aware(now, timezone.get_current_timezone())
-
-        except Exception:
-            for key in ['codigo_verificacion', 'correo_verificacion', 'codigo_expira']:
-                request.session.pop(key, None)
-            return render(request, 'registro.html', {
-                'error': 'Error en el proceso de verificación. Solicita un nuevo código.',
-                'escuelas': Escuela.objects.all()
-            })
-
-        if now > expiracion:
-            for key in ['codigo_verificacion', 'correo_verificacion', 'codigo_expira']:
-                request.session.pop(key, None)
-            return render(request, 'registro.html', {
-                'error': 'El código ha expirado. Solicita uno nuevo.',
-                'escuelas': Escuela.objects.all()
-            })
-
-        if codigo != codigo_sesion:
-            return render(request, 'registro.html', {
-                'error': 'Código de verificación inválido.',
-                'escuelas': Escuela.objects.all()
-            })
-
-        # 🔹 Verificar si el email ya existe
-        if Usuario.objects.filter(email__iexact=email).exists():
-            for key in ['codigo_verificacion', 'correo_verificacion', 'codigo_expira']:
-                request.session.pop(key, None)
-            return render(request, 'registro.html', {
-                'error': 'El email ya está registrado',
-                'escuelas': Escuela.objects.all()
-            })
-
-        # 🔹 Crear usuario
-        user = Usuario.objects.create_user(
-            email=email,
-            password=password,
-            first_name=first_name,
-            last_name=last_name,
-            username=email
-        )
-
-        # 🔹 Asignar escuela elegida (o detectar automáticamente)
-        escuela = None
-        if escuela_id:
-            try:
-                escuela = Escuela.objects.get(id=escuela_id)
-            except Escuela.DoesNotExist:
-                pass
-
-        if not escuela:  # Si no seleccionó, intentamos deducir por correo
-            dominio = email.split('@')[-1].lower()
-            if "admin" in dominio or "negocios" in email.lower():
-                escuela = Escuela.objects.filter(nombre__icontains="Administración y Negocios").first()
-            elif "comunicacion" in email.lower():
-                escuela = Escuela.objects.filter(nombre__icontains="Comunicación").first()
-            elif "construccion" in email.lower():
-                escuela = Escuela.objects.filter(nombre__icontains="Construcción").first()
-            elif "diseno" in email.lower():
-                escuela = Escuela.objects.filter(nombre__icontains="Diseño").first()
-            elif "gastronomia" in email.lower():
-                escuela = Escuela.objects.filter(nombre__icontains="Gastronomía").first()
-            elif "informatica" in email.lower() or "telecom" in email.lower():
-                escuela = Escuela.objects.filter(nombre__icontains="Informática").first()
-            elif "ingenieria" in email.lower() or "recursos" in email.lower():
-                escuela = Escuela.objects.filter(nombre__icontains="Ingeniería").first()
-            elif "salud" in email.lower():
-                escuela = Escuela.objects.filter(nombre__icontains="Salud").first()
-            elif "turismo" in email.lower() or "hospitalidad" in email.lower():
-                escuela = Escuela.objects.filter(nombre__icontains="Turismo").first()
-
-        if escuela:
-            user.escuela = escuela
-            user.save()
-
-        # 🔹 Limpiar sesión
-        for key in ['codigo_verificacion', 'correo_verificacion', 'codigo_expira']:
-            request.session.pop(key, None)
-
-        return redirect('login')
-
-    # ✅ Cargar escuelas para el formulario GET
-    escuelas = Escuela.objects.all()
-    return render(request, 'registro.html', {'escuelas': escuelas})
-
->>>>>>> cd578bd98aff33d6b9ff70b0047d7be6d0f735a2
+        logger.exception("Error obteniendo emociones: %s", e)
+        return JsonResponse({"labels": [], "values": [], "error": str(e)}, status=500)

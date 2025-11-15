@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}📊 Dashboard Emocional{% endblock %}
+
+{% block content %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/grafico_profesor.css' %}">
+
+<style>
+    .card {
+        height: 100%;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .card-chart {
+        position: relative;
+        height: 300px;
+        width: 100%;
+        margin: auto;
+    }
+    .card h4 {
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+    }
+</style>
+
+<div class="dashboard-wrapper container-fluid py-5">
+  <div class="dashboard-header mb-4 text-center">
+    <h2>📊 Dashboard Emocional – Escuela</h2>
+    <div class="acciones mt-3">
+      <a href="{% url 'modulo_profesor' %}" class="btn btn-volver">⬅️ Volver al Módulo Profesor</a>
+      <button id="descargarPDF" class="btn btn-descargar">📄 Descargar PDF</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="row g-4 justify-content-center">
+
+      <!-- Totales Globales -->
+      <div class="col-12 col-md-6 col-lg-5 d-flex justify-content-center">
+        <div class="card w-100 p-2">
+          <h4 class="text-center">Totales Globales de Emociones</h4>
+          <div class="card-chart">
+            <canvas id="graficoTotales"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Duración promedio -->
+      <div class="col-12 col-md-6 col-lg-5 d-flex justify-content-center">
+        <div class="card w-100 p-2">
+          <h4 class="text-center">Duración Promedio por Escuela</h4>
+          <div class="card-chart">
+            <canvas id="graficoDuracion"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Satisfacción -->
+      <div class="col-12 col-md-6 col-lg-5 d-flex justify-content-center">
+        <div class="card w-100 p-2">
+          <h4 class="text-center">Satisfacción General por Escuela</h4>
+          <div class="card-chart">
+            <canvas id="graficoSatisfaccion"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Emociones por Escuela (primer registro como Telecom) -->
+      <div class="col-12 col-md-6 col-lg-5 d-flex justify-content-center">
+        <div class="card w-100 p-2">
+          <h4 class="text-center">Emociones por Escuela</h4>
+          <div class="card-chart">
+            <canvas id="graficoTelecom"></canvas>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf"></script>
+
+<script>
+// ====================================================================
+// Cargar datos reales desde Django
+// ====================================================================
+const emocionesGlobales = JSON.parse(`{{ emociones_globales|safe }}`);
+const datosDuracion = JSON.parse(`{{ datos_duracion|safe }}`);
+const datosSatisfaccion = JSON.parse(`{{ datos_satisfaccion|safe }}`);
+const datosEscuelas = JSON.parse(`{{ datos_emociones|safe }}`);
+
+// Para el gráfico Telecom usamos la primera escuela
+const datosTelecom = datosEscuelas.length > 0 ? datosEscuelas[0].emociones : {};
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  Chart.defaults.font.size = 10;
+
+  // =============================
+  // 1. Totales Globales (Pie)
+  // =============================
+  if (Object.keys(emocionesGlobales).length > 0) {
+    new Chart(document.getElementById("graficoTotales"), {
+      type: "pie",
+      data: {
+        labels: Object.keys(emocionesGlobales),
+        datasets: [{ data: Object.values(emocionesGlobales) }]
+      },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+  }
+
+  // =============================
+  // 2. Duración promedio (Bar)
+  // =============================
+  if (datosDuracion.length > 0) {
+    new Chart(document.getElementById("graficoDuracion"), {
+      type: "bar",
+      data: {
+        labels: datosDuracion.map(e => e.escuela),
+        datasets: [{ label: "Segundos", data: datosDuracion.map(e => e.promedio) }]
+      },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+  }
+
+  // =============================
+  // 3. Satisfacción (Bar)
+  // =============================
+  if (datosSatisfaccion.length > 0) {
+    new Chart(document.getElementById("graficoSatisfaccion"), {
+      type: "bar",
+      data: {
+        labels: datosSatisfaccion.map(e => e.escuela),
+        datasets: [
+          { label: "Sí le gustó", data: datosSatisfaccion.map(e => e.si) },
+          { label: "No le gustó", data: datosSatisfaccion.map(e => e.no) }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: { y: { beginAtZero: true } }
+      }
+    });
+  }
+
+  // =============================
+  // 4. Emociones por escuela (Pie)
+  // =============================
+  if (datosTelecom) {
+    new Chart(document.getElementById("graficoTelecom"), {
+      type: "pie",
+      data: {
+        labels: Object.keys(datosTelecom),
+        datasets: [{ data: Object.values(datosTelecom) }]
+      },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+  }
+
+  // =============================
+  // PDF
+  // =============================
+  document.getElementById("descargarPDF").addEventListener("click", () => {
+    html2canvas(document.querySelector(".dashboard-wrapper")).then(canvas => {
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jspdf.jsPDF("p", "mm", "a4");
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save("dashboard_emocional.pdf");
+    });
+  });
+
+});
+</script>
+
+{% endblock %}
