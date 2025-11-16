@@ -1,0 +1,110 @@
+python manage.py shell
+
+# -----------------------------
+# IMPORTS
+# -----------------------------
+from gestion.models import Escuela, Rol, Emocion, Encuesta, Actividad
+
+# -----------------------------
+# ESCUELAS
+# -----------------------------
+escuelas = [
+    "Escuela de Administración y Negocios",
+    "Escuela de Comunicación",
+    "Escuela de Construcción",
+    "Escuela de Diseño",
+    "Escuela de Gastronomía",
+    "Escuela de Informática y Telecomunicaciones",
+    "Escuela de Ingeniería y Recursos Naturales",
+    "Escuela de Salud y Bienestar",
+    "Escuela de Turismo y Hospitalidad",
+]
+
+for nombre in escuelas:
+    Escuela.objects.get_or_create(nombre=nombre)
+
+print("✅ Escuelas cargadas correctamente.")
+
+# -----------------------------
+# ROLES
+# -----------------------------
+roles = [
+    {"nombre": "Administrador", "descripcion": "Usuario con todos los permisos"},
+    {"nombre": "Psicóloga", "descripcion": "Usuario con permisos de psicóloga"},
+    {"nombre": "Profesor", "descripcion": "Usuario con permisos de docente"},
+    {"nombre": "Alumno", "descripcion": "Usuario que participa en encuestas y actividades"},
+    {"nombre": "Otro", "descripcion": "Rol genérico para otros tipos de usuario"}
+]
+
+for r in roles:
+    Rol.objects.get_or_create(nombre=r["nombre"], defaults={"descripcion": r["descripcion"]})
+
+print("✅ Roles cargados correctamente.")
+
+# -----------------------------
+# EMOCIONES
+# -----------------------------
+emociones = [
+    {"nombre_emocion": "Feliz", "descripcion": "Emoción de alegría y satisfacción"},
+    {"nombre_emocion": "Enojado", "descripcion": "Emoción de irritación o enojo"},
+    {"nombre_emocion": "Triste", "descripcion": "Emoción de desánimo o tristeza"},
+    {"nombre_emocion": "Neutral", "descripcion": "Emoción sin cambios significativos"}
+]
+
+for e in emociones:
+    Emocion.objects.get_or_create(nombre_emocion=e["nombre_emocion"], defaults={"descripcion": e["descripcion"]})
+
+print("✅ Emociones cargadas correctamente.")
+
+# -----------------------------
+# ENCUESTAS
+# -----------------------------
+encuestas = [
+    {"nombre": "Encuesta A", "tipo": "a", "descripcion": "Encuesta tipo A"},
+    {"nombre": "Encuesta B", "tipo": "b", "descripcion": "Encuesta tipo B"},
+    {"nombre": "Encuesta C", "tipo": "c", "descripcion": "Encuesta tipo C"},
+    {"nombre": "Encuesta D", "tipo": "d", "descripcion": "Encuesta tipo D"},
+]
+
+for enc in encuestas:
+    Encuesta.objects.get_or_create(nombre=enc["nombre"], defaults={"tipo": enc["tipo"], "descripcion": enc["descripcion"]})
+
+print("✅ Encuestas cargadas correctamente.")
+
+# -----------------------------
+# ACTIVIDADES
+# -----------------------------
+# Primero obtenemos las emociones desde la DB para FK
+emociones_dict = {e.nombre_emocion: e for e in Emocion.objects.all()}
+
+actividades = [
+    # Feliz
+    {"nombre_actividad": "Ver película divertida", "descripcion": "Actividad para aumentar la felicidad", "emocion": "Feliz"},
+    {"nombre_actividad": "Escuchar música alegre", "descripcion": "Escuchar canciones que generen felicidad", "emocion": "Feliz"},
+    {"nombre_actividad": "Salir a caminar con amigos", "descripcion": "Actividad social para fomentar alegría", "emocion": "Feliz"},
+
+    # Enojado
+    {"nombre_actividad": "Respiración profunda", "descripcion": "Ejercicio para calmar la ira", "emocion": "Enojado"},
+    {"nombre_actividad": "Escribir en un diario", "descripcion": "Expresar frustraciones por escrito", "emocion": "Enojado"},
+    {"nombre_actividad": "Practicar deporte intenso", "descripcion": "Liberar energía y enojo", "emocion": "Enojado"},
+
+    # Triste
+    {"nombre_actividad": "Escuchar música tranquila", "descripcion": "Relajarse y procesar emociones", "emocion": "Triste"},
+    {"nombre_actividad": "Hablar con un amigo", "descripcion": "Compartir sentimientos con alguien de confianza", "emocion": "Triste"},
+    {"nombre_actividad": "Leer un libro motivador", "descripcion": "Encontrar inspiración y ánimo", "emocion": "Triste"},
+
+    # Neutral
+    {"nombre_actividad": "Organizar espacio personal", "descripcion": "Mantener orden y claridad mental", "emocion": "Neutral"},
+    {"nombre_actividad": "Hacer pausa consciente", "descripcion": "Tomar un break y relajarse", "emocion": "Neutral"},
+    {"nombre_actividad": "Tomar té o café", "descripcion": "Actividad relajante sin emociones extremas", "emocion": "Neutral"}
+]
+
+for act in actividades:
+    emocion_fk = emociones_dict.get(act["emocion"])
+    if emocion_fk:
+        Actividad.objects.get_or_create(
+            nombre_actividad=act["nombre_actividad"],
+            defaults={"descripcion": act["descripcion"], "emocion": emocion_fk}
+        )
+
+print("✅ Actividades cargadas correctamente.")

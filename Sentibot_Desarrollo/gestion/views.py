@@ -132,6 +132,7 @@ def detalle_alumno(request, alumno_id):
     return render(request, 'modulo/detalle_alumno.html', {'alumno': alumno})
 
 
+
 def escuelas(request):
     escuelas = [
         {'id': 1, 'nombre': 'Escuela de Ingeniería', 'carreras': ['Informática', 'Civil', 'Industrial'], 'sede': 'Santiago'},
@@ -362,236 +363,6 @@ def encuesta_satisfaccion(request):
 
 
 
-    # Generar código legible: 6 dígitos
-    codigo = f"{secrets.randbelow(1000000):06d}"
-    expiracion = timezone.now() + timezone.timedelta(minutes=10)
-
-    # Guardar en sesión (expiracion como ISO de aware datetime)
-    request.session['codigo_verificacion'] = codigo
-    request.session['correo_verificacion'] = correo
-    request.session['codigo_expira'] = expiracion.isoformat()
-    request.session.save()  # forzar persistencia inmediata
-
-    subject = 'Tu código de verificación'
-    message = f'Hola,\n\nTu código de verificación es: {codigo}\n\nExpira en 10 minutos.'
-    from_email = settings.EMAIL_HOST_USER
-
-    try:
-        send_mail(subject, message, from_email, [correo], fail_silently=False)
-        logger.info("Código %s enviado a %s", codigo, correo)
-        return JsonResponse({'mensaje': 'Código enviado al correo.'})
-    except Exception as e:
-        logger.exception("Error enviando correo a %s: %s", correo, e)
-        # Limpiar sesión si falla el envío
-        request.session.pop('codigo_verificacion', None)
-        request.session.pop('correo_verificacion', None)
-        request.session.pop('codigo_expira', None)
-        return JsonResponse({'error': 'No se pudo enviar el correo. Revisa configuración de correo.'}, status=500)
-
-from django.views.decorators.http import require_POST
-@require_POST
-def validar_codigo(request):
-    """
-    Espera JSON con { correo, codigo } y valida contra lo guardado en sesión.
-    Responde {"ok": True} o {"ok": False, "error": "..."}
-    """
-    try:
-        body_text = request.body.decode('utf-8')
-    except Exception:
-        body_text = '<no body>'
-
-    # DEBUG: mostrar en consola
-    print("DEBUG validar_codigo - request.body:", body_text)
-    print("DEBUG validar_codigo - session keys:", list(request.session.keys()))
-    print("DEBUG validar_codigo - session data:",
-          {k: request.session.get(k) for k in ['codigo_verificacion', 'correo_verificacion', 'codigo_expira']})
-
-    # parsear JSON
-    try:
-        payload = json.loads(body_text)
-        correo = (payload.get('correo') or '').strip().lower()
-        codigo = (payload.get('codigo') or '').strip()
-    except Exception:
-        return JsonResponse({"ok": False, "error": "JSON inválido"}, status=400)
-
-    codigo_sesion = request.session.get('codigo_verificacion')
-    correo_sesion = (request.session.get('correo_verificacion') or '').lower()
-    codigo_expira_iso = request.session.get('codigo_expira')
-
-    if not (codigo_sesion and correo_sesion and codigo_expira_iso):
-        return JsonResponse({"ok": False, "error": "No hay un código de verificación válido. Verifica tu correo."}, status=400)
-
-    if correo != correo_sesion:
-        return JsonResponse({"ok": False, "error": "El correo no coincide con el verificado."}, status=400)
-
-    # parsear fecha y normalizar timezone
-    try:
-        expiracion = parse_datetime(codigo_expira_iso)
-        if expiracion is None:
-            raise ValueError(f"No se pudo parsear la fecha desde sesión: {codigo_expira_iso}")
-
-        # si es naive -> convertir a aware usando tz del proyecto
-        if timezone.is_naive(expiracion):
-            expiracion = timezone.make_aware(expiracion, timezone.get_current_timezone())
-
-        now = timezone.now()
-        if timezone.is_naive(now):
-            now = timezone.make_aware(now, timezone.get_current_timezone())
-
-        print("DEBUG validar_codigo - expiracion tzinfo:", expiracion.tzinfo)
-        print("DEBUG validar_codigo - now tzinfo:", now.tzinfo)
-    except Exception as e:
-        # limpiar sesión por seguridad
-        request.session.pop('codigo_verificacion', None)
-        request.session.pop('correo_verificacion', None)
-        request.session.pop('codigo_expira', None)
-        logger.exception("Error parseando fecha en validar_codigo: %s", e)
-        return JsonResponse({"ok": False, "error": "Error en el proceso (fecha). Solicita nuevo código."}, status=400)
-
-    # comprobar expiración
-    if now > expiracion:
-        request.session.pop('codigo_verificacion', None)
-        request.session.pop('correo_verificacion', None)
-        request.session.pop('codigo_expira', None)
-        return JsonResponse({"ok": False, "error": "El código ha expirado. Solicita uno nuevo."}, status=400)
-
-    if codigo != codigo_sesion:
-        return JsonResponse({"ok": False, "error": "Código inválido."}, status=400)
-
-    return JsonResponse({"ok": True})
-
-from django.shortcuts import render, redirect
-from django.utils import timezone
-from django.utils.dateparse import parse_datetime
-from gestion.models import Escuela, Usuario  # ✅ usamos Usuario, no Perfil
-
-
-def registro(request):
-    if request.method == "POST":
-        email = (request.POST.get('correo') or '').strip()
-        password = request.POST.get('contrasena')
-        first_name = (request.POST.get('first_name') or '').strip()
-        last_name = (request.POST.get('last_name') or '').strip()
-        codigo = (request.POST.get('codigo') or '').strip()
-        escuela_id = request.POST.get('escuela')  # ✅ capturamos la escuela seleccionada
-
-        # 🔹 Datos de sesión para verificación
-        codigo_sesion = request.session.get('codigo_verificacion')
-        correo_sesion = request.session.get('correo_verificacion')
-        codigo_expira_iso = request.session.get('codigo_expira')
-
-        # Validaciones básicas
-        if not (codigo_sesion and correo_sesion and codigo_expira_iso):
-            return render(request, 'registro.html', {
-                'error': 'No hay un código de verificación válido. Verifica tu correo primero.',
-                'escuelas': Escuela.objects.all()
-            })
-
-        if email.lower() != correo_sesion.lower():
-            return render(request, 'registro.html', {
-                'error': 'El correo no coincide con el que se verificó.',
-                'escuelas': Escuela.objects.all()
-            })
-
-        # 🔹 Validar expiración del código
-        try:
-            expiracion = parse_datetime(codigo_expira_iso)
-            if expiracion is None and isinstance(codigo_expira_iso, str):
-                if codigo_expira_iso.endswith('Z'):
-                    expiracion = parse_datetime(codigo_expira_iso[:-1] + '+00:00')
-            if expiracion is None:
-                raise ValueError("No se pudo parsear la fecha de expiración")
-
-            if timezone.is_naive(expiracion):
-                expiracion = timezone.make_aware(expiracion, timezone.get_current_timezone())
-
-            now = timezone.now()
-            if timezone.is_naive(now):
-                now = timezone.make_aware(now, timezone.get_current_timezone())
-
-        except Exception:
-            for key in ['codigo_verificacion', 'correo_verificacion', 'codigo_expira']:
-                request.session.pop(key, None)
-            return render(request, 'registro.html', {
-                'error': 'Error en el proceso de verificación. Solicita un nuevo código.',
-                'escuelas': Escuela.objects.all()
-            })
-
-        if now > expiracion:
-            for key in ['codigo_verificacion', 'correo_verificacion', 'codigo_expira']:
-                request.session.pop(key, None)
-            return render(request, 'registro.html', {
-                'error': 'El código ha expirado. Solicita uno nuevo.',
-                'escuelas': Escuela.objects.all()
-            })
-
-        if codigo != codigo_sesion:
-            return render(request, 'registro.html', {
-                'error': 'Código de verificación inválido.',
-                'escuelas': Escuela.objects.all()
-            })
-
-        # 🔹 Verificar si el email ya existe
-        if Usuario.objects.filter(email__iexact=email).exists():
-            for key in ['codigo_verificacion', 'correo_verificacion', 'codigo_expira']:
-                request.session.pop(key, None)
-            return render(request, 'registro.html', {
-                'error': 'El email ya está registrado',
-                'escuelas': Escuela.objects.all()
-            })
-
-        # 🔹 Crear usuario
-        user = Usuario.objects.create_user(
-            email=email,
-            password=password,
-            first_name=first_name,
-            last_name=last_name,
-            username=email
-        )
-
-        # 🔹 Asignar escuela elegida (o detectar automáticamente)
-        escuela = None
-        if escuela_id:
-            try:
-                escuela = Escuela.objects.get(id=escuela_id)
-            except Escuela.DoesNotExist:
-                pass
-
-        if not escuela:  # Si no seleccionó, intentamos deducir por correo
-            dominio = email.split('@')[-1].lower()
-            if "admin" in dominio or "negocios" in email.lower():
-                escuela = Escuela.objects.filter(nombre__icontains="Administración y Negocios").first()
-            elif "comunicacion" in email.lower():
-                escuela = Escuela.objects.filter(nombre__icontains="Comunicación").first()
-            elif "construccion" in email.lower():
-                escuela = Escuela.objects.filter(nombre__icontains="Construcción").first()
-            elif "diseno" in email.lower():
-                escuela = Escuela.objects.filter(nombre__icontains="Diseño").first()
-            elif "gastronomia" in email.lower():
-                escuela = Escuela.objects.filter(nombre__icontains="Gastronomía").first()
-            elif "informatica" in email.lower() or "telecom" in email.lower():
-                escuela = Escuela.objects.filter(nombre__icontains="Informática").first()
-            elif "ingenieria" in email.lower() or "recursos" in email.lower():
-                escuela = Escuela.objects.filter(nombre__icontains="Ingeniería").first()
-            elif "salud" in email.lower():
-                escuela = Escuela.objects.filter(nombre__icontains="Salud").first()
-            elif "turismo" in email.lower() or "hospitalidad" in email.lower():
-                escuela = Escuela.objects.filter(nombre__icontains="Turismo").first()
-
-        if escuela:
-            user.escuela = escuela
-            user.save()
-
-        # 🔹 Limpiar sesión
-        for key in ['codigo_verificacion', 'correo_verificacion', 'codigo_expira']:
-            request.session.pop(key, None)
-
-        return redirect('login')
-
-    # ✅ Cargar escuelas para el formulario GET
-    escuelas = Escuela.objects.all()
-    return render(request, 'registro.html', {'escuelas': escuelas})
-
 @login_required
 def procesar_encuesta(request):
     if request.method == "POST":
@@ -609,10 +380,13 @@ def procesar_encuesta(request):
 from django.shortcuts import redirect
 from .models import Sesion
 
+# En views.py
+@login_required
 def finalizar_y_encuesta(request):
+    """Finaliza la sesión activa del usuario y redirige a la encuesta."""
     sesion = Sesion.objects.filter(usuario=request.user, activa=True).order_by('-fecha_inicio').first()
     if sesion:
-        sesion.cerrar()  # ✅ aquí se registra fecha_fin correctamente
+        sesion.cerrar()  # registra fecha_fin y pone activa=False
     return redirect('encuesta_satisfaccion')
 def preguntas(request):
     return render(request, 'preguntas.html')
@@ -645,3 +419,15 @@ def resultado(request):
     }
 
     return render(request, "resultado.html", contexto)
+
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt
+@login_required
+def cerrar_sesion_ajax(request):
+    """Cierra la sesión activa del usuario desde el navegador (por ejemplo, al cerrar pestaña)."""
+    sesion = Sesion.objects.filter(usuario=request.user, activa=True).order_by('-fecha_inicio').first()
+    if sesion:
+        sesion.cerrar()
+        return JsonResponse({"status": "ok", "message": "Sesión finalizada"})
+    return JsonResponse({"status": "no_active_session"})

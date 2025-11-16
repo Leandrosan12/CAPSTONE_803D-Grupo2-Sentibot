@@ -103,10 +103,12 @@
                 </button>
 
                 <!-- Botón finalizar actividad -->
-                <a href="{% url 'encuesta_satisfaccion' %}" 
+                <!-- Botón finalizar actividad (cierra sesión y luego encuesta) -->
+                <a href="{% url 'finalizar_y_encuesta' %}" 
                   class="btn btn-success rounded-pill fw-bold text-white">
                   Finalizar ✅
                 </a>
+
               </div>
             </div>
           </div>
@@ -157,6 +159,12 @@
   transition: width 0.5s ease-in-out;
 }
 </style>
+<script>
+window.addEventListener("beforeunload", function (e) {
+    // Llamar al backend para cerrar sesión activa
+    navigator.sendBeacon("{% url 'cerrar_sesion_ajax' %}");
+});
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 {% endblock %}

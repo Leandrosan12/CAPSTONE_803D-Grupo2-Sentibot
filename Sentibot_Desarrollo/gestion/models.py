@@ -1,8 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
-
-
+from django.db import models
+from django.contrib.auth.models import AbstractUser
+from django.conf import settings
+from django.utils import timezone
 # ------------------------------
 # Roles y Escuelas
 # ------------------------------
@@ -28,11 +30,9 @@ class Escuela(models.Model):
 class Usuario(AbstractUser):
     email = models.EmailField(unique=True)
     telefono = models.CharField(max_length=20, blank=True, null=True)
-    rol = models.ForeignKey(Rol, on_delete=models.CASCADE, related_name="usuarios", null=True, blank=True)
-    escuela = models.ForeignKey(Escuela, on_delete=models.CASCADE, related_name="usuarios", null=True, blank=True)
+    rol = models.ForeignKey(Rol, on_delete=models.SET_NULL, null=True, related_name="usuarios")
+    escuela = models.ForeignKey(Escuela, on_delete=models.SET_NULL, null=True, related_name="usuarios")
 
-    REQUIRED_FIELDS = []
-    EMAIL_FIELD = 'email'
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
