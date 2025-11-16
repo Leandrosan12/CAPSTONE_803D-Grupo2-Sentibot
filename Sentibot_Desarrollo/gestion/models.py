@@ -166,6 +166,7 @@ class Reporte(models.Model):
         return f"Reporte {self.tipo_reporte} - {self.usuario.email}"
 
 
+
 # ------------------------------
 # Vista / Historial de emociones (opcional)
 # ------------------------------
@@ -174,19 +175,14 @@ class EmotionSession(models.Model):
 
     feliz_seg = models.IntegerField(default=0)
     feliz_pct = models.FloatField(default=0.0)
-
     triste_seg = models.IntegerField(default=0)
     triste_pct = models.FloatField(default=0.0)
-
     neutral_seg = models.IntegerField(default=0)
     neutral_pct = models.FloatField(default=0.0)
-
     enojado_seg = models.IntegerField(default=0)
     enojado_pct = models.FloatField(default=0.0)
-
     sorprendido_seg = models.IntegerField(default=0)
     sorprendido_pct = models.FloatField(default=0.0)
-
     sinreconocer_seg = models.IntegerField(default=0)
     sinreconocer_pct = models.FloatField(default=0.0)
 

@@ -28,7 +28,8 @@
             <span class="fw-bold">Apellido:</span> <span>{{ user.last_name }}</span>
           </li>
           <li class="list-group-item d-flex justify-content-between">
-            <span class="fw-bold">Sede:</span> <span>Melipilla</span>
+            <span class="fw-bold">Escuela:</span> 
+            <span>{{ user.escuela.nombre|default:"Sin asignar" }}</span>
           </li>
           <li class="list-group-item d-flex justify-content-between">
             <span class="fw-bold">Correo:</span> <span>{{ user.email }}</span>
@@ -41,13 +42,13 @@
           </li>
         </ul>
 
-        <!-- Botón Editar (cambiado a <button>) -->
+        <!-- Botón Editar -->
         <button type="button" id="editProfileBtn" class="btn btn-success btn-lg">Editar</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Enlace al script JS -->
+<!-- Script -->
 <script src="{% static 'js/perfil.js' %}"></script>
 {% endblock %}

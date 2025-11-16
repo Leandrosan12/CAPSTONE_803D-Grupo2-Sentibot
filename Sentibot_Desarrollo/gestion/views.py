@@ -132,6 +132,7 @@ def detalle_alumno(request, alumno_id):
     return render(request, 'modulo/detalle_alumno.html', {'alumno': alumno})
 
 
+
 def escuelas(request):
     escuelas = [
         {'id': 1, 'nombre': 'Escuela de Ingeniería', 'carreras': ['Informática', 'Civil', 'Industrial'], 'sede': 'Santiago'},
@@ -147,6 +148,9 @@ def escuelas(request):
 @login_required
 def actividades(request):
     return render(request, 'actividades.html')
+def lista_usuarios(request):
+    # tu lógica aquí, por ejemplo:
+    return render(request, 'lista_usuarios.html')
 
 
 def mantenimiento(request):
