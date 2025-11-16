@@ -81,9 +81,12 @@ const preguntasSiNo = {
   ]
 };
 
+
+
 // Inicialización
 let puntajes = { Felicidad: 0, Tristeza: 0, Miedo: 0, Enojo: 0 };
 let preguntaIndex = 0;
+
 let etapa = "seleccion"; // "seleccion" o "sino"
 let emocionPredominante = "";
 
