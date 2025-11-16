@@ -27,7 +27,8 @@ urlpatterns = [
     path("actividades/<str:emocion_nombre>/", views.mostrar_actividades, name="mostrar_actividades"),
     path('dashboard_emociones/', views.dashboard_emociones, name='dashboard_emociones'),
     path('encuesta_satisfaccion/', views.encuesta_satisfaccion, name='encuesta_satisfaccion'),
- 
+    path('cerrar_sesion_ajax/', views.cerrar_sesion_ajax, name='cerrar_sesion_ajax'),
+
     path('finalizar_y_encuesta/', views.finalizar_y_encuesta, name='finalizar_y_encuesta'),
 
 ]

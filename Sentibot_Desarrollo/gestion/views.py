@@ -343,8 +343,23 @@ def procesar_encuesta(request):
 from django.shortcuts import redirect
 from .models import Sesion
 
+# En views.py
+@login_required
 def finalizar_y_encuesta(request):
+    """Finaliza la sesión activa del usuario y redirige a la encuesta."""
     sesion = Sesion.objects.filter(usuario=request.user, activa=True).order_by('-fecha_inicio').first()
     if sesion:
-        sesion.cerrar()  # ✅ aquí se registra fecha_fin correctamente
+        sesion.cerrar()  # registra fecha_fin y pone activa=False
     return redirect('encuesta_satisfaccion')
+
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt
+@login_required
+def cerrar_sesion_ajax(request):
+    """Cierra la sesión activa del usuario desde el navegador (por ejemplo, al cerrar pestaña)."""
+    sesion = Sesion.objects.filter(usuario=request.user, activa=True).order_by('-fecha_inicio').first()
+    if sesion:
+        sesion.cerrar()
+        return JsonResponse({"status": "ok", "message": "Sesión finalizada"})
+    return JsonResponse({"status": "no_active_session"})
