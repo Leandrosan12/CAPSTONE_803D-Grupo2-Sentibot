@@ -9,24 +9,50 @@
     </h2>
 
     {% if user.is_authenticated %}
-        <!-- Enlaces para todos los usuarios -->
-        <a href="{% url 'perfil' %}"><img src="{% static 'Icon/user.png' %}" alt="Perfil"> Perfil</a>
-        <a href="{% url 'opciones' %}"><img src="{% static 'Icon/ejercicio.png' %}" alt="Actividades"> Actividades</a>
-        <!-- Nuevo enlace: Psicóloga -->
+
+    {% if user.is_staff %}
+        {# ---- MÓDULOS PARA ADMINISTRADORES ---- #}
+
+      
+
+        <a href="{% url 'modulo_profesor' %}">
+            <img src="{% static 'Icon/lupa.png' %}" alt="Módulo Profesor"> Módulo Profesor
+        </a>
+
+        <a href="{% url 'agenda' %}">
+            <img src="{% static 'Icon/calendario.png' %}" alt="Agenda"> Agenda
+        </a>
+
+        <a href="{% url 'mantenimiento' %}">
+            <img src="{% static 'Icon/reserva.png' %}" alt="Reserva"> Reserva
+        </a>
+
+    {% else %}
+        {# ---- MÓDULOS PARA USUARIOS NORMALES ---- #}
+
+        <a href="{% url 'perfil' %}">
+            <img src="{% static 'Icon/user.png' %}" alt="Perfil"> Perfil
+        </a>
+
+        <a href="{% url 'opciones' %}">
+            <img src="{% static 'Icon/ejercicio.png' %}" alt="Actividades"> Actividades
+        </a>
+
         <a href="https://psicologia.geasa.cl/login" target="_blank">
             <img src="{% static 'Icon/reserva.png' %}" alt="Psicóloga"> Psicóloga
         </a>
-        <!-- Enlaces solo para admins -->
-        {% if user.is_staff %}
-            <a href="{% url 'modulo_psicologa' %}"><img src="{% static 'Icon/lupa.png' %}" alt="Módulo Psicóloga"> Módulo Psicóloga</a>
-            <a href="{% url 'modulo_profesor' %}"><img src="{% static 'Icon/lupa.png' %}" alt="Módulo Profesor"> Módulo Profesor</a>
-            <a href="{% url 'agenda' %}"><img src="{% static 'Icon/calendario.png' %}" alt="Agenda"> Agenda</a>
-            <a href="{% url 'extra' %}"><img src="{% static 'Icon/feliz.png' %}" alt="Extras"> Emociones</a>
-            <a href="{% url 'mantenimiento' %}"><img src="{% static 'Icon/reserva.png' %}" alt="Reserva"> Reserva</a>
-        {% endif %}
-
-        <a href="{% url 'logout' %}"><img src="{% static 'Icon/cierre.png' %}" alt="Cerrar sesión"> Cerrar sesión</a>
-    {% else %}
-        <a href="{% url 'login' %}"><img src="{% static 'Icon/cierre.png' %}" alt="Iniciar sesión"> Iniciar sesión</a>
     {% endif %}
+
+    {# ---- Logout para todos los usuarios autenticados ---- #}
+    <a href="{% url 'logout' %}">
+        <img src="{% static 'Icon/cierre.png' %}" alt="Cerrar sesión"> Cerrar sesión
+    </a>
+
+    {% else %}
+    {# ---- Login para usuarios no autenticados ---- #}
+    <a href="{% url 'login' %}">
+        <img src="{% static 'Icon/cierre.png' %}" alt="Iniciar sesión"> Iniciar sesión
+    </a>
+    {% endif %}
+
 </nav>
