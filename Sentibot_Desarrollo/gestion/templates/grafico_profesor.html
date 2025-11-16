@@ -36,40 +36,36 @@
   <div class="container">
     <div class="row g-4 justify-content-center">
 
-      <!-- Totales Globales -->
-      <div class="col-12 col-md-6 col-lg-5 d-flex justify-content-center">
+        <div class="col-12 col-md-6 col-lg-5 d-flex justify-content-center">
         <div class="card w-100 p-2">
-          <h4 class="text-center">Totales Globales de Emociones</h4>
+          <h4 class="text-center">Totales Globales de Emociones (Suma de %)</h4>
           <div class="card-chart">
             <canvas id="graficoTotales"></canvas>
           </div>
         </div>
       </div>
 
-      <!-- Duración promedio -->
-      <div class="col-12 col-md-6 col-lg-5 d-flex justify-content-center">
+        <div class="col-12 col-md-6 col-lg-5 d-flex justify-content-center">
         <div class="card w-100 p-2">
-          <h4 class="text-center">Duración Promedio por Escuela</h4>
+          <h4 class="text-center">Duración Promedio por Escuela (Segundos)</h4>
           <div class="card-chart">
             <canvas id="graficoDuracion"></canvas>
           </div>
         </div>
       </div>
 
-      <!-- Satisfacción -->
-      <div class="col-12 col-md-6 col-lg-5 d-flex justify-content-center">
+        <div class="col-12 col-md-6 col-lg-5 d-flex justify-content-center">
         <div class="card w-100 p-2">
-          <h4 class="text-center">Satisfacción General por Escuela</h4>
+          <h4 class="text-center">Satisfacción General por Escuela (Conteo Si/No)</h4>
           <div class="card-chart">
             <canvas id="graficoSatisfaccion"></canvas>
           </div>
         </div>
       </div>
 
-      <!-- Emociones por Escuela (primer registro como Telecom) -->
-      <div class="col-12 col-md-6 col-lg-5 d-flex justify-content-center">
+        <div class="col-12 col-md-6 col-lg-5 d-flex justify-content-center">
         <div class="card w-100 p-2">
-          <h4 class="text-center">Emociones por Escuela</h4>
+          <h4 class="text-center">Distribución Emocional por {{ datosEscuelas.0.escuela|default:"Escuela" }} (Suma de %)</h4>
           <div class="card-chart">
             <canvas id="graficoTelecom"></canvas>
           </div>
@@ -93,8 +89,8 @@ const datosDuracion = JSON.parse(`{{ datos_duracion|safe }}`);
 const datosSatisfaccion = JSON.parse(`{{ datos_satisfaccion|safe }}`);
 const datosEscuelas = JSON.parse(`{{ datos_emociones|safe }}`);
 
-// Para el gráfico Telecom usamos la primera escuela
-const datosTelecom = datosEscuelas.length > 0 ? datosEscuelas[0].emociones : {};
+// ⚠️ CORRECCIÓN CLAVE: Acceder a la clave 'porcentajes'
+const datosTelecom = datosEscuelas.length > 0 ? datosEscuelas[0].porcentajes : {};
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -108,7 +104,17 @@ document.addEventListener("DOMContentLoaded", () => {
       type: "pie",
       data: {
         labels: Object.keys(emocionesGlobales),
-        datasets: [{ data: Object.values(emocionesGlobales) }]
+        datasets: [{ 
+          data: Object.values(emocionesGlobales),
+          backgroundColor: [
+            'rgba(75, 192, 192, 0.8)', 
+            'rgba(255, 99, 132, 0.8)',
+            'rgba(201, 203, 207, 0.8)', 
+            'rgba(255, 159, 64, 0.8)', 
+            'rgba(54, 162, 235, 0.8)', 
+            'rgba(153, 102, 255, 0.8)' 
+          ]
+        }]
       },
       options: { responsive: true, maintainAspectRatio: false }
     });
@@ -122,9 +128,13 @@ document.addEventListener("DOMContentLoaded", () => {
       type: "bar",
       data: {
         labels: datosDuracion.map(e => e.escuela),
-        datasets: [{ label: "Segundos", data: datosDuracion.map(e => e.promedio) }]
+        datasets: [{ 
+          label: "Promedio de Duración (s)", 
+          data: datosDuracion.map(e => e.promedio),
+          backgroundColor: 'rgba(54, 162, 235, 0.6)'
+        }]
       },
-      options: { responsive: true, maintainAspectRatio: false }
+      options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
     });
   }
 
@@ -137,8 +147,16 @@ document.addEventListener("DOMContentLoaded", () => {
       data: {
         labels: datosSatisfaccion.map(e => e.escuela),
         datasets: [
-          { label: "Sí le gustó", data: datosSatisfaccion.map(e => e.si) },
-          { label: "No le gustó", data: datosSatisfaccion.map(e => e.no) }
+          { 
+            label: "Sí le gustó", 
+            data: datosSatisfaccion.map(e => e.si),
+            backgroundColor: 'rgba(75, 192, 192, 0.8)'
+          },
+          { 
+            label: "No le gustó", 
+            data: datosSatisfaccion.map(e => e.no),
+            backgroundColor: 'rgba(255, 99, 132, 0.8)'
+          }
         ]
       },
       options: {
@@ -152,12 +170,22 @@ document.addEventListener("DOMContentLoaded", () => {
   // =============================
   // 4. Emociones por escuela (Pie)
   // =============================
-  if (datosTelecom) {
+  if (Object.keys(datosTelecom).length > 0) {
     new Chart(document.getElementById("graficoTelecom"), {
       type: "pie",
       data: {
         labels: Object.keys(datosTelecom),
-        datasets: [{ data: Object.values(datosTelecom) }]
+        datasets: [{ 
+          data: Object.values(datosTelecom),
+          backgroundColor: [
+            'rgba(75, 192, 192, 0.8)', 
+            'rgba(255, 99, 132, 0.8)', 
+            'rgba(201, 203, 207, 0.8)', 
+            'rgba(255, 159, 64, 0.8)', 
+            'rgba(54, 162, 235, 0.8)', 
+            'rgba(153, 102, 255, 0.8)' 
+          ]
+        }]
       },
       options: { responsive: true, maintainAspectRatio: false }
     });

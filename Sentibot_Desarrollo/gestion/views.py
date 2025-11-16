@@ -11,7 +11,7 @@ from datetime import timedelta
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
-from django.db.models import Count, Sum
+from django.db.models import Count, Avg, F
 from django.db import connection
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
@@ -28,7 +28,7 @@ import requests
 # Modelos
 from .models import (
     Usuario, Emocion, EmocionReal, EmocionCamara,
-    Sesion, Escuela, EmotionSession
+    Sesion, Escuela, RespuestaEncuesta
 )
 
 logger = logging.getLogger(__name__)
@@ -60,6 +60,7 @@ def logout_view(request):
 # ------------------------------
 # PERFIL
 # ------------------------------
+@login_required(login_url='login')
 def perfil(request):
     return render(request, 'perfil.html')
 
@@ -244,16 +245,13 @@ def detalle_alumno(request, alumno_id):
     return render(request, 'modulo/detalle_alumno.html', {'alumno': alumno})
 
 def escuelas(request):
-    # Datos simulados de ejemplo
     escuelas_sim = [
         {'id': 1, 'nombre': 'Informática y Telecomunicación', 'carreras': ['Programación', 'Redes'], 'sede': 'Melipilla'},
         {'id': 2, 'nombre': 'Construcción', 'carreras': ['Edificación', 'Arquitectura'], 'sede': 'Melipilla'},
         {'id': 3, 'nombre': 'Gastronomía', 'carreras': ['Cocina Profesional', 'Pastelería'], 'sede': 'Melipilla'},
         {'id': 4, 'nombre': 'Otra Escuela', 'carreras': ['Diseño', 'Administración'], 'sede': 'Melipilla'},
     ]
-    # Cambié el template al nombre correcto
     return render(request, 'modulo/escuela.html', {'escuelas': escuelas_sim})
-
 
 # ------------------------------
 # SEGUIMIENTO / DASHBOARD
@@ -272,123 +270,88 @@ def seguimiento(request):
     return render(request, 'seguimiento.html', {'emociones': emociones, 'datos_usuarios': datos_usuarios})
 
 def dashboard_emociones(request):
-    datos = EmocionReal.objects.values('emocion__nombre_emocion').annotate(total=Count('emocion'))
-    etiquetas = [d['emocion__nombre_emocion'] for d in datos]
+    datos = EmocionReal.objects.values('tipo_emocion').annotate(total=Count('id'))
+    etiquetas = [d['tipo_emocion'] for d in datos]
     valores = [d['total'] for d in datos]
     return render(request, 'dashboard_emociones.html', {'emociones_labels': etiquetas, 'emociones_counts': valores})
 
-# ------------------------------ #
+# ------------------------------
 # MÓDULO PROFESOR (Dashboard)
-# ------------------------------ #
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-from django.db.models import Sum, Avg, F, ExpressionWrapper, FloatField
-from .models import Escuela, EmotionSession, Encuesta, RespuestaEncuesta
-import json
-
-
+# ------------------------------
 @login_required(login_url='login')
 def modulo_profesor(request):
     return render(request, "modulo_profesor.html")
 
-
-@login_required(login_url='login')
 def grafico_profesor(request):
-
     profesor = request.user
-
-    # ============================================================
-    # 1) Escuelas visibles según el profesor
-    # ============================================================
     if getattr(profesor, "escuela", None):
         escuelas = [profesor.escuela]
     else:
         escuelas = Escuela.objects.all()
 
-    datos_emociones = []
-    datos_duracion = []
-    datos_satisfaccion = []
+    datos_emociones, datos_duracion, datos_satisfaccion = [], [], []
+    tipos_emocion = ['Alegría', 'Tristeza', 'Neutral', 'Miedo', 'Enojo', 'Sorpresa']
 
-    # ============================================================
-    # 2) Recorrer escuelas y calcular estadísticas
-    
     for escuela in escuelas:
+        sesiones_escuela = Sesion.objects.filter(usuario__escuela=escuela)
+        emociones_reales = EmocionReal.objects.filter(sesion__in=sesiones_escuela)
 
-        sesiones = EmotionSession.objects.filter(user__escuela=escuela)
+        emociones_agregadas = {}
+        emociones_porcentaje = {}
+        for tipo in tipos_emocion:
+            cantidad = emociones_reales.filter(tipo_emocion=tipo).count()
+            emociones_agregadas[tipo.lower()] = cantidad
+            emociones_porcentaje[tipo.lower()] = cantidad
 
-        # ---------- 1️⃣ Totales de emociones ----------
-        emociones = sesiones.aggregate(
-            feliz=Sum('feliz_seg'),
-            triste=Sum('triste_seg'),
-            neutral=Sum('neutral_seg'),
-            enojado=Sum('enojado_seg'),
-            sorprendido=Sum('sorprendido_seg'),
-            sinreconocer=Sum('sinreconocer_seg')
-        )
-        emociones = {k: v or 0 for k, v in emociones.items()}
+        # Convertir a porcentaje
+        total_escuela = sum(emociones_porcentaje.values())
+        if total_escuela > 0:
+            for tipo, cantidad in emociones_porcentaje.items():
+                emociones_porcentaje[tipo] = round((cantidad / total_escuela) * 100, 2)
+        else:
+            emociones_porcentaje = {tipo.lower(): 0.0 for tipo in tipos_emocion}
 
         datos_emociones.append({
             "escuela": escuela.nombre,
-            "emociones": emociones
+            "cantidades": emociones_agregadas,
+            "porcentajes": emociones_porcentaje
         })
 
-        # ---------- 2️⃣ Duración promedio ----------
-        sesiones_dur = sesiones.annotate(
-            dur_total=(
-                F("feliz_seg") + F("triste_seg") + F("neutral_seg") +
-                F("enojado_seg") + F("sorprendido_seg") + F("sinreconocer_seg")
-            )
+        # Duración promedio sesiones
+        sesiones_con_duracion = sesiones_escuela.filter(fecha_inicio__isnull=False, fecha_fin__isnull=False).annotate(
+            dur_total=F('fecha_fin') - F('fecha_inicio')
         )
+        dur_promedio_timedelta = sesiones_con_duracion.aggregate(promedio=Avg('dur_total'))['promedio']
+        dur_prom_segundos = dur_promedio_timedelta.total_seconds() if dur_promedio_timedelta else 0
+        datos_duracion.append({"escuela": escuela.nombre, "promedio": round(dur_prom_segundos, 2)})
 
-        dur_prom = sesiones_dur.aggregate(
-            promedio=Avg('dur_total')
-        )["promedio"] or 0
-
-        datos_duracion.append({
-            "escuela": escuela.nombre,
-            "promedio": round(dur_prom, 2)
-        })
-
-        # ---------- 3️⃣ Nivel de satisfacción ----------
-        respuestas = RespuestaEncuesta.objects.filter(
-            usuario__escuela=escuela
-        )
-
-        # Se asume que la respuesta contiene "si" o "no"
+        # Encuestas
+        respuestas = RespuestaEncuesta.objects.filter(usuario__escuela=escuela)
         gusto = respuestas.filter(respuesta__icontains="si").count()
         no_gusto = respuestas.filter(respuesta__icontains="no").count()
+        datos_satisfaccion.append({"escuela": escuela.nombre, "si": gusto, "no": no_gusto})
 
-        datos_satisfaccion.append({
-            "escuela": escuela.nombre,
-            "si": gusto,
-            "no": no_gusto
-        })
+    # Totales globales
+    emociones_globales = {}
+    emociones_reales_globales = EmocionReal.objects.all()
+    for tipo in tipos_emocion:
+        cantidad_global = emociones_reales_globales.filter(tipo_emocion=tipo).count()
+        emociones_globales[tipo.lower()] = cantidad_global
 
-    # ============================================================
-    # 3) Totales globales de emociones
-    # ============================================================
-    emociones_globales = EmotionSession.objects.aggregate(
-        feliz=Sum('feliz_seg'),
-        triste=Sum('triste_seg'),
-        neutral=Sum('neutral_seg'),
-        enojado=Sum('enojado_seg'),
-        sorprendido=Sum('sorprendido_seg'),
-        sinreconocer=Sum('sinreconocer_seg')
-    )
-    emociones_globales = {k: v or 0 for k, v in emociones_globales.items()}
+    total_global = sum(emociones_globales.values())
+    if total_global > 0:
+        for tipo, cantidad in emociones_globales.items():
+            emociones_globales[tipo] = round((cantidad / total_global) * 100, 2)
+    else:
+        emociones_globales = {tipo.lower(): 0.0 for tipo in tipos_emocion}
 
-    # ============================================================
-    # 4) Enviar datos al template
-    # ============================================================
     context = {
         "datos_emociones": json.dumps(datos_emociones),
         "datos_duracion": json.dumps(datos_duracion),
         "datos_satisfaccion": json.dumps(datos_satisfaccion),
         "emociones_globales": json.dumps(emociones_globales),
     }
-
     return render(request, "grafico_profesor.html", context)
-
 
 # ------------------------------
 # API / REGISTRO DE EMOCIONES
@@ -405,7 +368,6 @@ def registrar_emocion(request):
         fiabilidad = data.get("fiabilidad")
 
         sesion = Sesion.objects.get(id=sesion_id)
-
         emocion = EmocionCamara.objects.create(
             sesion=sesion,
             nombre_emocion=nombre_emocion,
@@ -413,7 +375,6 @@ def registrar_emocion(request):
             duracion=duracion,
             fiabilidad=fiabilidad
         )
-
         return JsonResponse({"status": "ok", "id": emocion.id, "mensaje": f"Emoción {nombre_emocion} guardada"})
     except Sesion.DoesNotExist:
         return JsonResponse({"status": "error", "mensaje": "Sesión no encontrada"}, status=404)
@@ -425,26 +386,22 @@ def registrar_emocion(request):
 def predict_emotion_view(request):
     if request.method != "POST":
         return JsonResponse({"label": "Null", "confidence": 0, "error": "Método no permitido"}, status=405)
-
     try:
         data = json.loads(request.body)
         image_base64 = data.get("image")
         if not image_base64:
             return JsonResponse({"label": "Null", "confidence": 0, "error": "No se proporcionó imagen"}, status=400)
-
         if "," in image_base64:
             image_base64 = image_base64.split(",")[1]
-
         image_bytes = base64.b64decode(image_base64)
         Image.open(BytesIO(image_bytes))  # Validar imagen
-
         API_URL = "http://127.0.0.1:5000/predict_emotion"
         response = requests.post(API_URL, json={"image": image_base64}, timeout=5)
         result = response.json()
-        label = result.get("label", "Sin reconocer")
-        confidence = result.get("confidence", 0)
-        return JsonResponse({"label": label, "confidence": confidence})
-
+        return JsonResponse({
+            "label": result.get("label", "Sin reconocer"),
+            "confidence": result.get("confidence", 0)
+        })
     except Exception as e:
         logger.exception("Error prediciendo emoción: %s", e)
         return JsonResponse({"label": "Null", "confidence": 0, "error": str(e)}, status=500)
