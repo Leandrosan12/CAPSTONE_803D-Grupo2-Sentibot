@@ -237,4 +237,3 @@ class EncuestaSatisfaccion(models.Model):
 
     def __str__(self):
         return f"Encuesta sesión {self.sesion.id if self.sesion else 'sin sesión'} - {self.utilidad}"
-
