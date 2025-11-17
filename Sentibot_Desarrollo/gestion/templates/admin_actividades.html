@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Encabezado -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+        <div>
+            <h2 class="fw-bold text-light">
+                Administrar Actividades
+            </h2>
+            <p class="text-secondary mb-0">
+                Gestiona, filtra y organiza las actividades disponibles en el sistema.
+            </p>
+        </div>
+
+        <a href="{% url 'crear_actividad' %}" class="btn btn-success mt-2 mt-md-0">
+            ➕ Nueva Actividad
+        </a>
+    </div>
+
+    <!-- Formulario de búsqueda y filtro -->
+    <form method="get" class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 gap-2">
+
+        <!-- Filtro por emoción -->
+        <div class="d-flex align-items-center gap-2">
+            <label class="fw-semibold text-light mb-0">Filtrar por emoción:</label>
+            <select name="emocion" class="form-select w-auto" onchange="this.form.submit()">
+                <option value="">Todas</option>
+                {% for emo in emociones %}
+                    <option value="{{ emo.nombre_emocion }}" {% if filtro_emocion == emo.nombre_emocion %}selected{% endif %}>
+                        {{ emo.nombre_emocion }}
+                    </option>
+                {% endfor %}
+            </select>
+
+        </div>
+
+        <div class="d-flex flex-column flex-md-row align-items-md-center gap-2">
+            <label class="fw-semibold text-light mb-0">Buscar:</label>
+            <input type="text" name="q" value="{{ query }}" class="form-control">
+            <button type="submit" class="btn btn-primary">🔍 Buscar</button>
+        </div>
+
+    </form>
+
+    <!-- Tarjeta contenedora -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle" id="tabla-actividades">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>#</th>
+                            <th>Actividad</th>
+                            <th>Emoción</th>
+                            <th>Importancia</th>
+                            <th>Recurso</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                    {% for act in actividades %}
+                        <tr data-emocion="{{ act.emocion.nombre_emocion }}"
+                            data-nombre="{{ act.nombre_actividad }}">
+                            <!-- Numeración continua -->
+                            <td>{{ forloop.counter|add:actividades.start_index|add:-1 }}</td>
+                            <td>{{ act.nombre_actividad }}</td>
+                            <td>{{ act.emocion.nombre_emocion }}</td>
+                            <td>{{ act.importancia }}</td>
+
+                            <!-- Recurso -->
+                            <td>
+                                {% if act.recurso %}
+                                    <a href="{{ act.recurso }}" class="btn btn-sm btn-outline-primary"
+                                       target="_blank"
+                                       onclick="return validarLink('{{ act.recurso }}');">
+                                        Ver recurso
+                                    </a>
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Acciones -->
+                            <td class="text-center">
+                                <div class="btn-group" role="group">
+                                    <a class="btn btn-warning btn-sm"
+                                       href="{% url 'editar_actividad' act.id %}">
+                                        ✏️
+                                    </a>
+
+                                    <a class="btn btn-danger btn-sm"
+                                       href="{% url 'eliminar_actividad' act.id %}"
+                                       onclick="return confirm('¿Seguro que deseas eliminar esta actividad?');">
+                                        🗑️
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+
+                </table>
+            </div>
+
+            <!-- Paginación azul -->
+            {% if actividades.has_other_pages %}
+            <nav aria-label="Paginación de actividades">
+                <ul class="pagination justify-content-center mt-3">
+
+                    {% if actividades.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link text-primary border-primary" href="?page={{ actividades.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if filtro_emocion %}&emocion={{ filtro_emocion }}{% endif %}">
+                            « Anterior
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link text-secondary">« Anterior</span>
+                    </li>
+                    {% endif %}
+
+                    {% for num in actividades.paginator.page_range %}
+                        {% if actividades.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link bg-primary text-white border-primary">{{ num }}</span>
+                            </li>
+                        {% elif num > actividades.number|add:-3 and num < actividades.number|add:3 %}
+                            <li class="page-item">
+                                <a class="page-link text-primary border-primary" href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}{% if filtro_emocion %}&emocion={{ filtro_emocion }}{% endif %}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if actividades.has_next %}
+                    <li class="page-item">
+                        <a class="page-link text-primary border-primary" href="?page={{ actividades.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if filtro_emocion %}&emocion={{ filtro_emocion }}{% endif %}">
+                            Siguiente »
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link text-secondary">Siguiente »</span>
+                    </li>
+                    {% endif %}
+
+                </ul>
+            </nav>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+
+<!-- Validación del recurso/video -->
+<script>
+function validarLink(url) {
+    if (!url || url.trim() === "") {
+        alert("⚠️ No existe recurso disponible para esta actividad.");
+        return false;
+    }
+
+    const formatos = ["youtube.com", "youtu.be", ".mp4", ".webm", ".mov"];
+    const valido = formatos.some(f => url.includes(f));
+
+    if (!valido) {
+        alert("⚠️ El enlace no contiene un video válido.");
+        return false;
+    }
+
+    return true;
+}
+</script>
+{% endblock %}

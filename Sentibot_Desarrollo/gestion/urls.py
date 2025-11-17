@@ -38,4 +38,15 @@ urlpatterns = [
 
     path('finalizar_y_encuesta/', views.finalizar_y_encuesta, name='finalizar_y_encuesta'),
     path('resultado/', views.mostrar_resultado, name='mostrar_resultado'),
+
+    #panel admin
+    # PANEL ADMIN PERSONALIZADO
+
+    path('actividadesconf/', views.admin_actividades, name='actividadesconf'),
+    path('actividadesconf/editar/<int:id>/', views.editar_actividad, name='editar_actividad'),
+    path('actividadesconf/eliminar/<int:id>/', views.eliminar_actividad, name='eliminar_actividad'),
+    path('actividadesconf/crear/', views.crear_actividad, name='crear_actividad'),
+
+
+
 ]

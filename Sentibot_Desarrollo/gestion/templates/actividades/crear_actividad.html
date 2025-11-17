@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+
+    <!-- TÍTULO ELEGANTE -->
+    <div class="mb-4 text-center">
+        <h2 class="fw-bold text-white" style="text-shadow: 0 0 8px rgba(255,255,255,0.4);">
+            Crear Nueva Actividad
+        </h2>
+        <p class="text-light" style="opacity: 0.7;">
+            Agrega una actividad y relaciónala con una emoción.
+        </p>
+    </div>
+
+    <!-- TARJETA FORMULARIO FONDO BLANCO -->
+    <div class="card shadow-lg border-0 rounded-4 p-4">
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Nombre de la actividad</label>
+                <input type="text" name="nombre_actividad" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Descripción</label>
+                <textarea name="descripcion" class="form-control" required></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Emoción asociada</label>
+                <select name="emocion_id" class="form-control" required>
+                    {% for emo in emociones %}
+                        <option value="{{ emo.id }}">{{ emo.nombre_emocion }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Cómo realizarla</label>
+                <textarea name="como_realizarla" class="form-control"></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Importancia</label>
+                <input type="text" name="importancia" class="form-control">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Recurso (opcional)</label>
+                <input type="text" name="recurso" class="form-control">
+            </div>
+
+            <!-- BOTONES MODERNOS -->
+            <div class="d-flex justify-content-end gap-2 mt-4">
+                <button class="btn btn-success px-4" type="submit">
+                     Crear
+                </button>
+
+                <a href="{% url 'actividadesconf' %}" class="btn btn-outline-dark px-4">
+                     Cancelar
+                </a>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+{% endblock %}
