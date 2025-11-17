@@ -52,7 +52,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'sentibot',
-        'USER': 'admin',
+        'USER': 'root',
         'PASSWORD': 'admin',
         'HOST': 'localhost',
         'PORT': '3306',
@@ -64,16 +64,6 @@ AUTH_USER_MODEL = 'gestion.Usuario'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'sentibot',
-        'USER': 'root',
-        'PASSWORD': 'admin',
-        'HOST': 'localhost',
-        'PORT': '3306',
-    }
-}
 
 
 
