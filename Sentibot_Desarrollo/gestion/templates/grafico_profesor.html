@@ -22,189 +22,191 @@
         font-size: 1.2rem;
         margin-bottom: 0.5rem;
     }
+
+    /* Ocultar botones EN EL PDF */
+    @media print {
+        .no-print {
+            display: none !important;
+        }
+    }
+
+    /* Contenedor del PDF */
+    #pdfContenido {
+        background: white;
+        padding: 20px;
+    }
 </style>
 
 <div class="dashboard-wrapper container-fluid py-5">
-  <div class="dashboard-header mb-4 text-center">
+
+  <!-- =============================== -->
+  <!-- CABECERA (Botones ocultos en PDF) -->
+  <!-- =============================== -->
+  <div class="dashboard-header mb-4 text-center no-print">
     <h2>📊 Dashboard Emocional – Escuela</h2>
+
     <div class="acciones mt-3">
       <a href="{% url 'modulo_profesor' %}" class="btn btn-volver">⬅️ Volver al Módulo Profesor</a>
       <button id="descargarPDF" class="btn btn-descargar">📄 Descargar PDF</button>
     </div>
   </div>
 
-  <div class="container">
-    <div class="row g-4 justify-content-center">
+  <!-- ========================================= -->
+  <!-- TODO LO QUE VA DENTRO DEL PDF              -->
+  <!-- ========================================= -->
+  <div id="pdfContenido">
 
-        <div class="col-12 col-md-6 col-lg-5 d-flex justify-content-center">
-        <div class="card w-100 p-2">
-          <h4 class="text-center">Totales Globales de Emociones (Suma de %)</h4>
-          <div class="card-chart">
-            <canvas id="graficoTotales"></canvas>
-          </div>
-        </div>
-      </div>
+    <div class="text-center mb-4">
+      <h2 class="fw-bold">📊 Dashboard Emocional – {{ datosEscuelas.0.escuela|default:"Escuela" }}</h2>
 
-        <div class="col-12 col-md-6 col-lg-5 d-flex justify-content-center">
-        <div class="card w-100 p-2">
-          <h4 class="text-center">Duración Promedio por Escuela (Segundos)</h4>
-          <div class="card-chart">
-            <canvas id="graficoDuracion"></canvas>
-          </div>
-        </div>
-      </div>
-
-        <div class="col-12 col-md-6 col-lg-5 d-flex justify-content-center">
-        <div class="card w-100 p-2">
-          <h4 class="text-center">Satisfacción General por Escuela (Conteo Si/No)</h4>
-          <div class="card-chart">
-            <canvas id="graficoSatisfaccion"></canvas>
-          </div>
-        </div>
-      </div>
-
-        <div class="col-12 col-md-6 col-lg-5 d-flex justify-content-center">
-        <div class="card w-100 p-2">
-          <h4 class="text-center">Distribución Emocional por {{ datosEscuelas.0.escuela|default:"Escuela" }} (Suma de %)</h4>
-          <div class="card-chart">
-            <canvas id="graficoTelecom"></canvas>
-          </div>
-        </div>
-      </div>
-
+      <!-- Fecha y hora SOLO para PDF -->
+      <p id="infoPDF" class="fw-bold"></p>
     </div>
+
+    <div class="container">
+      <div class="row g-4 justify-content-center">
+
+        <div class="col-12 col-md-6 col-lg-5">
+          <div class="card w-100 p-2">
+            <h4 class="text-center">Totales Globales de Emociones (Suma de %)</h4>
+            <div class="card-chart">
+              <canvas id="graficoTotales"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-6 col-lg-5">
+          <div class="card w-100 p-2">
+            <h4 class="text-center">Duración Promedio por Escuela (Segundos)</h4>
+            <div class="card-chart">
+              <canvas id="graficoDuracion"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-6 col-lg-5">
+          <div class="card w-100 p-2">
+            <h4 class="text-center">Satisfacción General por Escuela (Conteo Si/No)</h4>
+            <div class="card-chart">
+              <canvas id="graficoSatisfaccion"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-6 col-lg-5">
+          <div class="card w-100 p-2">
+            <h4 class="text-center">Distribución Emocional (Suma de %)</h4>
+            <div class="card-chart">
+              <canvas id="graficoTelecom"></canvas>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
   </div>
+
 </div>
 
+<!-- ====================== -->
+<!-- SCRIPT: ChartJS       -->
+<!-- ====================== -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/html2canvas"></script>
-<script src="https://cdn.jsdelivr.net/npm/jspdf"></script>
+
+<!-- html2canvas -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<!-- jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
-// ====================================================================
-// Cargar datos reales desde Django
-// ====================================================================
+// ==========================
+// VARIABLES DESDE DJANGO
+// ==========================
 const emocionesGlobales = JSON.parse(`{{ emociones_globales|safe }}`);
 const datosDuracion = JSON.parse(`{{ datos_duracion|safe }}`);
 const datosSatisfaccion = JSON.parse(`{{ datos_satisfaccion|safe }}`);
 const datosEscuelas = JSON.parse(`{{ datos_emociones|safe }}`);
 
-// ⚠️ CORRECCIÓN CLAVE: Acceder a la clave 'porcentajes'
-const datosTelecom = datosEscuelas.length > 0 ? datosEscuelas[0].porcentajes : {};
+const datosTelecom = datosEscuelas.length ? datosEscuelas[0].porcentajes : {};
+const nombreEscuela = datosEscuelas.length ? datosEscuelas[0].escuela : "Escuela";
 
+// ==========================
+// FECHA Y HORA SOLO EN PDF
+// ==========================
 document.addEventListener("DOMContentLoaded", () => {
 
+  const fecha = new Date();
+  const fechaTexto = fecha.toLocaleDateString("es-CL");
+  const horaTexto = fecha.toLocaleTimeString("es-CL");
+
+  document.getElementById("infoPDF").innerHTML =
+    `📅 Fecha: ${fechaTexto} — 🕒 Hora: ${horaTexto}`;
+
+  // ============== GRÁFICOS ==============
   Chart.defaults.font.size = 10;
 
-  // =============================
-  // 1. Totales Globales (Pie)
-  // =============================
-  if (Object.keys(emocionesGlobales).length > 0) {
-    new Chart(document.getElementById("graficoTotales"), {
-      type: "pie",
-      data: {
-        labels: Object.keys(emocionesGlobales),
-        datasets: [{ 
-          data: Object.values(emocionesGlobales),
-          backgroundColor: [
-            'rgba(75, 192, 192, 0.8)', 
-            'rgba(255, 99, 132, 0.8)',
-            'rgba(201, 203, 207, 0.8)', 
-            'rgba(255, 159, 64, 0.8)', 
-            'rgba(54, 162, 235, 0.8)', 
-            'rgba(153, 102, 255, 0.8)' 
-          ]
-        }]
-      },
-      options: { responsive: true, maintainAspectRatio: false }
-    });
-  }
-
-  // =============================
-  // 2. Duración promedio (Bar)
-  // =============================
-  if (datosDuracion.length > 0) {
-    new Chart(document.getElementById("graficoDuracion"), {
-      type: "bar",
-      data: {
-        labels: datosDuracion.map(e => e.escuela),
-        datasets: [{ 
-          label: "Promedio de Duración (s)", 
-          data: datosDuracion.map(e => e.promedio),
-          backgroundColor: 'rgba(54, 162, 235, 0.6)'
-        }]
-      },
-      options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
-    });
-  }
-
-  // =============================
-  // 3. Satisfacción (Bar)
-  // =============================
-  if (datosSatisfaccion.length > 0) {
-    new Chart(document.getElementById("graficoSatisfaccion"), {
-      type: "bar",
-      data: {
-        labels: datosSatisfaccion.map(e => e.escuela),
-        datasets: [
-          { 
-            label: "Sí le gustó", 
-            data: datosSatisfaccion.map(e => e.si),
-            backgroundColor: 'rgba(75, 192, 192, 0.8)'
-          },
-          { 
-            label: "No le gustó", 
-            data: datosSatisfaccion.map(e => e.no),
-            backgroundColor: 'rgba(255, 99, 132, 0.8)'
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: { y: { beginAtZero: true } }
-      }
-    });
-  }
-
-  // =============================
-  // 4. Emociones por escuela (Pie)
-  // =============================
-  if (Object.keys(datosTelecom).length > 0) {
-    new Chart(document.getElementById("graficoTelecom"), {
-      type: "pie",
-      data: {
-        labels: Object.keys(datosTelecom),
-        datasets: [{ 
-          data: Object.values(datosTelecom),
-          backgroundColor: [
-            'rgba(75, 192, 192, 0.8)', 
-            'rgba(255, 99, 132, 0.8)', 
-            'rgba(201, 203, 207, 0.8)', 
-            'rgba(255, 159, 64, 0.8)', 
-            'rgba(54, 162, 235, 0.8)', 
-            'rgba(153, 102, 255, 0.8)' 
-          ]
-        }]
-      },
-      options: { responsive: true, maintainAspectRatio: false }
-    });
-  }
-
-  // =============================
-  // PDF
-  // =============================
-  document.getElementById("descargarPDF").addEventListener("click", () => {
-    html2canvas(document.querySelector(".dashboard-wrapper")).then(canvas => {
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jspdf.jsPDF("p", "mm", "a4");
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-      pdf.save("dashboard_emocional.pdf");
-    });
+  new Chart(document.getElementById("graficoTotales"), {
+    type: "pie",
+    data: {
+      labels: Object.keys(emocionesGlobales),
+      datasets: [{ data: Object.values(emocionesGlobales) }]
+    },
+    options: { responsive: true, maintainAspectRatio: false }
   });
 
+  new Chart(document.getElementById("graficoDuracion"), {
+    type: "bar",
+    data: {
+      labels: datosDuracion.map(e => e.escuela),
+      datasets: [{ label: "Duración (s)", data: datosDuracion.map(e => e.promedio) }]
+    },
+    options: { responsive: true, maintainAspectRatio: false }
+  });
+
+  new Chart(document.getElementById("graficoSatisfaccion"), {
+    type: "bar",
+    data: {
+      labels: datosSatisfaccion.map(e => e.escuela),
+      datasets: [
+        { label: "Sí le gustó", data: datosSatisfaccion.map(e => e.si) },
+        { label: "No le gustó", data: datosSatisfaccion.map(e => e.no) }
+      ]
+    },
+    options: { responsive: true, maintainAspectRatio: false }
+  });
+
+  new Chart(document.getElementById("graficoTelecom"), {
+    type: "pie",
+    data: {
+      labels: Object.keys(datosTelecom),
+      datasets: [{ data: Object.values(datosTelecom) }]
+    },
+    options: { responsive: true, maintainAspectRatio: false }
+  });
+
+});
+
+// ===================================
+// GENERAR PDF SIN BOTONES
+// ===================================
+document.getElementById("descargarPDF").addEventListener("click", async () => {
+
+  const elemento = document.getElementById("pdfContenido");
+
+  const canvas = await html2canvas(elemento, { scale: 2 });
+  const imgData = canvas.toDataURL("image/png");
+
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF("p", "mm", "a4");
+
+  const pdfWidth = pdf.internal.pageSize.getWidth();
+  const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+  pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+
+  pdf.save("dashboard_emocional.pdf");
 });
 </script>
 

@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const email = document.getElementById('correo_login');
   const password = document.getElementById('contrasena_login');
 
-  // Asegura que existan los mensajes de error de Bootstrap
+  // Crear feedback si no existe
   function ensureFeedback(el) {
     if (!el.nextElementSibling || !el.nextElementSibling.classList.contains('invalid-feedback')) {
       const fb = document.createElement('div');
@@ -27,27 +27,21 @@ document.addEventListener('DOMContentLoaded', function () {
     if (el.nextElementSibling) el.nextElementSibling.textContent = '';
   }
 
-  // ✅ Validación de email (acepta @gmail.com y @duocuc.cl)
+  // Validación de email
   function validateEmail(value) {
     if (!value) return { ok: false, msg: 'El correo es obligatorio.' };
     const v = value.trim().toLowerCase();
-
-    // formatos aceptados
     const gmailRegex = /@gmail\.com$/i;
     const duocRegex = /@duocuc\.cl$/i;
-
     if (!gmailRegex.test(v) && !duocRegex.test(v)) {
       return { ok: false, msg: 'El correo debe terminar en @gmail.com o @duocuc.cl.' };
     }
-
-    // validación básica general de email
     const basicEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!basicEmail.test(v)) return { ok: false, msg: 'Formato de correo inválido.' };
-
     return { ok: true, msg: '' };
   }
 
-  // ✅ Validación de contraseña
+  // Validación de contraseña
   function validatePassword(value) {
     if (!value) return { ok: false, msg: 'La contraseña es obligatoria.' };
     if (value.length < 8) return { ok: false, msg: 'Debe tener al menos 8 caracteres.' };
@@ -65,13 +59,13 @@ document.addEventListener('DOMContentLoaded', function () {
     r.ok ? setValid(password) : setInvalid(password, r.msg);
   });
 
-  // Validar al enviar
+  // Validación al enviar
   form.addEventListener('submit', function (e) {
     const emailResult = validateEmail(email.value);
     const passResult = validatePassword(password.value);
 
-    if (!emailResult.ok) setInvalid(email, emailResult.msg); else setValid(email);
-    if (!passResult.ok) setInvalid(password, passResult.msg); else setValid(password);
+    emailResult.ok ? setValid(email) : setInvalid(email, emailResult.msg);
+    passResult.ok ? setValid(password) : setInvalid(password, passResult.msg);
 
     if (!emailResult.ok || !passResult.ok) {
       e.preventDefault();

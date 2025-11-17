@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Selecciona Opción{% endblock %}
+{% block content %}
+{% load static %}
+
+<!-- Fuente profesional -->
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+
+<div class="container py-5 text-center" style="font-family: 'Montserrat', sans-serif;">
+  <h1 class="fw-bold text-light display-5 mb-3">
+    ¿Qué deseas hacer?
+  </h1>
+
+  <!-- Subtítulo -->
+  <p class="text-secondary fs-5 mb-5">
+    Selecciona una opción para continuar con tu experiencia interactiva.
+  </p>
+
+  <!-- Línea separadora -->
+  <div class="d-flex justify-content-center mb-5">
+    <div class="rounded-pill shadow-sm"
+         style="width: 220px; height: 6px;
+                background: linear-gradient(90deg, #48c6ef, #6f86d6, #48c6ef);
+                box-shadow: 0 0 10px rgba(111,134,214,0.6);">
+    </div>
+  </div>
+  <!-- Tarjetas -->
+  <div class="row justify-content-center g-5">
+    <!-- Tarjeta Cámara -->
+    <div class="col-md-4 col-10">
+      <a href="{% url 'camara' %}"
+         class="d-flex flex-column justify-content-center align-items-center text-white text-decoration-none rounded-4 shadow-lg p-5"
+         style="height: 210px; background: linear-gradient(135deg, #7B8BA4, #6f86d6, #48c6ef); transition: transform 0.4s;">
+        <span class="fs-1 mb-2">📷</span>
+        <span class="fw-semibold fs-4">Cámara</span>
+      </a>
+    </div>
+
+    <!-- Tarjeta Emoticones -->
+    <div class="col-md-4 col-10">
+      <a href="{% url 'extra' %}"
+         class="d-flex flex-column justify-content-center align-items-center text-white text-decoration-none rounded-4 shadow-lg p-5"
+         style="height: 210px; background: linear-gradient(135deg, #7B8BA4, #b06ab3, #f7797d); transition: transform 0.4s;">
+        <span class="fs-1 mb-2">😊</span>
+        <span class="fw-semibold fs-4">Emoticones</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Hover suave con Bootstrap + inline style -->
+<script>
+  document.querySelectorAll('a').forEach(card => {
+    card.addEventListener('mouseenter', () => card.style.transform = 'translateY(-10px) scale(1.05)');
+    card.addEventListener('mouseleave', () => card.style.transform = 'translateY(0) scale(1)');
+  });
+</script>
+
+{% endblock %}

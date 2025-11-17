@@ -8,6 +8,7 @@
         Sentibot
     </h2>
 
+<<<<<<< HEAD
 
     <a href="{% url 'camara' %}"><img src="{% static 'Icon/casa.png' %}" alt="Inicio"> Inicio</a>
     <a href="{% url 'perfil' %}"><img src="{% static 'Icon/user.png' %}" alt="Perfil"> Perfil</a>
@@ -21,4 +22,53 @@
     <a href="{% url 'mantenimiento' %}"><img src="{% static 'Icon/reserva.png' %}" alt="Reserva"> Reserva</a>
     <a href="{% url 'mantenimiento' %}"><img src="{% static 'Icon/globo.png' %}" alt="Extras"> Extras</a>
     
+=======
+    {% if user.is_authenticated %}
+
+    {% if user.is_staff %}
+        {# ---- MÓDULOS PARA ADMINISTRADORES ---- #}
+
+      
+
+        <a href="{% url 'modulo_profesor' %}">
+            <img src="{% static 'Icon/lupa.png' %}" alt="Módulo Profesor"> Módulo Profesor
+        </a>
+
+        <a href="{% url 'agenda' %}">
+            <img src="{% static 'Icon/calendario.png' %}" alt="Agenda"> Agenda
+        </a>
+
+        <a href="{% url 'mantenimiento' %}">
+            <img src="{% static 'Icon/reserva.png' %}" alt="Reserva"> Reserva
+        </a>
+
+    {% else %}
+        {# ---- MÓDULOS PARA USUARIOS NORMALES ---- #}
+
+        <a href="{% url 'perfil' %}">
+            <img src="{% static 'Icon/user.png' %}" alt="Perfil"> Perfil
+        </a>
+
+        <a href="{% url 'opciones' %}">
+            <img src="{% static 'Icon/ejercicio.png' %}" alt="Actividades"> Actividades
+        </a>
+
+        <a href="https://psicologia.geasa.cl/login" target="_blank">
+            <img src="{% static 'Icon/reserva.png' %}" alt="Psicóloga"> Psicóloga
+        </a>
+    {% endif %}
+
+    {# ---- Logout para todos los usuarios autenticados ---- #}
+    <a href="{% url 'logout' %}">
+        <img src="{% static 'Icon/cierre.png' %}" alt="Cerrar sesión"> Cerrar sesión
+    </a>
+
+    {% else %}
+    {# ---- Login para usuarios no autenticados ---- #}
+    <a href="{% url 'login' %}">
+        <img src="{% static 'Icon/cierre.png' %}" alt="Iniciar sesión"> Iniciar sesión
+    </a>
+    {% endif %}
+
+>>>>>>> origin/main
 </nav>

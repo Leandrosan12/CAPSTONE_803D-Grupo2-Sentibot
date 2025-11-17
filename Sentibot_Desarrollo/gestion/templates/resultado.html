@@ -1,0 +1,48 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Resultado de Emoción</title>
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .resultado-card {
+            padding: 2rem;
+            border-radius: 1rem;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            background-color: #fff;
+        }
+        .felicidad { color: #ffca28; }
+        .tristeza { color: #2196f3; }
+        .miedo { color: #9c27b0; }
+        .enojo { color: #f44336; }
+    </style>
+</head>
+<body>
+    <div class="resultado-card">
+        {% if emocion == "Felicidad" %}
+            <h1 class="felicidad">😄 ¡Te sientes Feliz!</h1>
+            <p>¡Genial! Mantén esa energía positiva y sigue disfrutando tu día.</p>
+        {% elif emocion == "Tristeza" %}
+            <h1 class="tristeza">😢 Te sientes Triste</h1>
+            <p>Está bien sentirse así. Tómate tu tiempo y cuida de ti mismo.</p>
+        {% elif emocion == "Miedo" %}
+            <h1 class="miedo">😨 Sientes Miedo</h1>
+            <p>Respira profundo. Identificarlo es el primer paso para superarlo.</p>
+        {% elif emocion == "Enojo" %}
+            <h1 class="enojo">😡 Estás Enojado</h1>
+            <p>Intenta relajarte y canalizar esa energía de manera positiva.</p>
+        {% else %}
+            <h1>🤔 Estado desconocido</h1>
+        {% endif %}
+    </div>
+</body>
+</html>

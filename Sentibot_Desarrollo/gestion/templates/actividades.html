@@ -1,142 +1,170 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Actividades Emocionales{% endblock %}
+{% block title %}Actividades para {{ emocion.nombre_emocion }}{% endblock %}
 
 {% block content %}
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="{% static 'css/actividades.css' %}">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-<div class="container my-5">
-  <h2 class="text-center fw-bold mb-3 text-dark">🌿 Actividades para Regular tus Emociones</h2>
-  <p class="text-center text-muted mb-5">
-    Haz clic en una emoción para descubrir pequeñas acciones que pueden ayudarte a sentirte mejor.
-  </p>
+<div class="container py-5 text-center">
 
-  <div class="accordion" id="emocionesAccordion">
-
-    <!-- ALEGRÍA -->
-    <div class="accordion-item emocion alegria">
-      <h2 class="accordion-header" id="alegriaHeader">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#alegria" aria-expanded="false" aria-controls="alegria">
-          🌞 Alegría
-        </button>
-      </h2>
-      <div id="alegria" class="accordion-collapse collapse" aria-labelledby="alegriaHeader" data-bs-parent="#emocionesAccordion">
-        <div class="accordion-body">
-          <ul>
-            <li>Escribe tres cosas por las que te sientas agradecido hoy.</li>
-            <li>Comparte tu alegría: envía un mensaje positivo a alguien que aprecias.</li>
-            <li>Disfruta de algo simple: una canción, un paseo o una comida deliciosa.</li>
-            <li>Crea un mural o collage con tus momentos felices.</li>
-            <li>Ríe sin razón: busca un video divertido o juega con alguien.</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <!-- TRISTEZA -->
-    <div class="accordion-item emocion tristeza">
-      <h2 class="accordion-header" id="tristezaHeader">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#tristeza" aria-expanded="false" aria-controls="tristeza">
-          🌧️ Tristeza
-        </button>
-      </h2>
-      <div id="tristeza" class="accordion-collapse collapse" aria-labelledby="tristezaHeader" data-bs-parent="#emocionesAccordion">
-        <div class="accordion-body">
-          <ul>
-            <li>Escucha una lista de canciones suaves y deja fluir tus emociones.</li>
-            <li>Sal a caminar y observa algo bonito de tu entorno.</li>
-            <li>Escribe lo que sientes sin juzgarte, solo déjalo salir.</li>
-            <li>Habla con alguien de confianza sobre lo que te pasa.</li>
-            <li>Haz algo pequeño que te genere bienestar (una ducha caliente, un té, una siesta).</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <!-- MIEDO -->
-    <div class="accordion-item emocion miedo">
-      <h2 class="accordion-header" id="miedoHeader">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#miedo" aria-expanded="false" aria-controls="miedo">
-          🌙 Miedo
-        </button>
-      </h2>
-      <div id="miedo" class="accordion-collapse collapse" aria-labelledby="miedoHeader" data-bs-parent="#emocionesAccordion">
-        <div class="accordion-body">
-          <ul>
-            <li>Haz respiraciones lentas y profundas durante un minuto.</li>
-            <li>Escribe tus miedos y analiza cuáles son reales y cuáles imaginarios.</li>
-            <li>Haz algo que te dé una sensación de control (organiza tu espacio, tu día o tus metas).</li>
-            <li>Repite una afirmación calmante: “Estoy a salvo, puedo manejar esto”.</li>
-            <li>Ve una película o lee algo inspirador que te relaje.</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <!-- ENOJO -->
-    <div class="accordion-item emocion enojo">
-      <h2 class="accordion-header" id="enojoHeader">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#enojo" aria-expanded="false" aria-controls="enojo">
-          🔥 Enojo
-        </button>
-      </h2>
-      <div id="enojo" class="accordion-collapse collapse" aria-labelledby="enojoHeader" data-bs-parent="#emocionesAccordion">
-        <div class="accordion-body">
-          <ul>
-            <li>Haz una pausa de 5 minutos antes de reaccionar.</li>
-            <li>Descarga la energía: sal a caminar, haz ejercicio o respira profundamente.</li>
-            <li>Escribe lo que te molesta y luego destruye el papel.</li>
-            <li>Escucha música que te ayude a liberar la tensión.</li>
-            <li>Reflexiona: ¿Qué necesitas en realidad en este momento?</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <!-- ASCO -->
-    <div class="accordion-item emocion asco">
-      <h2 class="accordion-header" id="ascoHeader">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#asco" aria-expanded="false" aria-controls="asco">
-          🌿 Asco
-        </button>
-      </h2>
-      <div id="asco" class="accordion-collapse collapse" aria-labelledby="ascoHeader" data-bs-parent="#emocionesAccordion">
-        <div class="accordion-body">
-          <ul>
-            <li>Haz limpieza de tu espacio o elimina algo que ya no necesitas.</li>
-            <li>Respira aire fresco o cambia de entorno.</li>
-            <li>Escribe lo que te causa rechazo y busca entender por qué.</li>
-            <li>Realiza una actividad creativa (dibujar, cocinar, pintar).</li>
-            <li>Recuerda una experiencia que te haya generado calma o aceptación.</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <!-- NEUTRAL -->
-    <div class="accordion-item emocion neutral">
-      <h2 class="accordion-header" id="neutralHeader">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#neutral" aria-expanded="false" aria-controls="neutral">
-          🌤️ Neutral
-        </button>
-      </h2>
-      <div id="neutral" class="accordion-collapse collapse" aria-labelledby="neutralHeader" data-bs-parent="#emocionesAccordion">
-        <div class="accordion-body">
-          <ul>
-            <li>Haz una pausa consciente de 10 minutos sin distracciones.</li>
-            <li>Planea una actividad nueva o un pequeño reto para hoy.</li>
-            <li>Piensa en una persona o recuerdo que te haga sentir tranquilo.</li>
-            <li>Realiza estiramientos o yoga suave.</li>
-            <li>Escucha sonidos naturales o una meditación guiada.</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
+  <!-- Título general elegante -->
+  <div class="mb-5">
+    <h1 class="fw-bold display-4 mb-2"
+        style="font-family: 'Comic Sans MS', cursive, sans-serif;">
+      <span class="emoticono-principal">
+        {% if emocion.nombre_emocion == "Alegría" %}😄
+        {% elif emocion.nombre_emocion == "Tristeza" %}😢
+        {% elif emocion.nombre_emocion == "Miedo" %}😨
+        {% elif emocion.nombre_emocion == "Enojo" %}😡
+        {% elif emocion.nombre_emocion == "Neutral" %}😐
+        {% else %}🧩{% endif %}
+      </span>
+      <span style="color: #f8f9fa;">Emoción detectada: <span class="text-capitalize">{{ emocion.nombre_emocion }}</span></span>
+    </h1>
+    {% if emocion.descripcion %}
+      <p class="fs-5 fw-semibold fst-italic mt-2" style="color: #adb5bd;">
+        Explora estas actividades para mejorar tu estado de ánimo y bienestar 😊
+      </p>
+    {% endif %}
   </div>
+
+  <!-- Actividades -->
+  <div class="row justify-content-center g-4">
+    {% if recomendaciones %}
+      {% for rec in recomendaciones %}
+        <div class="col-md-4">
+          <div class="card actividad-card shadow-lg border-0 rounded-4 h-100 p-3"
+               style="cursor:pointer; background: #f8f9fa;"
+               data-bs-toggle="modal" 
+               data-bs-target="#modalActividad{{ forloop.counter }}">
+            <div class="card-body d-flex flex-column">
+              
+              <!-- Título con emoticono y color elegante -->
+              <h5 class="card-title fw-bold titulo-actividad mb-3">
+                <span class="emoticono">{{ rec.actividad.emoticono|default:"🎯" }}</span>
+                <span class="titulo-texto">{{ rec.actividad.nombre_actividad }}</span>
+              </h5>
+
+              <p class="card-text text-muted text-truncate">{{ rec.actividad.descripcion|default:"Sin descripción disponible." }}</p>
+
+              <!-- Se recomienda + barra de porcentaje -->
+              <div class="mt-4">
+                <div class="text-muted fw-semibold mb-1">Se recomienda:</div>
+                <div class="progress rounded-pill" style="height: 20px;">
+                  <div class="progress-bar porcentaje-elegante" role="progressbar"
+                       style="width: {{ rec.porcentaje }}%;
+                              {% if rec.porcentaje >= 95 or rec.porcentaje == max_porcentaje %}background-color: #28a745;
+                              {% elif rec.porcentaje >= 50 %}background-color: #ffc107;
+                              {% else %}background-color: #6c757d;
+                              {% endif %}"
+                       aria-valuenow="{{ rec.porcentaje }}" aria-valuemin="0" aria-valuemax="100">
+                  </div>
+                </div>
+                <div class="mt-1 fw-bold text-dark">{{ rec.porcentaje }}%</div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal elegante -->
+        <div class="modal fade" id="modalActividad{{ forloop.counter }}" tabindex="-1" aria-labelledby="modalLabel{{ forloop.counter }}" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered modal-md">
+            <div class="modal-content rounded-4 shadow-lg">
+              <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title fs-5" id="modalLabel{{ forloop.counter }}">
+                  ✨ {{ rec.actividad.nombre_actividad }} ✨
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+              </div>
+              <div class="modal-body bg-light text-dark">
+                {% if rec.actividad.recurso %}
+                  <div class="ratio ratio-16x9 mb-3 rounded-3 overflow-hidden shadow-sm">
+                    <iframe src="{{ rec.embed_url }}" title="Video de {{ rec.actividad.nombre_actividad }}" allowfullscreen></iframe>
+                  </div>
+                {% endif %}
+
+                <div class="mb-3 p-3 bg-white rounded-3 shadow-sm">
+                  <p>📝 <strong>Descripción:</strong> {{ rec.actividad.descripcion }}</p>
+                  <p>🛠️ <strong>Cómo realizarla:</strong> {{ rec.actividad.como_realizarla }}</p>
+                </div>
+
+                {% if rec.actividad.recurso %}
+                  <a href="{{ rec.actividad.recurso }}" target="_blank" class="btn btn-dark mt-2 w-100 rounded-pill fw-bold">
+                    🔗 Ver recurso completo
+                  </a>
+                {% endif %}
+              </div>
+              <div class="modal-footer bg-light">
+                <!-- Botón cerrar modal -->
+                <button type="button" class="btn btn-outline-dark rounded-pill fw-semibold" data-bs-dismiss="modal">
+                  Cerrar ❌
+                </button>
+
+                <!-- Botón finalizar actividad -->
+                <!-- Botón finalizar actividad (cierra sesión y luego encuesta) -->
+                <a href="{% url 'finalizar_y_encuesta' %}" 
+                  class="btn btn-success rounded-pill fw-bold text-white">
+                  Finalizar ✅
+                </a>
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+      {% endfor %}
+    {% else %}
+      <p class="text-secondary fs-5">No hay actividades disponibles para esta emoción 😅.</p>
+    {% endif %}
+    
+  </div>
+  <!-- Botón para ir a preguntas.html 
+<div class="mt-5 text-center">
+  <a href="{% url 'preguntas' %}" 
+     class="btn btn-primary btn-lg rounded-pill fw-bold shadow-lg"
+     style="background: linear-gradient(90deg, #6c63ff, #28a745); border: none;">
+    📝 Ir a Preguntas
+  </a>
+</div>-->
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<style>
+/* Títulos y emoticonos */
+.titulo-actividad .titulo-texto {
+  font-size: 1.3rem;
+  color: #343a40;
+}
+.titulo-actividad .emoticono {
+  margin-right: 0.3rem;
+  font-size: 1.5rem;
+}
+
+/* Tarjetas hover elegante */
+.actividad-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+.actividad-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 1.5rem 2.5rem rgba(0,0,0,0.25);
+  background: #e9ecef;
+}
+
+/* Barra de porcentaje */
+.progress {
+  background-color: #dee2e6;
+}
+.progress-bar {
+  transition: width 0.5s ease-in-out;
+}
+</style>
+<script>
+window.addEventListener("beforeunload", function (e) {
+    // Llamar al backend para cerrar sesión activa
+    navigator.sendBeacon("{% url 'cerrar_sesion_ajax' %}");
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 {% endblock %}
