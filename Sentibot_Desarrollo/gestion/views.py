@@ -457,6 +457,7 @@ def predict_emotion_view(request):
 # ENCUESTA DE SATISFACCIÓN
 # ============================================================
 from django.contrib import messages
+from .models import EncuestaSatisfaccion
 
 @login_required
 def encuesta_satisfaccion(request):
