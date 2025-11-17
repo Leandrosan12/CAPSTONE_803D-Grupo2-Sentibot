@@ -761,3 +761,94 @@ def cerrar_sesion_ajax(request):
         sesion.cerrar()
         return JsonResponse({"status": "ok", "message": "Sesión finalizada"})
     return JsonResponse({"status": "no_active_session"})
+
+######################################
+###### Actividade panel admin    #####
+######################################
+
+from django.core.paginator import Paginator
+from django.db.models import Q
+
+@login_required
+def admin_actividades(request):
+    query = request.GET.get('q', '')  # Búsqueda por texto
+    filtro_emocion = request.GET.get('emocion', '')  # Filtro por emoción
+
+    actividades = Actividad.objects.select_related("emocion").all()
+
+    # Aplicar filtro global
+    if query:
+        actividades = actividades.filter(
+            Q(nombre_actividad__icontains=query) |
+            Q(emocion__nombre_emocion__icontains=query)
+        )
+
+    if filtro_emocion:
+        actividades = actividades.filter(emocion__nombre_emocion=filtro_emocion)
+
+    # Paginación
+    paginator = Paginator(actividades.order_by('id'), 10)  # 10 por página
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    emociones = Emocion.objects.all()
+
+    return render(request, "admin_actividades.html", {
+        "actividades": page_obj,
+        "emociones": emociones,
+        "query": query,
+        "filtro_emocion": filtro_emocion,
+    })
+
+
+@login_required
+def editar_actividad(request, id):
+    actividad = Actividad.objects.get(id=id)
+
+    if request.method == 'POST':
+        actividad.nombre_actividad = request.POST['nombre_actividad']
+        actividad.descripcion = request.POST['descripcion']
+        actividad.emocion_id = request.POST['emocion_id']
+        actividad.como_realizarla = request.POST['como_realizarla']
+        actividad.importancia = request.POST['importancia']
+        actividad.recurso = request.POST['recurso']
+        actividad.save()
+
+        return redirect('actividadesconf')
+
+    emociones = Emocion.objects.all()
+    return render(request, 'actividades/editar_actividad.html', {
+        'actividad': actividad,
+        'emociones': emociones
+    })
+
+@login_required
+def eliminar_actividad(request, id):
+    actividad = get_object_or_404(Actividad, id=id)
+    actividad.delete()
+    return redirect('actividadesconf')
+
+@login_required
+def crear_actividad(request):
+    emociones = Emocion.objects.all()
+
+    if request.method == "POST":
+        nombre = request.POST.get("nombre_actividad")
+        descripcion = request.POST.get("descripcion")
+        emocion_id = request.POST.get("emocion_id")
+        como = request.POST.get("como_realizarla")
+        importancia = request.POST.get("importancia")
+        recurso = request.POST.get("recurso")
+
+        Actividad.objects.create(
+            nombre_actividad=nombre,
+            descripcion=descripcion,
+            emocion_id=emocion_id,
+            como_realizarla=como,
+            importancia=importancia,
+            recurso=recurso
+        )
+
+        return redirect("actividadesconf")
+
+    return render(request, "actividades/crear_actividad.html", {"emociones": emociones})

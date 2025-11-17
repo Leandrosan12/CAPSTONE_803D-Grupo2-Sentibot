@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+
+    <!-- TÍTULO -->
+    <div class="mb-4 text-center">
+        <h2 class="fw-bold text-white" style="text-shadow: 0 0 8px rgba(255,255,255,0.4);">
+            Editar Actividad
+        </h2>
+        <p class="text-light" style="opacity: 0.7;">
+            Modifica los detalles de la actividad seleccionada.
+        </p>
+    </div>
+
+    <!-- TARJETA FORMULARIO -->
+    <div class="card shadow-lg border-0 rounded-4 p-4">
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Nombre de la actividad</label>
+                <input type="text" name="nombre_actividad" class="form-control"
+                       value="{{ actividad.nombre_actividad }}" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Descripción</label>
+                <textarea name="descripcion" class="form-control" required>{{ actividad.descripcion }}</textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Emoción asociada</label>
+                <select name="emocion_id" class="form-control" required>
+                    {% for emo in emociones %}
+                        <option value="{{ emo.id }}" {% if emo.id == actividad.emocion.id %}selected{% endif %}>
+                            {{ emo.nombre_emocion }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Cómo realizarla</label>
+                <textarea name="como_realizarla" class="form-control" required>{{ actividad.como_realizarla }}</textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Importancia</label>
+                <input type="text" name="importancia" class="form-control"
+                       value="{{ actividad.importancia }}">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Recurso (opcional)</label>
+                <input type="text" name="recurso" class="form-control"
+                       value="{{ actividad.recurso }}">
+            </div>
+
+            <!-- BOTONES -->
+            <div class="d-flex justify-content-end gap-2 mt-4">
+                <button class="btn btn-primary px-4" type="submit">
+                    Guardar cambios
+                </button>
+
+                <a href="{% url 'actividadesconf' %}" class="btn btn-outline-dark px-4">
+                    Volver
+                </a>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+{% endblock %}

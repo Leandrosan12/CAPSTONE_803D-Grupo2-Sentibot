@@ -18,4 +18,65 @@
 <!-- <script src="{% static 'js/sidebar.js' %}"></script>-->
 <script src="{% static 'js/topbar.js' %}"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<<<<<<< HEAD
 {% block scripts %}{% endblock %}
+=======
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const h2 = document.querySelector(".h2-top-bar");
+  const ruta = window.location.pathname;
+
+  // Diccionario de nombres amigables para tus rutas
+  const nombresRutas = {
+    "/": "Iniciar Sesión",
+    "/home/": "Inicio",
+    "/perfil/": "Perfil",
+    "/registro/": "Registro",
+    "/logout/": "Cerrar Sesión",
+    "/camara/": "Cámara",
+    "/agenda/": "Agenda",
+    "/emociones-data/": "Datos de Emociones",
+    "/seguimiento/": "Seguimiento",
+    "/actividades/": "Actividades",
+    "/opciones/": "Opciones",
+    "/mantenimiento/": "Mantenimiento",
+    "/extra/": "Emociones",
+    "/modulo_profesor/": "Módulo Profesor",
+    "/modulo/": "Módulo Principal",
+    "/modulo/escuelas/": "Escuelas",
+    "/modulo/alumnos/": "Alumnos",
+    "/modulo/detalle_alumno/": "Detalle de Alumno",
+    "/predict_emotion/": "Predicción de Emoción",
+    "/procesar_emocion_camara/": "Procesar Emoción de Cámara",
+    "/seleccionar_emocion/": "Seleccionar Emoción",
+    "/dashboard_emociones/": "Dashboard de Emociones",
+    "/encuesta_satisfaccion/": "Encuesta de Satisfacción"
+  };
+
+  // Intenta encontrar coincidencia exacta o parcial
+  let nombre = nombresRutas[ruta];
+  if (!nombre) {
+    for (const [key, val] of Object.entries(nombresRutas)) {
+      if (ruta.startsWith(key) && key !== "/") {
+        nombre = val;
+        break;
+      }
+    }
+  }
+
+  // Asigna título por defecto si no hay coincidencia
+  nombre = nombre || "Página";
+
+  // Actualiza topbar
+  if (h2) h2.textContent = `/ ${nombre}`;
+
+  // Cambia el título del navegador dinámicamente
+  document.title = `Sentibot — ${nombre}`;
+});
+</script>
+
+
+
+{% block scripts %}{% endblock %}
+>>>>>>> origin/main

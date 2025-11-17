@@ -1,12 +1,13 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
+from django.db import models
+from django.contrib.auth.models import AbstractUser
+from django.conf import settings
 from django.utils import timezone
-
-# ============================================================
-# 1) ROLES Y ESCUELAS
-# ============================================================
-
+# ------------------------------
+# Roles y Escuelas
+# ------------------------------
 class Rol(models.Model):
     nombre = models.CharField(max_length=100)
     descripcion = models.TextField(blank=True, null=True)
@@ -18,21 +19,19 @@ class Rol(models.Model):
 class Escuela(models.Model):
     nombre = models.CharField(max_length=200)
     direccion = models.TextField(blank=True, null=True)
-    sede = models.CharField(max_length=100, default="Melipilla")
 
     def __str__(self):
         return self.nombre
 
 
-# ============================================================
-# 2) USUARIOS
-# ============================================================
-
+# ------------------------------
+# Usuario (extendiendo AbstractUser)
+# ------------------------------
 class Usuario(AbstractUser):
     email = models.EmailField(unique=True)
     telefono = models.CharField(max_length=20, blank=True, null=True)
-    rol = models.ForeignKey(Rol, on_delete=models.SET_NULL, null=True, blank=True, related_name="usuarios")
-    escuela = models.ForeignKey(Escuela, on_delete=models.SET_NULL, null=True, blank=True, related_name="usuarios")
+    rol = models.ForeignKey(Rol, on_delete=models.SET_NULL, null=True, related_name="usuarios")
+    escuela = models.ForeignKey(Escuela, on_delete=models.SET_NULL, null=True, related_name="usuarios")
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
@@ -41,36 +40,9 @@ class Usuario(AbstractUser):
         return self.email
 
 
-# ============================================================
-# 3) REPORTES
-# ============================================================
-
-class Reporte(models.Model):
-    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name="reportes")
-    tipo_reporte = models.CharField(max_length=50)
-    contenido = models.TextField()
-    fecha = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"Reporte {self.tipo_reporte} - {self.usuario.email}"
-
-
-# ============================================================
-# 4) EMOCIONES
-# ============================================================
-
-class Emocion(models.Model):
-    nombre_emocion = models.CharField(max_length=50)
-    descripcion = models.TextField(blank=True, null=True)
-
-    def __str__(self):
-        return self.nombre_emocion
-
-
-# ============================================================
-# 5) SESIONES
-# ============================================================
-
+# ------------------------------
+# Sesiones y Emociones
+# ------------------------------
 class Sesion(models.Model):
     usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name="sesiones")
     fecha_inicio = models.DateTimeField(auto_now_add=True)
@@ -78,6 +50,7 @@ class Sesion(models.Model):
     activa = models.BooleanField(default=True)
 
     def cerrar(self):
+        """Cierra la sesión si sigue activa."""
         if self.activa:
             self.fecha_fin = timezone.now()
             self.activa = False
@@ -88,17 +61,21 @@ class Sesion(models.Model):
         return f"Sesión {self.id} - {self.usuario.email} ({estado})"
 
 
-# ============================================================
-# 6) EMOCIÓN CÁMARA / EMOCIÓN REAL
-# ============================================================
+
+
+class Emocion(models.Model):
+    nombre_emocion = models.CharField(max_length=50)
+    descripcion = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.nombre_emocion
+
 
 class EmocionCamara(models.Model):
     sesion = models.ForeignKey(Sesion, on_delete=models.CASCADE, related_name="emociones_camara")
     nombre_emocion = models.CharField(max_length=50)
-    fecha = models.DateTimeField(auto_now_add=True)
     probabilidad = models.FloatField()
-    duracion = models.FloatField(null=True, blank=True)
-    fiabilidad = models.FloatField(null=True, blank=True)
+    fecha = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.nombre_emocion} - {self.sesion.usuario.email}"
@@ -108,27 +85,45 @@ class EmocionReal(models.Model):
     sesion = models.ForeignKey(Sesion, on_delete=models.CASCADE, related_name="emociones_reales")
     emocion = models.ForeignKey(Emocion, on_delete=models.CASCADE, related_name="emociones_reales")
     tipo_emocion = models.CharField(max_length=50)
-    porcentaje = models.FloatField(default=0.0)
+    porcentaje = models.FloatField(default=0.0, help_text="Promedio de probabilidad según la cámara")
 
     def calcular_porcentaje(self):
+        """
+        Calcula el promedio de probabilidad de esta emoción usando los registros
+        de EmocionCamara de la misma sesión y la emoción destacada.
+        """
         registros = self.sesion.emociones_camara.filter(nombre_emocion__iexact=self.tipo_emocion)
-
         if registros.exists():
             promedio = sum(r.probabilidad for r in registros) / registros.count()
             self.porcentaje = round(promedio, 2)
         else:
             self.porcentaje = 0.0
-
         self.save()
 
     def __str__(self):
         return f"{self.tipo_emocion} - {self.sesion.usuario.email} ({self.porcentaje}%)"
 
 
-# ============================================================
-# 7) ENCUESTAS (ENCUESTA - PREGUNTA - RESPUESTA)
-# ============================================================
 
+# ------------------------------
+# Actividades
+# ------------------------------
+class Actividad(models.Model):
+    nombre_actividad = models.CharField(max_length=100)
+    descripcion = models.TextField(blank=True, null=True)
+    importancia = models.TextField(blank=True, null=True)
+    como_realizarla = models.TextField(blank=True, null=True)
+    recurso = models.TextField(blank=True, null=True)
+    emocion = models.ForeignKey(Emocion, on_delete=models.CASCADE, related_name="actividades")
+
+    def __str__(self):
+        return self.nombre_actividad
+
+
+
+# ------------------------------
+# Encuestas
+# ------------------------------
 class Encuesta(models.Model):
     nombre = models.CharField(max_length=200)
     tipo = models.CharField(max_length=100)
@@ -158,56 +153,23 @@ class RespuestaPregunta(models.Model):
     respuesta = models.TextField()
 
 
-# ============================================================
-# 8) ACTIVIDADES POR EMOCIÓN
-# ============================================================
-
-class Actividad(models.Model):
-    nombre_actividad = models.CharField(max_length=100)
-    descripcion = models.TextField(blank=True, null=True)
-    importancia = models.TextField(blank=True, null=True)
-    como_realizarla = models.TextField(blank=True, null=True)
-    recurso = models.TextField(blank=True, null=True)
-    emocion = models.ForeignKey(Emocion, on_delete=models.CASCADE, related_name="actividades")
+# ------------------------------
+# Reportes
+# ------------------------------
+class Reporte(models.Model):
+    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name="reportes")
+    tipo_reporte = models.CharField(max_length=50)
+    contenido = models.TextField()
+    fecha = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.nombre_actividad
+        return f"Reporte {self.tipo_reporte} - {self.usuario.email}"
 
 
-# ============================================================
-# 9) SCHOOLS - STUDENTS
-# ============================================================
 
-class School(models.Model):
-    name = models.CharField(max_length=200)
-    sede = models.CharField(max_length=100, blank=True)
-    description = models.TextField(blank=True)
-
-    def __str__(self):
-        return self.name
-
-
-class Student(models.Model):
-    rut = models.CharField(max_length=20, unique=True)
-    nombre = models.CharField(max_length=200)
-    sede = models.CharField(max_length=100)
-    edad = models.PositiveIntegerField(null=True, blank=True)
-    correo = models.EmailField(blank=True)
-    telefono = models.CharField(max_length=50, blank=True)
-    school = models.ForeignKey(School, related_name='students', on_delete=models.SET_NULL, null=True, blank=True)
-
-    def __str__(self):
-        return f"{self.nombre} ({self.rut})"
-
-    class Meta:
-        managed = False
-        db_table = 'vw_emociones_camara'
-
-
-# ============================================================
-# 10) RESUMEN EMOCIONES (Dashboard)
-# ============================================================
-
+# ------------------------------
+# Vista / Historial de emociones (opcional)
+# ------------------------------
 class EmotionSession(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
@@ -227,16 +189,42 @@ class EmotionSession(models.Model):
     fecha = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Sesión de {self.user.email} - {self.fecha.strftime('%Y-%m-%d %H:%M:%S')}"
+        return f"Sesión de {self.user or 'Anónimo'} - {self.fecha.strftime('%Y-%m-%d %H:%M:%S')}"
 
 
-# ============================================================
-# 11) ENCUESTA SATISFACCIÓN (1 a 1 con Sesión)
-# ============================================================
+# ------------------------------
+# Modelos de módulos adicionales (flexibles)
+# ------------------------------
+class School(models.Model):
+    name = models.CharField(max_length=200)
+    sede = models.CharField(max_length=100, blank=True)
+    description = models.TextField(blank=True)
+
+    def __str__(self):
+        return self.name
+
+
+class Student(models.Model):
+    rut = models.CharField(max_length=20, unique=True)
+    nombre = models.CharField(max_length=200)
+    sede = models.CharField(max_length=100)
+    edad = models.PositiveIntegerField(null=True, blank=True)
+    correo = models.EmailField(blank=True)
+    telefono = models.CharField(max_length=50, blank=True)
+    school = models.ForeignKey(School, related_name='students', on_delete=models.SET_NULL, null=True, blank=True)
+
+    class Meta:
+        managed = False  # Django no crea ni modifica esta tabla (vista)
+        db_table = 'vw_emociones_camara'
+
+    def __str__(self):
+        return f"{self.nombre} ({self.rut})"
+
+from django.db import models
 
 class EncuestaSatisfaccion(models.Model):
-    sesion = models.OneToOneField(
-        Sesion,
+    sesion = models.OneToOneField(  # 🔗 relación 1 a 1 con la sesión
+        'Sesion',
         on_delete=models.CASCADE,
         related_name='encuesta',
         null=True,
