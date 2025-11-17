@@ -498,8 +498,7 @@ def camara(request):
         sesion = Sesion.objects.create(usuario=request.user)
     return render(request, "camara.html", {"sesion_id": sesion.id})
 
-def extra(request):
-    return render(request, 'extra.html')
+
 
 def agenda_view(request):
     return render(request, 'agenda.html')
