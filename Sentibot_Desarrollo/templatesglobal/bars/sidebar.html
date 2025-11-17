@@ -1,7 +1,6 @@
 {% load static %}
 <link rel="stylesheet" href="{% static 'css/siderbar.css' %}">
 
-
 <nav class="sidebar" id="sidebar">
     <h2 class="titulo-sidebar">
         <img src="{% static 'Icon/senti.png' %}" alt="icono Sentibot" class="icono">
@@ -12,8 +11,6 @@
 
     {% if user.is_staff %}
         {# ---- MÓDULOS PARA ADMINISTRADORES ---- #}
-
-      
 
         <a href="{% url 'modulo_profesor' %}">
             <img src="{% static 'Icon/lupa.png' %}" alt="Módulo Profesor"> Módulo Profesor
@@ -26,6 +23,14 @@
         <a href="{% url 'mantenimiento' %}">
             <img src="{% static 'Icon/reserva.png' %}" alt="Reserva"> Reserva
         </a>
+
+        <!-- Nuevo módulo: Administrar Actividades -->
+        <a href="{% url 'actividadesconf' %}">
+            <img src="{% static 'Icon/ejercicio.png' %}" alt="Actividades Config">
+            Configurar Actividades
+        </a>
+
+
 
     {% else %}
         {# ---- MÓDULOS PARA USUARIOS NORMALES ---- #}

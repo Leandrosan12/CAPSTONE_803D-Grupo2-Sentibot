@@ -15,7 +15,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
 ]
 
 AUTH_USER_MODEL = 'gestion.Usuario'
@@ -65,6 +64,19 @@ AUTH_USER_MODEL = 'gestion.Usuario'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+<<<<<<< HEAD
+=======
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'sentibot',
+        'USER': 'root',
+        'PASSWORD': 'lilo1309',
+        'HOST': 'localhost',
+        'PORT': '3306',
+    }
+}
+>>>>>>> origin/main
 
 
 
