@@ -26,7 +26,7 @@ urlpatterns = [
 
     # --- 🧩 Módulos principales ---
     path('modulo/', views.modulo, name='modulo'),
-
+    path('actualizar_alumno/<int:alumno_id>/', views.actualizar_alumno, name='actualizar_alumno'),
     # --- 👨‍🏫 Módulo del profesor ---
     path('modulo_profesor/', views.modulo_profesor, name='modulo_profesor'),  # Vista principal del módulo profesor
     path('grafico_profesor/', views.grafico_profesor, name='grafico_profesor'),  # Dashboard emocional del profesor

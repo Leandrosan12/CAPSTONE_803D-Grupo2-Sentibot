@@ -1,129 +1,142 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const alumnoCard = document.getElementById("alumnoInfo");
-  const btnEditar = document.getElementById("btnEditar");
-  const btnHistorial = document.getElementById("btnHistorial");
-  const btnCerrarHistorial = document.getElementById("btnCerrarHistorial");
-  const historialContainer = document.getElementById("historialContainer");
-  const resumenEmociones = document.getElementById("resumenEmociones");
-  const listaActividades = document.getElementById("listaActividades");
-  const btnDescargarPDF = document.getElementById("btnDescargarPDF");
-  const canvas = document.getElementById("chartEmociones");
+document.addEventListener("DOMContentLoaded", function () {
+    // -----------------------------
+    // Elementos del DOM
+    // -----------------------------
+    const alumnoCard = document.getElementById("alumnoInfo");
+    const editarForm = document.getElementById("editarForm");
 
-  if (!alumnoCard) {
-    console.error("❌ No se encontró el contenedor del alumno (alumnoInfo).");
-    return;
-  }
+    const btnEditar = document.getElementById("btnEditar");
+    const btnGuardar = document.getElementById("btnGuardar");
+    const btnCancelar = document.getElementById("btnCancelar");
 
-  // Leer datos del alumno
-  const alumnoId = alumnoCard.dataset.alumnoId;
-  const nombre = alumnoCard.dataset.nombre;
-  const sede = alumnoCard.dataset.escuela;
-  const email = alumnoCard.dataset.email;
-  const rut = alumnoCard.dataset.rut;
-  const rol = alumnoCard.dataset.rol;
+    const id = alumnoCard.dataset.id;
 
-  // Datos simulados (reemplázalos si quieres con datos reales)
-  const emociones = [
-    { tipo: "Felicidad", porcentaje: 40 },
-    { tipo: "Tristeza", porcentaje: 20 },
-    { tipo: "Ira", porcentaje: 15 },
-    { tipo: "Sorpresa", porcentaje: 10 },
-    { tipo: "Neutral", porcentaje: 15 }
-  ];
+    const editNombre = document.getElementById("editNombre");
+    const editApellido = document.getElementById("editApellido");
+    const editEmail = document.getElementById("editEmail");
+    const editEscuela = document.getElementById("editEscuela");
+    const editRol = document.getElementById("editRol");
 
-  const actividades = [
-    "Participó en una dinámica grupal (Emoción: Felicidad)",
-    "Entrevista de autoevaluación emocional (Emoción: Tristeza)",
-    "Presentación oral (Emoción: Sorpresa)",
-    "Trabajo colaborativo (Emoción: Neutral)"
-  ];
-
-  // Botón HISTORIAL
-  btnHistorial.addEventListener("click", () => {
-    historialContainer.style.display = "block";
-
-    resumenEmociones.innerHTML = `
-      <p class="lead">
-        Registro de emociones detectadas mediante cámara y actividades asociadas.
-      </p>
-      <p><strong>Emoción predominante:</strong> ${emociones[0].tipo}</p>
-    `;
-
-    // Renderizar gráfico
-    const ctx = canvas.getContext("2d");
-    new Chart(ctx, {
-      type: "pie",
-      data: {
-        labels: emociones.map(e => e.tipo),
-        datasets: [{
-          data: emociones.map(e => e.porcentaje),
-          backgroundColor: ["#28a745", "#007bff", "#ffc107", "#dc3545", "#6c757d"]
-        }]
-      },
-      options: {
-        plugins: { legend: { position: "bottom" } },
-        responsive: false
-      }
-    });
-
-    // Listar actividades
-    listaActividades.innerHTML = "";
-    actividades.forEach(a => {
-      const li = document.createElement("li");
-      li.className = "list-group-item";
-      li.textContent = a;
-      listaActividades.appendChild(li);
-    });
-  });
-
-  // Botón CERRAR HISTORIAL
-  btnCerrarHistorial.addEventListener("click", () => {
-    historialContainer.style.display = "none";
-  });
-
-  // Botón EDITAR
-  btnEditar.addEventListener("click", () => {
-    if (alumnoId) {
-      window.location.href = `/editar_alumno/${alumnoId}/`;
-    } else {
-      alert("No se pudo identificar el alumno.");
+    // -----------------------------
+    // Función para setear select
+    // -----------------------------
+    function setSelectValue(selectElement, value) {
+        if (!value) return;
+        for (const opt of selectElement.options) {
+            if (String(opt.value) === String(value)) {
+                opt.selected = true;
+                break;
+            }
+        }
     }
-  });
 
-  // Botón DESCARGAR PDF
-  btnDescargarPDF.addEventListener("click", async () => {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    const fechaHora = new Date().toLocaleString();
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(16);
-    doc.text(sede, 20, 20);
-    doc.setFontSize(14);
-    doc.text("Informe de Emociones y Actividades", 20, 30);
-
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(11);
-    doc.text("Generado: " + fechaHora, 20, 40);
-    doc.text("Alumno: " + nombre, 20, 50);
-    doc.text("Correo: " + email, 20, 60);
-    doc.text("Rut: " + rut, 20, 70);
-    doc.text("Rol: " + rol, 20, 80);
-    doc.text("Emoción predominante: " + emociones[0].tipo, 20, 90);
-
-    // Lista de actividades
-    let y = 105;
-    doc.text("Actividades:", 20, y);
-    y += 10;
-    actividades.forEach(a => {
-      doc.text("- " + a, 25, y);
-      y += 10;
-      if (y > 270) {
-        doc.addPage();
-        y = 20;
-      }
+    // -----------------------------
+    // Abrir formulario de edición
+    // -----------------------------
+    btnEditar.addEventListener("click", () => {
+        editNombre.value = alumnoCard.dataset.nombre;
+        editApellido.value = alumnoCard.dataset.apellido;
+        editEmail.value = alumnoCard.dataset.email;
+        setSelectValue(editEscuela, alumnoCard.dataset.escuela);
+        setSelectValue(editRol, alumnoCard.dataset.rol);
+        editarForm.style.display = "block";
     });
 
-    doc.save(`Informe_${nombre.replace(/\s+/g, "_")}.pdf`);
-  });
+    // -----------------------------
+    // Cancelar edición
+    // -----------------------------
+    btnCancelar.addEventListener("click", () => {
+        editarForm.style.display = "none";
+    });
+
+    // -----------------------------
+    // Guardar cambios vía POST
+    // -----------------------------
+    btnGuardar.addEventListener("click", async () => {
+        const datos = {
+            nombre: editNombre.value,
+            apellido: editApellido.value,
+            email: editEmail.value,
+            escuela: editEscuela.value,
+            rol: editRol.value
+        };
+
+        try {
+            const response = await fetch(`/actualizar_alumno/${id}/`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCookie("csrftoken")
+                },
+                body: JSON.stringify(datos)
+            });
+
+            if (response.ok) {
+                alert("Alumno actualizado correctamente.");
+                location.reload();
+            } else {
+                const errorData = await response.json();
+                alert("Error al actualizar el alumno: " + (errorData.error || "Error desconocido"));
+            }
+        } catch (err) {
+            alert("Error en la petición: " + err);
+        }
+    });
+
+    // -----------------------------
+    // Función para obtener cookie CSRF
+    // -----------------------------
+    function getCookie(name) {
+        const cookies = document.cookie.split(";");
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + "=")) {
+                return decodeURIComponent(cookie.substring(name.length + 1));
+            }
+        }
+        return null;
+    }
+
+    // ==========================
+    // Gráfico Pie - Emociones
+    // ==========================
+    const emo = document.getElementById("emocionesData").dataset;
+    new Chart(document.getElementById("pieChartEmociones"), {
+        type: "pie",
+        data: {
+            labels: ["Feliz", "Triste", "Neutral", "Enojado", "Sorprendido"],
+            datasets: [{
+                data: [
+                    parseInt(emo.feliz) || 0,
+                    parseInt(emo.triste) || 0,
+                    parseInt(emo.neutral) || 0,
+                    parseInt(emo.enojado) || 0,
+                    parseInt(emo.sorprendido) || 0
+                ],
+                backgroundColor: ['#FFD700','#1E90FF','#A9A9A9','#FF4500','#FF69B4']
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+
+    // ==========================
+    // Gráfico Barras - Encuesta
+    // ==========================
+    const encuesta = document.getElementById("encuestaData").dataset;
+    new Chart(document.getElementById("barChartEncuesta"), {
+        type: "bar",
+        data: {
+            labels: ["Recomendación"],
+            datasets: [{
+                label: "Puntaje",
+                data: [parseInt(encuesta.recomendacion) || 0],
+                backgroundColor: ['#4CAF50']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: { y: { beginAtZero: true, max: 10 } }
+        }
+    });
 });

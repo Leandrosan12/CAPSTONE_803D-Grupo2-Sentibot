@@ -4,8 +4,9 @@ from django.conf import settings
 from django.utils import timezone
 
 # ------------------------------
-# Roles y Escuelas
+# ROLES Y ESCUELAS
 # ------------------------------
+
 class Rol(models.Model):
     nombre = models.CharField(max_length=100)
     descripcion = models.TextField(blank=True, null=True)
@@ -23,8 +24,9 @@ class Escuela(models.Model):
 
 
 # ------------------------------
-# Usuario personalizado
+# USUARIO PERSONALIZADO
 # ------------------------------
+
 class Usuario(AbstractUser):
     email = models.EmailField(unique=True)
     telefono = models.CharField(max_length=20, blank=True, null=True)
@@ -32,15 +34,16 @@ class Usuario(AbstractUser):
     escuela = models.ForeignKey(Escuela, on_delete=models.SET_NULL, null=True, related_name="usuarios")
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = []  # Se elimina username como obligatorio
 
     def __str__(self):
         return self.email
 
 
 # ------------------------------
-# Sesiones y Emociones
+# SESIONES Y EMOCIONES
 # ------------------------------
+
 class Sesion(models.Model):
     usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="sesiones")
     fecha_inicio = models.DateTimeField(auto_now_add=True)
@@ -96,8 +99,9 @@ class EmocionReal(models.Model):
 
 
 # ------------------------------
-# Actividades
+# ACTIVIDADES
 # ------------------------------
+
 class Actividad(models.Model):
     nombre_actividad = models.CharField(max_length=100)
     descripcion = models.TextField(blank=True, null=True)
@@ -111,8 +115,9 @@ class Actividad(models.Model):
 
 
 # ------------------------------
-# Encuestas
+# ENCUESTAS
 # ------------------------------
+
 class Encuesta(models.Model):
     nombre = models.CharField(max_length=200)
     tipo = models.CharField(max_length=100)
@@ -143,8 +148,9 @@ class RespuestaPregunta(models.Model):
 
 
 # ------------------------------
-# Reportes
+# REPORTES
 # ------------------------------
+
 class Reporte(models.Model):
     usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="reportes")
     tipo_reporte = models.CharField(max_length=50)
@@ -156,8 +162,9 @@ class Reporte(models.Model):
 
 
 # ------------------------------
-# EmotionSession
+# EMOTION SESSION (RESUMEN)
 # ------------------------------
+
 class EmotionSession(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
@@ -181,8 +188,9 @@ class EmotionSession(models.Model):
 
 
 # ------------------------------
-# School (vista externa)
+# VISTA EXTERNA: STUDENT
 # ------------------------------
+
 class School(models.Model):
     name = models.CharField(max_length=200)
     sede = models.CharField(max_length=100, blank=True)
@@ -210,8 +218,9 @@ class Student(models.Model):
 
 
 # ------------------------------
-# Encuesta de satisfacción
+# ENCUESTA SATISFACCIÓN
 # ------------------------------
+
 class EncuestaSatisfaccion(models.Model):
     sesion = models.OneToOneField(
         'Sesion',

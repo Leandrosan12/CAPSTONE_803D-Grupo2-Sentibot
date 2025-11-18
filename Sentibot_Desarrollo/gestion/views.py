@@ -9,6 +9,7 @@ import base64
 from io import BytesIO
 from datetime import timedelta
 from random import randint, sample
+from .models import EncuestaSatisfaccion
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
@@ -249,9 +250,148 @@ def alumnos(request):
     return render(request, 'modulo/alumnos.html', {'usuarios': usuarios})
 
 
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .models import Usuario, Escuela, Rol, Sesion, EmocionCamara, EncuestaSatisfaccion
+from django.db.models import Count
+import json
+
 def detalle_alumno(request, alumno_id):
     alumno = get_object_or_404(Usuario, id=alumno_id)
-    return render(request, 'modulo/detalle_alumno.html', {'alumno': alumno})
+    escuelas = Escuela.objects.all()
+    roles = Rol.objects.all()
+
+    # ----------------------------
+    # 📌 EMOCIONES DEL ALUMNO
+    # ----------------------------
+    sesion = Sesion.objects.filter(usuario=alumno).order_by('-fecha_inicio').first()
+
+    emociones_data = {
+        'Feliz': 0,
+        'Triste': 0,
+        'Neutral': 0,
+        'Enojado': 0,
+        'Sorprendido': 0
+    }
+
+    if sesion:
+        emociones_contadas = (
+            EmocionCamara.objects.filter(sesion=sesion)
+            .values('nombre_emocion')
+            .annotate(total=Count('nombre_emocion'))
+        )
+        for item in emociones_contadas:
+            emo = item['nombre_emocion'].lower().strip()
+            # Normalización
+            if emo in ["surprised", "sorpresa", "sorprendida"]:
+                emo = "sorprendido"
+            elif emo in ["happy", "feliz"]:
+                emo = "feliz"
+            elif emo in ["sad", "triste"]:
+                emo = "triste"
+            elif emo in ["neutral", "neutral"]:
+                emo = "neutral"
+            elif emo in ["angry", "enojado"]:
+                emo = "enojado"
+
+            emo = emo.capitalize()
+            if emo in emociones_data:
+                emociones_data[emo] = item['total']
+
+    # ----------------------------
+    # 📌 ENCUESTA DE SATISFACCIÓN
+    # ----------------------------
+    encuesta = EncuestaSatisfaccion.objects.filter(sesion=sesion).first()
+    encuesta_data = {
+        "utilidad": encuesta.utilidad if encuesta else 0,
+        "recomendacion": encuesta.recomendacion if encuesta else 0
+    }
+
+    return render(request, 'modulo/detalle_alumno.html', {
+        'alumno': alumno,
+        'escuelas': escuelas,
+        'roles': roles,
+        'emociones_data': emociones_data,
+        'encuesta_data': encuesta_data
+    })
+
+
+# ----------------------------
+# AJAX: ACTUALIZAR ALUMNO
+# ----------------------------
+@csrf_exempt
+def actualizar_alumno(request, alumno_id):
+    if request.method == "POST":
+        alumno = get_object_or_404(Usuario, id=alumno_id)
+        data = json.loads(request.body)
+
+        alumno.first_name = data.get('nombre', alumno.first_name)
+        alumno.last_name = data.get('apellido', alumno.last_name)
+        alumno.email = data.get('email', alumno.email)
+
+        escuela_id = data.get('escuela')
+        rol_id = data.get('rol')
+
+        if escuela_id:
+            alumno.escuela_id = escuela_id
+        if rol_id:
+            alumno.rol_id = rol_id
+
+        alumno.save()
+        return JsonResponse({"status": "ok"})
+    return JsonResponse({"status": "error"}, status=400)
+
+# ----------------------------
+# AJAX: ACTUALIZAR ALUMNO
+# ----------------------------
+@csrf_exempt
+def actualizar_alumno(request, alumno_id):
+    if request.method == "POST":
+        alumno = get_object_or_404(Usuario, id=alumno_id)
+        data = json.loads(request.body)
+
+        alumno.first_name = data.get('nombre', alumno.first_name)
+        alumno.last_name = data.get('apellido', alumno.last_name)
+        alumno.email = data.get('email', alumno.email)
+
+        escuela_id = data.get('escuela')
+        rol_id = data.get('rol')
+
+        if escuela_id:
+            alumno.escuela_id = escuela_id
+        if rol_id:
+            alumno.rol_id = rol_id
+
+        alumno.save()
+        return JsonResponse({"status": "ok"})
+    return JsonResponse({"status": "error"}, status=400)
+
+# =============================
+# POST PARA ACTUALIZAR ALUMNO
+# =============================
+@csrf_exempt
+def actualizar_alumno(request, alumno_id):
+    if request.method == "POST":
+        alumno = get_object_or_404(Usuario, id=alumno_id)
+        data = json.loads(request.body)
+
+        alumno.first_name = data.get('nombre', alumno.first_name)
+        alumno.last_name = data.get('apellido', alumno.last_name)
+        alumno.email = data.get('email', alumno.email)
+
+        escuela_id = data.get('escuela')
+        rol_id = data.get('rol')
+
+        if escuela_id:
+            alumno.escuela = Escuela.objects.get(id=escuela_id)
+        if rol_id:
+            alumno.rol = Rol.objects.get(id=rol_id)
+
+        alumno.save()
+        return JsonResponse({"status": "ok"})
+
+    return JsonResponse({"status": "error", "message": "Método no permitido"}, status=400)
 
 
 
