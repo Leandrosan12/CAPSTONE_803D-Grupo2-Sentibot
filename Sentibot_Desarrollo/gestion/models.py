@@ -1,10 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
-from django.db import models
-from django.contrib.auth.models import AbstractUser
-from django.conf import settings
 from django.utils import timezone
+
 # ------------------------------
 # Roles y Escuelas
 # ------------------------------
@@ -25,7 +23,7 @@ class Escuela(models.Model):
 
 
 # ------------------------------
-# Usuario (extendiendo AbstractUser)
+# Usuario personalizado
 # ------------------------------
 class Usuario(AbstractUser):
     email = models.EmailField(unique=True)
@@ -44,13 +42,12 @@ class Usuario(AbstractUser):
 # Sesiones y Emociones
 # ------------------------------
 class Sesion(models.Model):
-    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name="sesiones")
+    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="sesiones")
     fecha_inicio = models.DateTimeField(auto_now_add=True)
     fecha_fin = models.DateTimeField(blank=True, null=True)
     activa = models.BooleanField(default=True)
 
     def cerrar(self):
-        """Cierra la sesión si sigue activa."""
         if self.activa:
             self.fecha_fin = timezone.now()
             self.activa = False
@@ -59,8 +56,6 @@ class Sesion(models.Model):
     def __str__(self):
         estado = "Activa" if self.activa else "Cerrada"
         return f"Sesión {self.id} - {self.usuario.email} ({estado})"
-
-
 
 
 class Emocion(models.Model):
@@ -85,13 +80,9 @@ class EmocionReal(models.Model):
     sesion = models.ForeignKey(Sesion, on_delete=models.CASCADE, related_name="emociones_reales")
     emocion = models.ForeignKey(Emocion, on_delete=models.CASCADE, related_name="emociones_reales")
     tipo_emocion = models.CharField(max_length=50)
-    porcentaje = models.FloatField(default=0.0, help_text="Promedio de probabilidad según la cámara")
+    porcentaje = models.FloatField(default=0.0)
 
     def calcular_porcentaje(self):
-        """
-        Calcula el promedio de probabilidad de esta emoción usando los registros
-        de EmocionCamara de la misma sesión y la emoción destacada.
-        """
         registros = self.sesion.emociones_camara.filter(nombre_emocion__iexact=self.tipo_emocion)
         if registros.exists():
             promedio = sum(r.probabilidad for r in registros) / registros.count()
@@ -102,7 +93,6 @@ class EmocionReal(models.Model):
 
     def __str__(self):
         return f"{self.tipo_emocion} - {self.sesion.usuario.email} ({self.porcentaje}%)"
-
 
 
 # ------------------------------
@@ -118,7 +108,6 @@ class Actividad(models.Model):
 
     def __str__(self):
         return self.nombre_actividad
-
 
 
 # ------------------------------
@@ -143,13 +132,13 @@ class Pregunta(models.Model):
 
 class RespuestaEncuesta(models.Model):
     encuesta = models.ForeignKey(Encuesta, on_delete=models.CASCADE, related_name="respuestas")
-    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name="respuestas_encuesta")
+    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="respuestas_encuesta")
     respuesta = models.TextField()
 
 
 class RespuestaPregunta(models.Model):
     pregunta = models.ForeignKey(Pregunta, on_delete=models.CASCADE, related_name="respuestas")
-    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name="respuestas_preguntas")
+    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="respuestas_preguntas")
     respuesta = models.TextField()
 
 
@@ -157,7 +146,7 @@ class RespuestaPregunta(models.Model):
 # Reportes
 # ------------------------------
 class Reporte(models.Model):
-    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name="reportes")
+    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="reportes")
     tipo_reporte = models.CharField(max_length=50)
     contenido = models.TextField()
     fecha = models.DateTimeField(auto_now_add=True)
@@ -166,9 +155,8 @@ class Reporte(models.Model):
         return f"Reporte {self.tipo_reporte} - {self.usuario.email}"
 
 
-
 # ------------------------------
-# Vista / Historial de emociones (opcional)
+# EmotionSession
 # ------------------------------
 class EmotionSession(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -189,11 +177,11 @@ class EmotionSession(models.Model):
     fecha = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Sesión de {self.user or 'Anónimo'} - {self.fecha.strftime('%Y-%m-%d %H:%M:%S')}"
+        return f"Sesión de {self.user} - {self.fecha}"
 
 
 # ------------------------------
-# Modelos de módulos adicionales (flexibles)
+# School (vista externa)
 # ------------------------------
 class School(models.Model):
     name = models.CharField(max_length=200)
@@ -214,16 +202,18 @@ class Student(models.Model):
     school = models.ForeignKey(School, related_name='students', on_delete=models.SET_NULL, null=True, blank=True)
 
     class Meta:
-        managed = False  # Django no crea ni modifica esta tabla (vista)
+        managed = False
         db_table = 'vw_emociones_camara'
 
     def __str__(self):
         return f"{self.nombre} ({self.rut})"
 
-from django.db import models
 
+# ------------------------------
+# Encuesta de satisfacción
+# ------------------------------
 class EncuestaSatisfaccion(models.Model):
-    sesion = models.OneToOneField(  # 🔗 relación 1 a 1 con la sesión
+    sesion = models.OneToOneField(
         'Sesion',
         on_delete=models.CASCADE,
         related_name='encuesta',
