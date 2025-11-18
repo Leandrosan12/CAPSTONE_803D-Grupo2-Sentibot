@@ -50,7 +50,7 @@ def login(request):
         user = authenticate(request, email=email, password=password)
         if user is not None and user.is_active:
             auth_login(request, user)
-            return redirect('camara')
+            return redirect('perfil')
         return render(request, 'login.html', {'error': 'Correo o contraseña incorrectos'})
     return render(request, 'login.html')
 
