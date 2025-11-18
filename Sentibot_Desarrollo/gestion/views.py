@@ -872,8 +872,6 @@ def emociones_por_escuela(request):
         .annotate(total=Count("id"))               # Cuenta cuántas veces aparece
         .order_by("sesion__usuario__escuela__nombre")
     )
-
-    # Formato más limpio
     result = {}
     for item in data:
         escuela = item["sesion__usuario__escuela__nombre"]
