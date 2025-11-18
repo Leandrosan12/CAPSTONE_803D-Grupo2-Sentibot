@@ -5,7 +5,6 @@
 
 {% block content %}
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="{% static 'css/grafico_profesor.css' %}">
 
 <style>
     .card {
@@ -14,23 +13,13 @@
     }
     .card-chart {
         position: relative;
-        height: 300px;
+        height: 350px;
         width: 100%;
         margin: auto;
     }
-    .card h4 {
-        font-size: 1.2rem;
-        margin-bottom: 0.5rem;
-    }
-
-    /* Ocultar botones EN EL PDF */
     @media print {
-        .no-print {
-            display: none !important;
-        }
+        .no-print { display: none !important; }
     }
-
-    /* Contenedor del PDF */
     #pdfContenido {
         background: white;
         padding: 20px;
@@ -39,174 +28,106 @@
 
 <div class="dashboard-wrapper container-fluid py-5">
 
-  <!-- =============================== -->
-  <!-- CABECERA (Botones ocultos en PDF) -->
-  <!-- =============================== -->
+  <!-- CABECERA (NO SALE EN PDF) -->
   <div class="dashboard-header mb-4 text-center no-print">
-    <h2>📊 Dashboard Emocional – Escuela</h2>
+    <h2>📊 Dashboard Emocional – {{ escuela.nombre }}</h2>
 
     <div class="acciones mt-3">
-      <a href="{% url 'modulo_profesor' %}" class="btn btn-volver">⬅️ Volver al Módulo Profesor</a>
-      <button id="descargarPDF" class="btn btn-descargar">📄 Descargar PDF</button>
+      <a href="{% url 'modulo_profesor' %}" class="btn btn-secondary">⬅️ Volver</a>
+      <button id="descargarPDF" class="btn btn-primary">📄 Descargar PDF</button>
     </div>
   </div>
 
-  <!-- ========================================= -->
-  <!-- TODO LO QUE VA DENTRO DEL PDF              -->
-  <!-- ========================================= -->
+  <!-- CONTENIDO DEL PDF -->
   <div id="pdfContenido">
 
     <div class="text-center mb-4">
-      <h2 class="fw-bold">📊 Dashboard Emocional – {{ datosEscuelas.0.escuela|default:"Escuela" }}</h2>
-
-      <!-- Fecha y hora SOLO para PDF -->
+      <h2 class="fw-bold">📊 Dashboard Emocional – {{ escuela.nombre }}</h2>
       <p id="infoPDF" class="fw-bold"></p>
     </div>
 
     <div class="container">
       <div class="row g-4 justify-content-center">
 
-        <div class="col-12 col-md-6 col-lg-5">
-          <div class="card w-100 p-2">
-            <h4 class="text-center">Totales Globales de Emociones (Suma de %)</h4>
+        <!-- GRÁFICO PRINCIPAL -->
+        <div class="col-12 col-md-10">
+          <div class="card w-100 p-3">
+            <h4 class="text-center">Usuarios por Emoción</h4>
             <div class="card-chart">
-              <canvas id="graficoTotales"></canvas>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-12 col-md-6 col-lg-5">
-          <div class="card w-100 p-2">
-            <h4 class="text-center">Duración Promedio por Escuela (Segundos)</h4>
-            <div class="card-chart">
-              <canvas id="graficoDuracion"></canvas>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-12 col-md-6 col-lg-5">
-          <div class="card w-100 p-2">
-            <h4 class="text-center">Satisfacción General por Escuela (Conteo Si/No)</h4>
-            <div class="card-chart">
-              <canvas id="graficoSatisfaccion"></canvas>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-12 col-md-6 col-lg-5">
-          <div class="card w-100 p-2">
-            <h4 class="text-center">Distribución Emocional (Suma de %)</h4>
-            <div class="card-chart">
-              <canvas id="graficoTelecom"></canvas>
+              <canvas id="graficoUsuariosEmocion"></canvas>
             </div>
           </div>
         </div>
 
       </div>
     </div>
-
   </div>
-
 </div>
 
-<!-- ====================== -->
-<!-- SCRIPT: ChartJS       -->
-<!-- ====================== -->
+<!-- LIBRERÍAS -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<!-- html2canvas -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
-<!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
-// ==========================
-// VARIABLES DESDE DJANGO
-// ==========================
-const emocionesGlobales = JSON.parse(`{{ emociones_globales|safe }}`);
-const datosDuracion = JSON.parse(`{{ datos_duracion|safe }}`);
-const datosSatisfaccion = JSON.parse(`{{ datos_satisfaccion|safe }}`);
-const datosEscuelas = JSON.parse(`{{ datos_emociones|safe }}`);
+/* ================================
+   DATOS DE DJANGO → JAVASCRIPT
+   ================================ */
+const emocionesEscuela = {{ emociones_por_escuela|safe }};
 
-const datosTelecom = datosEscuelas.length ? datosEscuelas[0].porcentajes : {};
-const nombreEscuela = datosEscuelas.length ? datosEscuelas[0].escuela : "Escuela";
+console.log("📊 Datos recibidos:", emocionesEscuela);
 
-// ==========================
-// FECHA Y HORA SOLO EN PDF
-// ==========================
+/* FECHA PDF */
 document.addEventListener("DOMContentLoaded", () => {
 
-  const fecha = new Date();
-  const fechaTexto = fecha.toLocaleDateString("es-CL");
-  const horaTexto = fecha.toLocaleTimeString("es-CL");
+    const fecha = new Date();
+    document.getElementById("infoPDF").innerHTML =
+        `📅 Fecha: ${fecha.toLocaleDateString("es-CL")} — 🕒 ${fecha.toLocaleTimeString("es-CL")}`;
 
-  document.getElementById("infoPDF").innerHTML =
-    `📅 Fecha: ${fechaTexto} — 🕒 Hora: ${horaTexto}`;
+    /* GRÁFICO DE PASTEL */
+    const ctx = document.getElementById("graficoUsuariosEmocion");
 
-  // ============== GRÁFICOS ==============
-  Chart.defaults.font.size = 10;
-
-  new Chart(document.getElementById("graficoTotales"), {
-    type: "pie",
-    data: {
-      labels: Object.keys(emocionesGlobales),
-      datasets: [{ data: Object.values(emocionesGlobales) }]
-    },
-    options: { responsive: true, maintainAspectRatio: false }
-  });
-
-  new Chart(document.getElementById("graficoDuracion"), {
-    type: "bar",
-    data: {
-      labels: datosDuracion.map(e => e.escuela),
-      datasets: [{ label: "Duración (s)", data: datosDuracion.map(e => e.promedio) }]
-    },
-    options: { responsive: true, maintainAspectRatio: false }
-  });
-
-  new Chart(document.getElementById("graficoSatisfaccion"), {
-    type: "bar",
-    data: {
-      labels: datosSatisfaccion.map(e => e.escuela),
-      datasets: [
-        { label: "Sí le gustó", data: datosSatisfaccion.map(e => e.si) },
-        { label: "No le gustó", data: datosSatisfaccion.map(e => e.no) }
-      ]
-    },
-    options: { responsive: true, maintainAspectRatio: false }
-  });
-
-  new Chart(document.getElementById("graficoTelecom"), {
-    type: "pie",
-    data: {
-      labels: Object.keys(datosTelecom),
-      datasets: [{ data: Object.values(datosTelecom) }]
-    },
-    options: { responsive: true, maintainAspectRatio: false }
-  });
-
+    new Chart(ctx, {
+        type: "pie",
+        data: {
+            labels: Object.keys(emocionesEscuela),
+            datasets: [{
+                data: Object.values(emocionesEscuela),
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: "bottom" }
+            }
+        }
+    });
 });
 
-// ===================================
-// GENERAR PDF SIN BOTONES
-// ===================================
+/* DESCARGA PDF */
 document.getElementById("descargarPDF").addEventListener("click", async () => {
 
-  const elemento = document.getElementById("pdfContenido");
+  await new Promise(resolve => setTimeout(resolve, 300));
 
-  const canvas = await html2canvas(elemento, { scale: 2 });
-  const imgData = canvas.toDataURL("image/png");
+  html2canvas(document.getElementById("pdfContenido"), {
+      scale: 3,
+      useCORS: true,
+      allowTaint: true,
+  }).then(canvas => {
+      const imgData = canvas.toDataURL("image/png");
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF("p", "mm", "a4");
 
-  const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF("p", "mm", "a4");
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
 
-  const pdfWidth = pdf.internal.pageSize.getWidth();
-  const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save("dashboard_emocional.pdf");
+  });
 
-  pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-
-  pdf.save("dashboard_emocional.pdf");
 });
 </script>
 

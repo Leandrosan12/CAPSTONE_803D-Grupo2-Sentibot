@@ -236,12 +236,13 @@ def modulo(request):
     return render(request, 'modulo/modulo.html')
 
 
+from django.shortcuts import render
+from .models import Escuela
+@login_required(login_url='login')
 def modulo_profesor(request):
-    profesores = [
-        {'id': 1, 'nombre': 'Juan Torres', 'rut': '18.234.567-9', 'correo': 'juan.torres@duocuc.cl', 'telefono': '+569 87654321', 'sede': 'Santiago'},
-        {'id': 2, 'nombre': 'María Rojas', 'rut': '17.123.456-0', 'correo': 'maria.rojas@duocuc.cl', 'telefono': '+569 91234567', 'sede': 'Melipilla'},
-    ]
-    return render(request, 'modulo_profesor.html', {'profesores': profesores})
+    """Muestra la lista de escuelas en el módulo del profesor."""
+    escuelas = Escuela.objects.all().order_by('nombre')
+    return render(request, 'modulo_profesor.html', {'escuelas': escuelas})
 
 
 def alumnos(request):
@@ -255,13 +256,6 @@ def detalle_alumno(request, alumno_id):
 
 
 
-def escuelas(request):
-    escuelas = [
-        {'id': 1, 'nombre': 'Escuela de Ingeniería', 'carreras': ['Informática', 'Civil', 'Industrial'], 'sede': 'Santiago'},
-        {'id': 2, 'nombre': 'Escuela de Construcción', 'carreras': ['Construcción', 'Arquitectura'], 'sede': 'Quilpué'},
-        {'id': 3, 'nombre': 'Escuela de Medicina', 'carreras': ['Medicina', 'Enfermería'], 'sede': 'Concepción'},
-    ]
-    return render(request, 'escuelas.html', {'escuelas': escuelas})
 
 
 # ============================================================
@@ -330,11 +324,30 @@ def seguimiento(request):
     return render(request, 'seguimiento.html', {'emociones_labels': etiquetas, 'emociones_counts': valores})
 
 
-def dashboard_emociones(request):
-    datos = EmocionReal.objects.values('emocion__nombre_emocion').annotate(total=Count('emocion'))
-    etiquetas = [d['emocion__nombre_emocion'] for d in datos]
-    valores = [d['total'] for d in datos]
-    return render(request, 'dashboard_emociones.html', {'emociones_labels': etiquetas, 'emociones_counts': valores})
+from django.db.models import Count
+from django.http import JsonResponse
+import json
+
+def dashboard_emociones(request, escuela_id):
+    escuela = Escuela.objects.get(id=escuela_id)
+
+    emociones = (
+        EmocionReal.objects
+        .filter(sesion__usuario__escuela=escuela)
+        .values("tipo_emocion")
+        .annotate(total=Count("id"))
+    )
+
+    emociones_por_escuela = {
+        e["tipo_emocion"]: e["total"] for e in emociones
+    }
+
+    print("🔍 EMOCIONES ENVIADAS AL TEMPLATE:", emociones_por_escuela)
+
+    return render(request, "dashboard_emociones.html", {
+        "escuela": escuela,
+        "emociones_por_escuela": json.dumps(emociones_por_escuela)
+    })
 
 
 # ============================================================
@@ -528,14 +541,6 @@ def detalle_alumno(request, alumno_id):
     alumno = get_object_or_404(Usuario, id=alumno_id)
     return render(request, 'modulo/detalle_alumno.html', {'alumno': alumno})
 
-def escuelas(request):
-    escuelas_sim = [
-        {'id': 1, 'nombre': 'Informática y Telecomunicación', 'carreras': ['Programación', 'Redes'], 'sede': 'Melipilla'},
-        {'id': 2, 'nombre': 'Construcción', 'carreras': ['Edificación', 'Arquitectura'], 'sede': 'Melipilla'},
-        {'id': 3, 'nombre': 'Gastronomía', 'carreras': ['Cocina Profesional', 'Pastelería'], 'sede': 'Melipilla'},
-        {'id': 4, 'nombre': 'Otra Escuela', 'carreras': ['Diseño', 'Administración'], 'sede': 'Melipilla'},
-    ]
-    return render(request, 'modulo/escuela.html', {'escuelas': escuelas_sim})
 
 # ------------------------------
 # SEGUIMIENTO / DASHBOARD
@@ -553,11 +558,31 @@ def seguimiento(request):
 
     return render(request, 'seguimiento.html', {'emociones': emociones, 'datos_usuarios': datos_usuarios})
 
-def dashboard_emociones(request):
-    datos = EmocionReal.objects.values('tipo_emocion').annotate(total=Count('id'))
-    etiquetas = [d['tipo_emocion'] for d in datos]
-    valores = [d['total'] for d in datos]
-    return render(request, 'dashboard_emociones.html', {'emociones_labels': etiquetas, 'emociones_counts': valores})
+from django.db.models import Count
+from django.http import JsonResponse
+import json
+
+def dashboard_emociones(request, escuela_id):
+    escuela = Escuela.objects.get(id=escuela_id)
+
+    emociones = (
+        EmocionReal.objects
+        .filter(sesion__usuario__escuela=escuela)
+        .values("tipo_emocion")
+        .annotate(total=Count("id"))
+    )
+
+    emociones_por_escuela = {
+        e["tipo_emocion"]: e["total"] for e in emociones
+    }
+
+    print("🔍 EMOCIONES ENVIADAS AL TEMPLATE:", emociones_por_escuela)
+
+    return render(request, "dashboard_emociones.html", {
+        "escuela": escuela,
+        "emociones_por_escuela": json.dumps(emociones_por_escuela)
+    })
+
 
 # ------------------------------
 # MÓDULO PROFESOR (Dashboard)
@@ -565,80 +590,35 @@ def dashboard_emociones(request):
 def opciones(request):
     return render(request, 'opciones.html')
 
-@login_required(login_url='login')
-def modulo_profesor(request):
-    return render(request, "modulo_profesor.html")
 
-def grafico_profesor(request):
-    profesor = request.user
-    if getattr(profesor, "escuela", None):
-        escuelas = [profesor.escuela]
-    else:
-        escuelas = Escuela.objects.all()
 
-    datos_emociones, datos_duracion, datos_satisfaccion = [], [], []
-    tipos_emocion = ['Alegría', 'Tristeza', 'Neutral', 'Miedo', 'Enojo', 'Sorpresa']
+from django.shortcuts import render, get_object_or_404
+from django.db.models import Count
+from .models import Escuela, EmocionReal
 
-    for escuela in escuelas:
-        sesiones_escuela = Sesion.objects.filter(usuario__escuela=escuela)
-        emociones_reales = EmocionReal.objects.filter(sesion__in=sesiones_escuela)
+def grafico_profesor(request, escuela_id):
 
-        emociones_agregadas = {}
-        emociones_porcentaje = {}
-        for tipo in tipos_emocion:
-            cantidad = emociones_reales.filter(tipo_emocion=tipo).count()
-            emociones_agregadas[tipo.lower()] = cantidad
-            emociones_porcentaje[tipo.lower()] = cantidad
+    escuela = get_object_or_404(Escuela, id=escuela_id)
 
-        # Convertir a porcentaje
-        total_escuela = sum(emociones_porcentaje.values())
-        if total_escuela > 0:
-            for tipo, cantidad in emociones_porcentaje.items():
-                emociones_porcentaje[tipo] = round((cantidad / total_escuela) * 100, 2)
-        else:
-            emociones_porcentaje = {tipo.lower(): 0.0 for tipo in tipos_emocion}
+    emociones_raw = (
+        EmocionReal.objects
+        .filter(sesion__usuario__escuela=escuela)
+        .values('tipo_emocion')
+        .annotate(total=Count('id'))
+    )
 
-        datos_emociones.append({
-            "escuela": escuela.nombre,
-            "cantidades": emociones_agregadas,
-            "porcentajes": emociones_porcentaje
-        })
+    print("🔍 EMOCIONES ENVIADAS AL TEMPLATE:", list(emociones_raw))
 
-        # Duración promedio sesiones
-        sesiones_con_duracion = sesiones_escuela.filter(fecha_inicio__isnull=False, fecha_fin__isnull=False).annotate(
-            dur_total=F('fecha_fin') - F('fecha_inicio')
-        )
-        dur_promedio_timedelta = sesiones_con_duracion.aggregate(promedio=Avg('dur_total'))['promedio']
-        dur_prom_segundos = dur_promedio_timedelta.total_seconds() if dur_promedio_timedelta else 0
-        datos_duracion.append({"escuela": escuela.nombre, "promedio": round(dur_prom_segundos, 2)})
-
-        # Encuestas
-        respuestas = RespuestaEncuesta.objects.filter(usuario__escuela=escuela)
-        gusto = respuestas.filter(respuesta__icontains="si").count()
-        no_gusto = respuestas.filter(respuesta__icontains="no").count()
-        datos_satisfaccion.append({"escuela": escuela.nombre, "si": gusto, "no": no_gusto})
-
-    # Totales globales
-    emociones_globales = {}
-    emociones_reales_globales = EmocionReal.objects.all()
-    for tipo in tipos_emocion:
-        cantidad_global = emociones_reales_globales.filter(tipo_emocion=tipo).count()
-        emociones_globales[tipo.lower()] = cantidad_global
-
-    total_global = sum(emociones_globales.values())
-    if total_global > 0:
-        for tipo, cantidad in emociones_globales.items():
-            emociones_globales[tipo] = round((cantidad / total_global) * 100, 2)
-    else:
-        emociones_globales = {tipo.lower(): 0.0 for tipo in tipos_emocion}
-
-    context = {
-        "datos_emociones": json.dumps(datos_emociones),
-        "datos_duracion": json.dumps(datos_duracion),
-        "datos_satisfaccion": json.dumps(datos_satisfaccion),
-        "emociones_globales": json.dumps(emociones_globales),
+    emociones_por_escuela = {
+        item["tipo_emocion"]: item["total"]
+        for item in emociones_raw
     }
-    return render(request, "grafico_profesor.html", context)
+
+    return render(request, "grafico_profesor.html", {
+        "escuela": escuela,
+        "emociones_por_escuela": emociones_por_escuela,
+    })
+
 
 # ------------------------------
 # API / REGISTRO DE EMOCIONES
@@ -852,3 +832,58 @@ def crear_actividad(request):
         return redirect("actividadesconf")
 
     return render(request, "actividades/crear_actividad.html", {"emociones": emociones})
+
+from django.shortcuts import render
+from .models import Escuela
+
+def escuelas(request):
+    lista = Escuela.objects.all()
+    return render(request, "escuelas.html", {"escuelas": lista})
+
+from django.http import HttpResponse
+from reportlab.pdfgen import canvas
+
+def descargar_reporte(request, escuela_id):
+    # Crear respuesta como PDF
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="reporte_escuela_{escuela_id}.pdf"'
+
+    p = canvas.Canvas(response)
+    p.drawString(100, 750, f"Reporte de Escuela ID {escuela_id}")
+    p.drawString(100, 730, "Aquí va tu resumen real…")
+    p.showPage()
+    p.save()
+
+    return response
+
+from django.db.models import Count
+from django.http import JsonResponse
+from .models import EmocionReal
+
+
+def emociones_por_escuela(request):
+    # Obtiene un conteo de emociones por Escuela
+    data = (
+        EmocionReal.objects
+        .values(
+            "sesion__usuario__escuela__nombre",     # Escuela
+            "emocion__nombre_emocion"              # Emoción de la BD
+        )
+        .annotate(total=Count("id"))               # Cuenta cuántas veces aparece
+        .order_by("sesion__usuario__escuela__nombre")
+    )
+
+    # Formato más limpio
+    result = {}
+    for item in data:
+        escuela = item["sesion__usuario__escuela__nombre"]
+        emocion = item["emocion__nombre_emocion"]
+        total = item["total"]
+
+        if escuela not in result:
+            result[escuela] = {}
+
+        result[escuela][emocion] = total
+
+    return JsonResponse(result)
+

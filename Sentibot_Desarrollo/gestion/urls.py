@@ -1,5 +1,7 @@
+# gestion/urls.py
 from django.urls import path
 from . import views
+from .views import emociones_por_escuela
 
 urlpatterns = [
     # --- 🔐 Autenticación ---
@@ -29,7 +31,8 @@ urlpatterns = [
 
     # --- 👨‍🏫 Módulo del profesor ---
     path('modulo_profesor/', views.modulo_profesor, name='modulo_profesor'),  # Vista principal del módulo profesor
-    path('grafico_profesor/', views.grafico_profesor, name='grafico_profesor'),  # Dashboard emocional del profesor
+    # RUTA MODIFICADA: Ahora requiere el ID de la escuela
+    path('grafico_profesor/<int:escuela_id>/', views.grafico_profesor, name='grafico_profesor'),  # Dashboard emocional filtrado
 
     # --- 🏫 Escuelas y Alumnos ---
     path('modulo/escuelas/', views.escuelas, name='escuelas'),
@@ -47,6 +50,7 @@ urlpatterns = [
     path("predict_emotion/", views.predict_emotion_view, name="predict_emotion"),
     path("procesar_emocion_camara/<int:sesion_id>/", views.procesar_emocion_camara, name="procesar_emocion_camara"),
     path("seleccionar_emocion/<str:emocion_nombre>/", views.seleccionar_emocion, name="seleccionar_emocion"),
+    path('descargar-reporte/<int:escuela_id>/', views.descargar_reporte, name='descargar_reporte'),
 
 
     path('dashboard_emociones/', views.dashboard_emociones, name='dashboard_emociones'),
@@ -64,7 +68,6 @@ urlpatterns = [
     path('actividadesconf/editar/<int:id>/', views.editar_actividad, name='editar_actividad'),
     path('actividadesconf/eliminar/<int:id>/', views.eliminar_actividad, name='eliminar_actividad'),
     path('actividadesconf/crear/', views.crear_actividad, name='crear_actividad'),
-
-
-
+    path("emociones/por-escuela/", emociones_por_escuela, name="emociones_por_escuela"),
+    path('dashboard-emocional/<int:escuela_id>/',views.grafico_profesor, name='dashboard_emocional'),
 ]

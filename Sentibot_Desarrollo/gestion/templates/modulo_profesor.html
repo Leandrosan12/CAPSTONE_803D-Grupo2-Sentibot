@@ -1,122 +1,36 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Escuelas{% endblock %}
+{% block title %}Módulo Profesor{% endblock %}
 
 {% block content %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
 <link rel="stylesheet" href="{% static 'css/modulo_profesor.css' %}">
 
-<!-- === Encabezado === -->
 <section class="text-center py-5 bg-light">
-  <h2 class="fw-bold display-6">🎓 Módulo – Escuelas</h2>
-  <p class="text-secondary fs-5">Selecciona una escuela para acceder a su análisis</p>
+  <h2 class="fw-bold display-6">👨‍🏫 Módulo del Profesor</h2>
+  <p class="text-secondary fs-5">Selecciona una escuela para acceder a su análisis emocional</p>
 </section>
 
-<!-- === Tarjetas de Escuelas Manuales (lista completa) === -->
 <div class="container my-5">
   <div class="row g-4 justify-content-center">
 
-    <!-- 1 -->
-    <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-      <div class="card shadow-lg border-0 rounded-4 h-100 hover-scale text-center p-4">
-        <h5 class="fw-bold mb-2">Escuela de Administración y Negocios</h5>
-        <p class="text-muted">Melipilla</p>
-        <a href="{% url 'grafico_profesor' %}" class="btn btn-primary fw-semibold px-4 py-2 rounded-pill">
-          📊 Ver Gráficos
-        </a>
+    {% for escuela in escuelas %}
+      <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+        <div class="card shadow-lg border-0 rounded-4 h-100 hover-scale text-center p-4">
+          <h5 class="fw-bold mb-2">{{ escuela.nombre }}</h5>
+          <p class="text-muted">{{ escuela.direccion|default:"Melipilla" }}</p>
+          <a href="{% url 'dashboard_emocional' escuela.id %}">Ver Dashboard</a>
+            📊 Ver Gráficos
+          </a>
+        </div>
       </div>
-    </div>
-
-    <!-- 2 -->
-    <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-      <div class="card shadow-lg border-0 rounded-4 h-100 hover-scale text-center p-4">
-        <h5 class="fw-bold mb-2">Escuela de Comunicación</h5>
-        <p class="text-muted">Melipilla</p>
-        <a href="{% url 'grafico_profesor' %}" class="btn btn-primary fw-semibold px-4 py-2 rounded-pill">
-          📊 Ver Gráficos
-        </a>
+    {% empty %}
+      <div class="col-12 text-center">
+        <p class="fs-4 text-warning">⚠️ No se encontraron escuelas registradas.</p>
       </div>
-    </div>
-
-    <!-- 3 -->
-    <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-      <div class="card shadow-lg border-0 rounded-4 h-100 hover-scale text-center p-4">
-        <h5 class="fw-bold mb-2">Escuela de Construcción</h5>
-        <p class="text-muted">Melipilla</p>
-        <a href="{% url 'grafico_profesor' %}" class="btn btn-primary fw-semibold px-4 py-2 rounded-pill">
-          📊 Ver Gráficos
-        </a>
-      </div>
-    </div>
-
-    <!-- 4 -->
-    <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-      <div class="card shadow-lg border-0 rounded-4 h-100 hover-scale text-center p-4">
-        <h5 class="fw-bold mb-2">Escuela de Diseño</h5>
-        <p class="text-muted">Melipilla</p>
-        <a href="{% url 'grafico_profesor' %}" class="btn btn-primary fw-semibold px-4 py-2 rounded-pill">
-          📊 Ver Gráficos
-        </a>
-      </div>
-    </div>
-
-    <!-- 5 -->
-    <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-      <div class="card shadow-lg border-0 rounded-4 h-100 hover-scale text-center p-4">
-        <h5 class="fw-bold mb-2">Escuela de Gastronomía</h5>
-        <p class="text-muted">Melipilla</p>
-        <a href="{% url 'grafico_profesor' %}" class="btn btn-primary fw-semibold px-4 py-2 rounded-pill">
-          📊 Ver Gráficos
-        </a>
-      </div>
-    </div>
-
-    <!-- 6 -->
-    <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-      <div class="card shadow-lg border-0 rounded-4 h-100 hover-scale text-center p-4">
-        <h5 class="fw-bold mb-2">Escuela de Informática y Telecomunicaciones</h5>
-        <p class="text-muted">Melipilla</p>
-        <a href="{% url 'grafico_profesor' %}" class="btn btn-primary fw-semibold px-4 py-2 rounded-pill">
-          📊 Ver Gráficos
-        </a>
-      </div>
-    </div>
-
-    <!-- 7 -->
-    <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-      <div class="card shadow-lg border-0 rounded-4 h-100 hover-scale text-center p-4">
-        <h5 class="fw-bold mb-2">Escuela de Ingeniería y Recursos Naturales</h5>
-        <p class="text-muted">Melipilla</p>
-        <a href="{% url 'grafico_profesor' %}" class="btn btn-primary fw-semibold px-4 py-2 rounded-pill">
-          📊 Ver Gráficos
-        </a>
-      </div>
-    </div>
-
-    <!-- 8 -->
-    <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-      <div class="card shadow-lg border-0 rounded-4 h-100 hover-scale text-center p-4">
-        <h5 class="fw-bold mb-2">Escuela de Salud y Bienestar</h5>
-        <p class="text-muted">Melipilla</p>
-        <a href="{% url 'grafico_profesor' %}" class="btn btn-primary fw-semibold px-4 py-2 rounded-pill">
-          📊 Ver Gráficos
-        </a>
-      </div>
-    </div>
-
-    <!-- 9 -->
-    <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-      <div class="card shadow-lg border-0 rounded-4 h-100 hover-scale text-center p-4">
-        <h5 class="fw-bold mb-2">Escuela de Turismo y Hospitalidad</h5>
-        <p class="text-muted">Melipilla</p>
-        <a href="{% url 'grafico_profesor' %}" class="btn btn-primary fw-semibold px-4 py-2 rounded-pill">
-          📊 Ver Gráficos
-        </a>
-      </div>
-    </div>
+    {% endfor %}
 
   </div>
 </div>
-
 {% endblock %}
