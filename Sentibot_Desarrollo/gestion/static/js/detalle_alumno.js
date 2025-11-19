@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", function () {
         editEmail.value = alumnoCard.dataset.email;
         setSelectValue(editEscuela, alumnoCard.dataset.escuela);
         setSelectValue(editRol, alumnoCard.dataset.rol);
-        editarForm.style.display = "block";
+            Form.style.display = "block";
     });
 
     // -----------------------------
