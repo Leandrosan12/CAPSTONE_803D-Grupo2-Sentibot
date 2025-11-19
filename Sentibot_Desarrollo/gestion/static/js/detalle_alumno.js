@@ -33,6 +33,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // -----------------------------
     // Abrir formulario de edición
     // -----------------------------
+
     btnEditar.addEventListener("click", () => {
         editNombre.value = alumnoCard.dataset.nombre;
         editApellido.value = alumnoCard.dataset.apellido;
@@ -40,6 +41,7 @@ document.addEventListener("DOMContentLoaded", function () {
         setSelectValue(editEscuela, alumnoCard.dataset.escuela);
         setSelectValue(editRol, alumnoCard.dataset.rol);
         editarForm.style.display = "block";
+        alumnoCard.style.display = "none";
     });
 
     // -----------------------------
@@ -47,6 +49,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // -----------------------------
     btnCancelar.addEventListener("click", () => {
         editarForm.style.display = "none";
+        alumnoCard.style.display = "block";
     });
 
     // -----------------------------

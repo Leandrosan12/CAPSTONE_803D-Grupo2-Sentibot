@@ -262,11 +262,8 @@ def detalle_alumno(request, alumno_id):
     escuelas = Escuela.objects.all()
     roles = Rol.objects.all()
 
-    # ----------------------------
     # 📌 EMOCIONES DEL ALUMNO
-    # ----------------------------
     sesion = Sesion.objects.filter(usuario=alumno).order_by('-fecha_inicio').first()
-
     emociones_data = {
         'Feliz': 0,
         'Triste': 0,
@@ -274,7 +271,6 @@ def detalle_alumno(request, alumno_id):
         'Enojado': 0,
         'Sorprendido': 0
     }
-
     if sesion:
         emociones_contadas = (
             EmocionCamara.objects.filter(sesion=sesion)
@@ -283,7 +279,6 @@ def detalle_alumno(request, alumno_id):
         )
         for item in emociones_contadas:
             emo = item['nombre_emocion'].lower().strip()
-            # Normalización
             if emo in ["surprised", "sorpresa", "sorprendida"]:
                 emo = "sorprendido"
             elif emo in ["happy", "feliz"]:
@@ -294,14 +289,11 @@ def detalle_alumno(request, alumno_id):
                 emo = "neutral"
             elif emo in ["angry", "enojado"]:
                 emo = "enojado"
-
             emo = emo.capitalize()
             if emo in emociones_data:
                 emociones_data[emo] = item['total']
 
-    # ----------------------------
     # 📌 ENCUESTA DE SATISFACCIÓN
-    # ----------------------------
     encuesta = EncuestaSatisfaccion.objects.filter(sesion=sesion).first()
     encuesta_data = {
         "utilidad": encuesta.utilidad if encuesta else 0,
@@ -663,9 +655,7 @@ def lista_usuarios(request):
         datos = [dict(zip(columnas, row)) for row in cursor.fetchall()]
     return render(request, 'lista_usuarios.html', {'usuarios': datos})
 
-def detalle_alumno(request, alumno_id):
-    alumno = get_object_or_404(Usuario, id=alumno_id)
-    return render(request, 'modulo/detalle_alumno.html', {'alumno': alumno})
+
 
 def escuelas(request):
     escuelas_sim = [

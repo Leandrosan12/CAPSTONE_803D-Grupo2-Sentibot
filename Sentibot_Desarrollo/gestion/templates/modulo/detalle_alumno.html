@@ -121,4 +121,26 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="{% static 'js/detalle_alumno.js' %}"></script>
+<script>
+// Mostrar formulario de edición al hacer clic en "Editar"
+document.addEventListener('DOMContentLoaded', function() {
+    const btnEditar = document.getElementById('btnEditar');
+    const btnCancelar = document.getElementById('btnCancelar');
+    const alumnoInfo = document.getElementById('alumnoInfo');
+    const editarForm = document.getElementById('editarForm');
+
+    if (btnEditar && editarForm && alumnoInfo) {
+        btnEditar.addEventListener('click', function() {
+            alumnoInfo.style.display = 'none';
+            editarForm.style.display = 'block';
+        });
+    }
+    if (btnCancelar && editarForm && alumnoInfo) {
+        btnCancelar.addEventListener('click', function() {
+            editarForm.style.display = 'none';
+            alumnoInfo.style.display = 'block';
+        });
+    }
+});
+</script>
 {% endblock %}
