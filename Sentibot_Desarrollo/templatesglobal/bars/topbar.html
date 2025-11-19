@@ -2,14 +2,15 @@
 <link rel="stylesheet" href="{% static 'css/topbar.css' %}">
 
 <div class="top-bar" id="topbar">
-  <div class="top-left d-flex align-items-center">
-    <button id="btn-toggle-sidebar" class="btn btn-light me-3">☰</button>
-    <h1 class="h1-top-bar m-0">Sentibot</h1>
-    <h2 class="h2-top-bar ms-2 text-secondary" id="page-title">/ Cargando...</h2>
+  <div class="top-left">
+    <button id="btn-toggle-sidebar" class="btn btn-light">☰</button>
+    <h1 class="h1-top-bar">Sentibot</h1>
+    <h2 class="h2-top-bar">/ Tu amigo/a</h2>
   </div>
 
   <div class="top-right">
-    <!-- Puedes añadir aquí perfil, notificaciones, etc. -->
+    <a href="#" class="btn-login">{{ user.email }}</a>
+    
   </div>
 </div>
 

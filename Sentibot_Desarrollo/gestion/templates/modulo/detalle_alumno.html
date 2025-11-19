@@ -4,66 +4,121 @@
 {% block title %}📄 Detalle Alumno{% endblock %}
 
 {% block content %}
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
 
-<div class="card text-white bg-dark mb-4">
-  <div class="card-body d-flex justify-content-between align-items-center">
-    
-    <!-- Info Alumno -->
-    <div class="d-flex align-items-center">
-      <img src="{% static 'icon/avatar.png' %}" alt="Avatar" class="rounded-circle border border-white me-3" style="width:80px; height:80px;">
-      <div>
-        <h2 class="h4 mb-1">{{ alumno.first_name }} {{ alumno.last_name }}</h2>
-        <p class="mb-1"><strong>Sede:</strong> {{ alumno.escuela.nombre|default:"Sin sede" }}</p>
-        <p class="mb-1"><strong>Correo:</strong> {{ alumno.email }}</p>
-        <p class="mb-1"><strong>Rut:</strong> {{ alumno.rut|default:"Sin rut" }}</p>
-        <p class="mb-0"><strong>Rol:</strong> {{ alumno.rol.nombre|default:"Sin rol" }}</p>
-      </div>
+<style>
+.chart-container {
+    width: 100%;
+    max-width: 350px;
+    height: 260px;
+    margin: 0 auto;
+}
+</style>
+
+<!-- TARJETA INFORMACIÓN -->
+<div 
+    id="alumnoInfo"
+    class="card text-white bg-dark mb-4"
+    data-id="{{ alumno.id }}"
+    data-nombre="{{ alumno.first_name }}"
+    data-apellido="{{ alumno.last_name }}"
+    data-email="{{ alumno.email }}"
+    {% if alumno.escuela %}data-escuela="{{ alumno.escuela.id }}"{% else %}data-escuela=""{% endif %}
+    {% if alumno.rol %}data-rol="{{ alumno.rol.id }}"{% else %}data-rol=""{% endif %}
+>
+    <div class="card-body d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+            <img src="{% static 'icon/avatar.png' %}" class="rounded-circle border border-white me-3"
+                 style="width:80px; height:80px;">
+            <div>
+                <h2 class="h4 mb-1">{{ alumno.first_name }} {{ alumno.last_name }}</h2>
+                <p class="mb-1"><strong>Sede:</strong> {% if alumno.escuela %}{{ alumno.escuela.nombre }}{% else %}N/A{% endif %}</p>
+                <p class="mb-1"><strong>Correo:</strong> {{ alumno.email }}</p>
+                <p class="mb-1"><strong>Rol:</strong> {% if alumno.rol %}{{ alumno.rol.nombre }}{% else %}N/A{% endif %}</p>
+            </div>
+        </div>
+        <div class="d-flex flex-column gap-2">
+            <button id="btnEditar" class="btn btn-success">Editar</button>
+        </div>
     </div>
-
-    <!-- Botones -->
-    <div class="d-flex flex-column gap-2">
-      <button class="btn btn-success">Documentar</button>
-      <button class="btn btn-success">Editar</button>
-      <button class="btn btn-success">Historial</button>
-    </div>
-
-  </div>
 </div>
 
-<!-- Gráficos -->
+<!-- FORMULARIO DE EDICIÓN -->
+<div id="editarForm" class="card p-3 mb-4" style="display:none;">
+    <h4>Editar Alumno</h4>
+    <div class="row">
+        <div class="col-md-6">
+            <label>Nombre:</label>
+            <input id="editNombre" class="form-control">
+        </div>
+        <div class="col-md-6">
+            <label>Apellido:</label>
+            <input id="editApellido" class="form-control">
+        </div>
+        <div class="col-md-6 mt-2">
+            <label>Correo:</label>
+            <input id="editEmail" class="form-control">
+        </div>
+        <div class="col-md-6 mt-2">
+            <label>Escuela:</label>
+            <select id="editEscuela" class="form-control">
+                {% for e in escuelas %}
+                <option value="{{ e.id }}" {% if alumno.escuela and alumno.escuela.id == e.id %}selected{% endif %}>{{ e.nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-6 mt-2">
+            <label>Rol:</label>
+            <select id="editRol" class="form-control">
+                {% for r in roles %}
+                <option value="{{ r.id }}" {% if alumno.rol and alumno.rol.id == r.id %}selected{% endif %}>{{ r.nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="mt-3">
+        <button id="btnGuardar" class="btn btn-success">Guardar Cambios</button>
+        <button id="btnCancelar" class="btn btn-danger">Cancelar</button>
+    </div>
+</div>
+
+<!-- GRÁFICOS -->
 <div class="row g-4">
-
-  <div class="col-md-6">
-    <div class="card text-center">
-      <div class="card-body">
-        <h5 class="card-title">Emociones (Pastel)</h5>
-        <!-- Pastel simulado -->
-        <div class="mx-auto my-3" style="width:150px; height:150px; position:relative; border-radius:50%; overflow:hidden;">
-          <div class="position-absolute top-0 start-50 translate-middle bg-danger" style="width:50%; height:50%; transform-origin:left bottom; clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%); transform: rotate(0deg);"></div>
-          <div class="position-absolute top-0 start-50 translate-middle bg-primary" style="width:50%; height:50%; transform-origin:left bottom; clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%); transform: rotate(90deg);"></div>
-          <div class="position-absolute top-0 start-50 translate-middle bg-warning" style="width:50%; height:50%; transform-origin:left bottom; clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%); transform: rotate(180deg);"></div>
-          <div class="position-absolute top-0 start-50 translate-middle bg-info" style="width:50%; height:50%; transform-origin:left bottom; clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%); transform: rotate(270deg);"></div>
+    <!-- Gráfico de emociones -->
+    <div class="col-md-6 d-flex justify-content-center">
+        <div class="card w-100">
+            <div class="card-body text-center">
+                <h5 class="card-title">😊 Emociones</h5>
+                <div id="emocionesData"
+                     data-feliz="{{ emociones_data.Feliz }}"
+                     data-triste="{{ emociones_data.Triste }}"
+                     data-neutral="{{ emociones_data.Neutral }}"
+                     data-enojado="{{ emociones_data.Enojado }}"
+                     data-sorprendido="{{ emociones_data.Sorprendido }}">
+                </div>
+                <div class="chart-container">
+                    <canvas id="pieChartEmociones"></canvas>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
 
-  <div class="col-md-6">
-    <div class="card text-center">
-      <div class="card-body">
-        <h5 class="card-title">Estados (Radar)</h5>
-        <!-- Radar simulado -->
-        <div class="mx-auto my-3" style="width:150px; height:150px; position:relative; border-radius:50%; background:#e0e0e0;">
-          <div class="position-absolute top-50 start-50 bg-primary" style="width:2px; height:60%; transform-origin:bottom center; transform: rotate(0deg);"></div>
-          <div class="position-absolute top-50 start-50 bg-primary" style="width:2px; height:80%; transform-origin:bottom center; transform: rotate(72deg);"></div>
-          <div class="position-absolute top-50 start-50 bg-primary" style="width:2px; height:50%; transform-origin:bottom center; transform: rotate(144deg);"></div>
-          <div class="position-absolute top-50 start-50 bg-primary" style="width:2px; height:70%; transform-origin:bottom center; transform: rotate(216deg);"></div>
-          <div class="position-absolute top-50 start-50 bg-primary" style="width:2px; height:90%; transform-origin:bottom center; transform: rotate(288deg);"></div>
+    <!-- Gráfico de encuesta -->
+    <div class="col-md-6 d-flex justify-content-center">
+        <div class="card w-100">
+            <div class="card-body text-center">
+                <h5 class="card-title">📊 Encuesta</h5>
+                <div id="encuestaData" 
+                     data-recomendacion="{{ encuesta_data.recomendacion }}">
+                </div>
+                <div class="chart-container">
+                    <canvas id="barChartEncuesta"></canvas>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
-
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{% static 'js/detalle_alumno.js' %}"></script>
 {% endblock %}

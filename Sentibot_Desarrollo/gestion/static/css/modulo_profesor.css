@@ -1,78 +1,112 @@
+/* === Fondo general === */
 body {
-  background: linear-gradient(180deg, #e7f0fa 0%, #c8dbf4 100%);
-  font-family: 'Poppins', sans-serif;
-  color: #333;
+  background-color: #f1f5f9;
+  font-family: "Inter", sans-serif;
 }
 
-/* Encabezado sin fondo azul */
+/* === Encabezado === */
 .encabezado-escuelas {
-  background: none;
-  color: #ffff;
-  padding-top: 40px;
-  padding-bottom: 10px;
+  background: linear-gradient(90deg, #243046, #2e3b55);
+  padding: 40px 0;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 .titulo-modulo {
-  font-weight: 700;
+  font-weight: 800;
   font-size: 2rem;
-  margin-bottom: 10px;
+  color: #ffffff;
+  text-align: center;
+  margin-bottom: 5px;
 }
 
 .descripcion {
-  font-size: 1.1rem;
-  color: #555;
+  color: #d9dfec;
+  font-size: 1rem;
+  text-align: center;
 }
 
-/* === Tarjetas de escuelas === */
+/* === Contenedor de tarjetas === */
+.container-cards {
+  margin-top: 40px;
+  margin-bottom: 60px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+  gap: 30px;
+  padding: 0 40px;
+}
+
+/* === Tarjetas === */
 .card-escuela {
-  background: linear-gradient(135deg, #2196f3, #1565c0);
-  color: white;
-  text-align: center;
-  padding: 30px 20px;
-  border-radius: 16px;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
-  transition: all 0.3s ease;
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+  padding: 30px 25px;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  height: 180px;
+  align-items: center;
+  text-align: center;
+  transition: all 0.25s ease;
 }
 
 .card-escuela:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
+  transform: translateY(-8px);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.22);
 }
 
 .card-title {
-  font-size: 1.1rem;
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: #1f2937;
+  margin-bottom: 5px;
+}
+
+.card-subtitle {
+  font-size: 0.95rem;
+  color: #6b7280;
   margin-bottom: 20px;
 }
 
-/* === Botón Ingresar === */
+/* === Botones iguales === */
 .btn-ingresar {
-  background-color: #0d47a1;
-  border: none;
+  width: 100%;
+  max-width: 220px;
+  background: linear-gradient(90deg, #005eff, #0078ff);
   color: white;
-  border-radius: 8px;
-  padding: 8px 20px;
-  font-weight: 500;
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  font-weight: 600;
+  padding: 10px 0;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.25s ease;
+  border: none;
 }
 
 .btn-ingresar:hover {
-  background-color: #ffff;
-  transform: translateY(-2px);
+  background: linear-gradient(90deg, #0049cc, #0060cc);
+  transform: scale(1.03);
 }
 
-/* Animación suave */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* Icono dentro del botón */
+.btn-ingresar i {
+  font-size: 1.1rem;
+}
+
+/* === Módulo General === */
+.modulo-escuela {
+  margin-top: 40px;
+  background-color: #f8fafc;
+}
+
+.modulo-contenido {
+  background-color: white;
+  border-radius: 12px;
+  padding: 25px;
+}
+
+.oculto {
+  display: none;
 }
