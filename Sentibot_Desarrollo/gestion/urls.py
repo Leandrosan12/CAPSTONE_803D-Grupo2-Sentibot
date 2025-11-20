@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .views import emociones_por_escuela, tiempo_promedio_sesion_por_escuela
 
 urlpatterns = [
     # --- 🔐 Autenticación ---
@@ -63,6 +64,9 @@ urlpatterns = [
     path('actividadesconf/editar/<int:id>/', views.editar_actividad, name='editar_actividad'),
     path('actividadesconf/eliminar/<int:id>/', views.eliminar_actividad, name='eliminar_actividad'),
     path('actividadesconf/crear/', views.crear_actividad, name='crear_actividad'),
+    path("emociones/por-escuela/", emociones_por_escuela, name="emociones_por_escuela"),
+    path('dashboard-emocional/<int:escuela_id>/',views.grafico_profesor, name='dashboard_emocional'),
+    path('dashboard/tiempo-promedio-sesion/<int:escuela_id>/',tiempo_promedio_sesion_por_escuela,name="tiempo_promedio_sesion_por_escuela")
 
 
 

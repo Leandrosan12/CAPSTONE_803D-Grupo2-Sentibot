@@ -4,57 +4,18 @@
 {% block title %}📊 Dashboard Emocional{% endblock %}
 
 {% block content %}
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="{% static 'css/grafico_profesor.css' %}">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-<style>
-    .card {
-        height: 100%;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-    .card-chart {
-        position: relative;
-        height: 300px;
-        width: 100%;
-        margin: auto;
-    }
-    .card h4 {
-        font-size: 1.2rem;
-        margin-bottom: 0.5rem;
-    }
+<div class="container-fluid">
 
-    /* Ocultar botones EN EL PDF */
-    @media print {
-        .no-print {
-            display: none !important;
-        }
-    }
-
-    /* Contenedor del PDF */
-    #pdfContenido {
-        background: white;
-        padding: 20px;
-    }
-</style>
-
-<div class="dashboard-wrapper container-fluid py-5">
-
-  <!-- =============================== -->
-  <!-- CABECERA (Botones ocultos en PDF) -->
-  <!-- =============================== -->
-  <div class="dashboard-header mb-4 text-center no-print">
-    <h2>📊 Dashboard Emocional – Escuela</h2>
-
-    <div class="acciones mt-3">
-      <a href="{% url 'modulo_profesor' %}" class="btn btn-volver">⬅️ Volver al Módulo Profesor</a>
-      <button id="descargarPDF" class="btn btn-descargar">📄 Descargar PDF</button>
+  <div class="text-center mb-4">
+    <div class="mt-3">
+      <a href="{% url 'modulo_profesor' %}" class="btn btn-secondary me-2">⬅️ Volver</a>
+      <button id="descargarPDF" class="btn btn-primary">📄 Descargar PDF</button>
     </div>
   </div>
 
-  <!-- ========================================= -->
-  <!-- TODO LO QUE VA DENTRO DEL PDF              -->
-  <!-- ========================================= -->
-  <div id="pdfContenido">
+  <div id="pdfContenido" class="bg-white p-4 rounded shadow-sm">
 
     <div class="text-center mb-4">
       <h2 class="fw-bold">📊 Dashboard Emocional – {{ datosEscuelas.0.escuela|default:"Escuela" }}</h2>
@@ -63,46 +24,166 @@
       <p id="infoPDF" class="fw-bold"></p>
     </div>
 
-    <div class="container">
-      <div class="row g-4 justify-content-center">
-
-        <div class="col-12 col-md-6 col-lg-5">
-          <div class="card w-100 p-2">
-            <h4 class="text-center">Totales Globales de Emociones (Suma de %)</h4>
-            <div class="card-chart">
-              <canvas id="graficoTotales"></canvas>
-            </div>
+    <!-- KPIs: SESIONES + EMOCIONES -->
+    <div class="row mb-3">
+      <div class="col-md-3 mb-3">
+        <div class="card text-center shadow-sm">
+          <div class="card-body">
+            <h6 class="card-title">Sesiones Totales ({{ escuela.nombre }})</h6>
+            <p class="fs-4 fw-bold">{{ sesiones_totales_escuela }}</p>
           </div>
         </div>
-
-        <div class="col-12 col-md-6 col-lg-5">
-          <div class="card w-100 p-2">
-            <h4 class="text-center">Duración Promedio por Escuela (Segundos)</h4>
-            <div class="card-chart">
-              <canvas id="graficoDuracion"></canvas>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-12 col-md-6 col-lg-5">
-          <div class="card w-100 p-2">
-            <h4 class="text-center">Satisfacción General por Escuela (Conteo Si/No)</h4>
-            <div class="card-chart">
-              <canvas id="graficoSatisfaccion"></canvas>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-12 col-md-6 col-lg-5">
-          <div class="card w-100 p-2">
-            <h4 class="text-center">Distribución Emocional (Suma de %)</h4>
-            <div class="card-chart">
-              <canvas id="graficoTelecom"></canvas>
-            </div>
-          </div>
-        </div>
-
       </div>
+
+      <div class="col-md-3 mb-3">
+        <div class="card text-center shadow-sm">
+          <div class="card-body">
+            <h6 class="card-title">Sesiones Totales (Global)</h6>
+            <p class="fs-4 fw-bold">{{ sesiones_totales_global }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-3 mb-3">
+        <div class="card text-center shadow-sm">
+          <div class="card-body">
+            <h6 class="card-title">Emociones ({{ escuela.nombre }})</h6>
+            <p class="mb-1 text-success">Positivas: {{ emoc_positivas_escuela }}</p>
+            <p class="mb-0 text-danger">Negativas: {{ emoc_negativas_escuela }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-3 mb-3">
+        <div class="card text-center shadow-sm">
+          <div class="card-body">
+            <h6 class="card-title">Emociones (Global por Escuela)</h6>
+            <p class="mb-1 text-success">Positivas: {{ emoc_positivas_global }}</p>
+            <p class="mb-0 text-danger">Negativas: {{ emoc_negativas_global }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GRÁFICO 1: EMOCIONES TOTALES POR ESCUELA -->
+    <div class="row justify-content-center mb-3">
+      <div class="col-12 col-md-5 ">
+        <div class="card shadow-sm h-100">
+          <div class="card-body">
+            <h4 class="card-title text-center mb-3">Emociones Totales ({{ escuela.nombre }})</h4>
+            
+            <div class="form-check form-switch mb-2">
+              <input class="form-check-input" type="checkbox" id="switchEmocionesEscuela">
+              <label class="form-check-label" for="switchEmocionesEscuela">Mostrar en porcentaje</label>
+            </div>
+
+            <div class="position-relative" style="height:290px;">
+              <canvas id="graficoEmocionesEscuela"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-5 ">
+        <div class="card shadow-sm h-70">
+          <div class="card-body">
+            <h4 class="card-title text-center mb-3">Emociones Totales (Global por Escuela)</h4>
+
+            <div class="form-check form-switch mb-2">
+              <input class="form-check-input" type="checkbox" id="switchEmocionesGlobal">
+              <label class="form-check-label" for="switchEmocionesGlobal">Mostrar en porcentaje</label>
+            </div>
+
+            <div class="position-relative" style="height:290px;">
+              <canvas id="graficoEmocionesGlobal"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GRÁFICO 2: TIEMPO PROMEDIO SESIÓN -->
+    <div class="row justify-content-center mb-3">
+      <div class="col-12 col-md-5 ">
+        <div class="card shadow-sm h-100">
+          <div class="card-body">
+            <h4 class="card-title text-center mb-3">⏱ Tiempo promedio por sesión ({{ escuela.nombre }})</h4>
+            <div class="position-relative" style="height:290px;">
+              <canvas id="graficoTiempoPromedioEscuela"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-5">
+        <div class="card shadow-sm h-70">
+          <div class="card-body">
+            <h4 class="card-title text-center mb-3">⏱ T.P (Global por Escuela)</h4>
+
+            <div class="mb-3 d-flex align-items-center gap-2">
+              <label for="topN" class="form-label mb-0">Mostrar Top:</label>
+              <select id="topN" class="form-select w-auto">
+                <option value="5">Top 5</option>
+                <option value="10" selected>Top 10</option>
+              </select>
+            </div>
+
+            <div class="position-relative" style="height:290px;">
+              <canvas id="graficoTiempoPromedioGlobal"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GRÁFICO 3: SATISFACCIÓN -->
+    <div class="row justify-content-center mb-3">
+
+      <!-- SELECT PARA CAMBIAR ESCUELA / GLOBAL -->
+      <div class="col-12 mb-1">
+        <div class="d-flex align-items-center gap-2 small">
+          <label for="recomendacionScope" class="form-label mb-0 small">
+            Mostrar:
+          </label>
+
+          <select id="recomendacionScope" class="form-select form-select-sm w-auto" style="min-width: 120px;">
+            <option value="escuela" selected>Escuela seleccionada</option>
+            <option value="global">Global por Escuela</option>
+          </select>
+        </div>
+      </div>
+
+
+
+      <!-- BARRAS DE SATISFACCIÓN -->
+      <div class="col-12 col-md-5 mb-4">
+        <div class="card shadow-sm h-100">
+          <div class="card-body">
+            <h4 class="card-title text-center mb-2">⭐ Satisfacción del 1 al 5</h4>
+            <div class="position-relative" style="height:290px;">
+              <canvas id="graficoSatisfaccionBarras"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TORTA UTILIDAD --> 
+      <div class="col-12 col-md-5 mb-4">
+        <div class="card shadow-sm h-70">
+          <div class="card-body">
+            <h4 class="card-title text-center mb-2"> Encuesta útil (Sí/No)</h4>
+            <div class="form-check form-switch mb-2">
+              <input class="form-check-input" type="checkbox" id="switchSatisfaccionTorta">
+              <label class="form-check-label" for="switchSatisfaccionTorta">Mostrar en porcentaje</label>
+            </div>
+            <div class="position-relative" style="height:290px;">
+              <canvas id="graficoSatisfaccionTorta"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
     </div>
 
   </div>
@@ -113,48 +194,191 @@
 <!-- SCRIPT: ChartJS       -->
 <!-- ====================== -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<!-- html2canvas -->
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
+{{ emociones_por_escuela|json_script:"emociones-escuela" }}
+{{ emociones_global|json_script:"emociones-global" }}
+{{ tiempo_promedio|json_script:"tiempo-promedio" }}
+{{ promedios_escuelas|json_script:"promedios-escuelas" }}
+{{ satisfaccion_barras|json_script:"satisfaccion-barras" }}
+{{ satisfaccion_torta|json_script:"satisfaccion-torta" }}
+{{ satisfaccion_barras_global|json_script:"satisfaccion-barras-global" }}
+{{ satisfaccion_torta_global|json_script:"satisfaccion-torta-global" }}
+
 <script>
-// ==========================
-// VARIABLES DESDE DJANGO
-// ==========================
-const emocionesGlobales = JSON.parse(`{{ emociones_globales|safe }}`);
-const datosDuracion = JSON.parse(`{{ datos_duracion|safe }}`);
-const datosSatisfaccion = JSON.parse(`{{ datos_satisfaccion|safe }}`);
-const datosEscuelas = JSON.parse(`{{ datos_emociones|safe }}`);
+const emocionesEscuela = JSON.parse(document.getElementById("emociones-escuela").textContent);
+const emocionesGlobal = JSON.parse(document.getElementById("emociones-global").textContent);
+const tiempoPromedioEscuela = JSON.parse(document.getElementById("tiempo-promedio").textContent);
+const promediosEscuelas = JSON.parse(document.getElementById("promedios-escuelas").textContent);
+const satisfaccionBarras = JSON.parse(document.getElementById("satisfaccion-barras").textContent);
+const satisfaccionTorta = JSON.parse(document.getElementById("satisfaccion-torta").textContent);
+const satisfaccionBarrasGlobal = JSON.parse(document.getElementById("satisfaccion-barras-global").textContent);
+const satisfaccionTortaGlobal = JSON.parse(document.getElementById("satisfaccion-torta-global").textContent);
 
-const datosTelecom = datosEscuelas.length ? datosEscuelas[0].porcentajes : {};
-const nombreEscuela = datosEscuelas.length ? datosEscuelas[0].escuela : "Escuela";
+const vibrantPastelColors = [
+  'rgba(255, 99, 132, 0.8)',
+  'rgba(54, 162, 235, 0.8)',
+  'rgba(255, 206, 86, 0.8)',
+  'rgba(75, 192, 192, 0.8)',
+  'rgba(153, 102, 255, 0.8)',
+  'rgba(255, 159, 64, 0.8)'
+];
 
-// ==========================
-// FECHA Y HORA SOLO EN PDF
-// ==========================
+let graficoEscuela, graficoGlobal, graficoTiempoGlobal, graficoSatisfaccionBarras, graficoSatisfaccionTorta;
+
+function renderPieChart(chart, dataObj, showPercent) {
+    const data = Object.values(dataObj);
+    const total = data.reduce((a,b)=>a+b,0);
+    chart.data.datasets[0].data = data.map(v => showPercent ? (v/total*100).toFixed(1) : v);
+    chart.options.plugins.datalabels.formatter = v => showPercent ? v + '%' : v;
+    chart.update();
+}
+
 document.addEventListener("DOMContentLoaded", () => {
+    const fecha = new Date();
+    document.getElementById("infoPDF").innerHTML =
+        `📅 Fecha: ${fecha.toLocaleDateString("es-CL")} — 🕒 ${fecha.toLocaleTimeString("es-CL")}`;
 
-  const fecha = new Date();
-  const fechaTexto = fecha.toLocaleDateString("es-CL");
-  const horaTexto = fecha.toLocaleTimeString("es-CL");
+    // --- EMOCIONES ESCUELA ---
+    const ctxEscuela = document.getElementById("graficoEmocionesEscuela").getContext("2d");
+    graficoEscuela = new Chart(ctxEscuela, {
+        type: "pie",
+        data: { labels: Object.keys(emocionesEscuela), datasets: [{ data: Object.values(emocionesEscuela), backgroundColor: vibrantPastelColors, borderWidth: 1 }] },
+        options: { responsive:true, maintainAspectRatio:false, plugins:{ datalabels:{ color:'#fff', font:{weight:'bold'}, formatter:v=>v } } },
+        plugins: [ChartDataLabels]
+    });
 
-  document.getElementById("infoPDF").innerHTML =
-    `📅 Fecha: ${fechaTexto} — 🕒 Hora: ${horaTexto}`;
+    document.getElementById("switchEmocionesEscuela").checked = false;
+    document.getElementById("switchEmocionesEscuela").addEventListener("change", e => {
+        renderPieChart(graficoEscuela, emocionesEscuela, e.target.checked);
+    });
 
-  // ============== GRÁFICOS ==============
-  Chart.defaults.font.size = 10;
+    // --- EMOCIONES GLOBAL ---
+    const ctxGlobal = document.getElementById("graficoEmocionesGlobal").getContext("2d");
+    graficoGlobal = new Chart(ctxGlobal, {
+        type: "pie",
+        data: { labels: Object.keys(emocionesGlobal), datasets: [{ data: Object.values(emocionesGlobal), backgroundColor: vibrantPastelColors, borderWidth: 1 }] },
+        options: { responsive:true, maintainAspectRatio:false, plugins:{ datalabels:{ color:'#fff', font:{weight:'bold'}, formatter:v=>v } } },
+        plugins: [ChartDataLabels]
+    });
 
-  new Chart(document.getElementById("graficoTotales"), {
-    type: "pie",
-    data: {
-      labels: Object.keys(emocionesGlobales),
-      datasets: [{ data: Object.values(emocionesGlobales) }]
-    },
-    options: { responsive: true, maintainAspectRatio: false }
-  });
+    document.getElementById("switchEmocionesGlobal").checked = false;
+    document.getElementById("switchEmocionesGlobal").addEventListener("change", e => {
+        renderPieChart(graficoGlobal, emocionesGlobal, e.target.checked);
+    });
+
+    // --- TIEMPO PROMEDIO ESCUELA ---
+    new Chart(document.getElementById("graficoTiempoPromedioEscuela"), {
+        type: "bar",
+        data: { labels: ["Promedio"], datasets: [{ label:"Minutos", data: [tiempoPromedioEscuela], borderWidth:1, backgroundColor:"#28a745" }] },
+        options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{ datalabels:{anchor:'end', align:'right', formatter:v=>v} }, scales:{ x:{ beginAtZero:true } } },
+        plugins:[ChartDataLabels]
+    });
+
+    // --- TIEMPO PROMEDIO GLOBAL ---
+    function renderGlobalChart(topN){
+        const entries = Object.entries(promediosEscuelas).sort((a,b)=>b[1]-a[1]).slice(0, topN);
+        const labels = entries.map(e=>e[0]);
+        const data = entries.map(e=>e[1]);
+        const ctx = document.getElementById("graficoTiempoPromedioGlobal").getContext("2d");
+        if(graficoTiempoGlobal) graficoTiempoGlobal.destroy();
+        graficoTiempoGlobal = new Chart(ctx, {
+            type:'bar',
+            data:{ labels, datasets:[{ label:'Minutos promedio', data, backgroundColor:'#28a745', borderWidth:1 }] },
+            options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{ datalabels:{anchor:'end', align:'right', formatter:v=>v} }, scales:{ x:{ beginAtZero:true } } },
+            plugins:[ChartDataLabels]
+        });
+    }
+    renderGlobalChart(10);
+    document.getElementById("topN").addEventListener("change", e => renderGlobalChart(parseInt(e.target.value)));
+
+    // --- SATISFACCIÓN ---
+    const ctxBarras = document.getElementById("graficoSatisfaccionBarras").getContext("2d");
+    const ctxTorta = document.getElementById("graficoSatisfaccionTorta").getContext("2d");
+
+    graficoSatisfaccionBarras = new Chart(ctxBarras, {
+        type:'bar',
+        data:{ labels:[1,2,3,4,5], datasets:[{ label:'Cantidad de respuestas', data:Object.values(satisfaccionBarras), backgroundColor:'#ffc107', borderWidth:1 }] },
+        options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{ datalabels:{anchor:'end', align:'right', formatter:v=>v} }, scales:{ x:{ beginAtZero:true } } },
+        plugins:[ChartDataLabels]
+    });
+
+    graficoSatisfaccionTorta = new Chart(ctxTorta, {
+        type:'pie',
+        data:{ labels:Object.keys(satisfaccionTorta), datasets:[{ data:Object.values(satisfaccionTorta), backgroundColor:['#28a745','#dc3545'], borderWidth:1 }] },
+        options:{ responsive:true, maintainAspectRatio:false, plugins:{ datalabels:{ color:'#fff', font:{weight:'bold'}, formatter:v=>v } } },
+        plugins:[ChartDataLabels]
+    });
+
+    document.getElementById("switchSatisfaccionTorta").checked = false;
+
+    function renderSatisfaccion(scope){
+        // BARRAS
+        let barraData = [];
+        const labels = [1,2,3,4,5];
+        if(scope === 'escuela'){
+            barraData = Object.values(satisfaccionBarras);
+        } else {
+            let globalCount = {1:0,2:0,3:0,4:0,5:0};
+            for(const esc in satisfaccionBarrasGlobal){
+                for(const key in satisfaccionBarrasGlobal[esc]){
+                    globalCount[key] += satisfaccionBarrasGlobal[esc][key];
+                }
+            }
+            barraData = labels.map(lvl => globalCount[lvl]);
+        }
+        graficoSatisfaccionBarras.data.datasets[0].data = barraData;
+        graficoSatisfaccionBarras.update();
+
+        // TORTA
+        let tortaData = {Sí:0, No:0};
+        if(scope === 'escuela'){
+            tortaData = satisfaccionTorta;
+        } else {
+            for(const esc in satisfaccionTortaGlobal){
+                tortaData['Sí'] += satisfaccionTortaGlobal[esc]['Sí'];
+                tortaData['No'] += satisfaccionTortaGlobal[esc]['No'];
+            }
+        }
+
+        const showPercent = document.getElementById("switchSatisfaccionTorta").checked;
+        const total = tortaData['Sí'] + tortaData['No'];
+        graficoSatisfaccionTorta.data.datasets[0].data = [
+            showPercent ? (tortaData['Sí']/total*100).toFixed(1) : tortaData['Sí'],
+            showPercent ? (tortaData['No']/total*100).toFixed(1) : tortaData['No']
+        ];
+        graficoSatisfaccionTorta.options.plugins.datalabels.formatter = v => showPercent ? v + '%' : v;
+        graficoSatisfaccionTorta.update();
+    }
+
+    const scopeSelector = document.getElementById("recomendacionScope");
+    if(scopeSelector){
+        scopeSelector.addEventListener("change", e => renderSatisfaccion(e.target.value));
+    }
+
+    document.getElementById("switchSatisfaccionTorta").addEventListener("change", e => {
+        const currentScope = scopeSelector ? scopeSelector.value : "escuela";
+        renderSatisfaccion(currentScope);
+    });
+
+    // --- PDF ---
+    document.getElementById("descargarPDF").addEventListener("click", async () => {
+        await new Promise(r => setTimeout(r, 300));
+        html2canvas(document.getElementById("pdfContenido"), { scale: 1.5 }).then(canvas => {
+            const imgData = canvas.toDataURL("image/png");
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF("p", "mm", "a4");
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const imgProps = pdf.getImageProperties(imgData);
+            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+            pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+            pdf.save("dashboard_emocional.pdf");
+        });
+    });
 
   new Chart(document.getElementById("graficoDuracion"), {
     type: "bar",
@@ -209,5 +433,9 @@ document.getElementById("descargarPDF").addEventListener("click", async () => {
   pdf.save("dashboard_emocional.pdf");
 });
 </script>
+
+
+
+
 
 {% endblock %}
