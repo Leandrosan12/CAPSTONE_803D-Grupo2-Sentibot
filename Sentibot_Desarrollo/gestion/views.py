@@ -1138,5 +1138,15 @@ def tiempo_promedio_sesion_por_escuela(request, escuela_id):
     return render(request, "dashboard/tiempo_promedio_sesion.html", context)
 
 
+def alumnos(request):
+    # Obtener parámetro de búsqueda
+    email = request.GET.get('email')
 
+    # Si se escribe un email, filtra
+    if email:
+        usuarios = Usuario.objects.filter(email__icontains=email)
+    else:
+        usuarios = Usuario.objects.all()
+
+    return render(request, 'modulo/alumnos.html', {"usuarios": usuarios})
 
