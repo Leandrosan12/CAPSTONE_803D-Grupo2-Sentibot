@@ -253,6 +253,8 @@ def detalle_alumno(request, id):
     # EMOCIONES
     emociones = EmotionSession.objects.filter(alumno_id=id)
 
+    # 📌 EMOCIONES DEL ALUMNO
+    sesion = Sesion.objects.filter(usuario=alumno).order_by('-fecha_inicio').first()
     emociones_data = {
         "Feliz": emociones.filter(emocion="Feliz").count(),
         "Triste": emociones.filter(emocion="Triste").count(),
@@ -264,6 +266,30 @@ def detalle_alumno(request, id):
     # ENCUESTA
     encuesta = EncuestaSatisfaccion.objects.filter(alumno_id=id).first()
 
+    if sesion:
+        emociones_contadas = (
+            EmocionCamara.objects.filter(sesion=sesion)
+            .values('nombre_emocion')
+            .annotate(total=Count('nombre_emocion'))
+        )
+        for item in emociones_contadas:
+            emo = item['nombre_emocion'].lower().strip()
+            if emo in ["surprised", "sorpresa", "sorprendida"]:
+                emo = "sorprendido"
+            elif emo in ["happy", "feliz"]:
+                emo = "feliz"
+            elif emo in ["sad", "triste"]:
+                emo = "triste"
+            elif emo in ["neutral", "neutral"]:
+                emo = "neutral"
+            elif emo in ["angry", "enojado"]:
+                emo = "enojado"
+            emo = emo.capitalize()
+            if emo in emociones_data:
+                emociones_data[emo] = item['total']
+
+    # 📌 ENCUESTA DE SATISFACCIÓN
+    encuesta = EncuestaSatisfaccion.objects.filter(sesion=sesion).first()
     encuesta_data = {
         "recomendacion": encuesta.puntaje if encuesta else 0
     }
