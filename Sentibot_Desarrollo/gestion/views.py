@@ -209,7 +209,8 @@ def registro(request):
 def modulo(request):
     return render(request, 'modulo/modulo.html')
     return render(request, "camara.html", {"sesion_id": sesion.id})
-
+def modulo_profesor(request):
+    return render(request, 'modulo/modulo_profesor.html')
 
 
 
