@@ -73,7 +73,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'sentibot',
         'USER': 'root',
-        'PASSWORD': 'admin',
+        'PASSWORD': 'lilo1309',
         'HOST': 'localhost',
         'PORT': '3306',
         'OPTIONS': {

@@ -208,9 +208,14 @@ def registro(request):
 # ------------------------------
 def modulo(request):
     return render(request, 'modulo/modulo.html')
-    return render(request, "camara.html", {"sesion_id": sesion.id})
+ 
+from django.shortcuts import render
+from .models import Escuela
+@login_required(login_url='login')
 def modulo_profesor(request):
-    return render(request, 'modulo/modulo_profesor.html')
+    """Muestra la lista de escuelas en el módulo del profesor."""
+    escuelas = Escuela.objects.all().order_by('nombre')
+    return render(request, 'modulo_profesor.html', {'escuelas': escuelas})
 
 
 
