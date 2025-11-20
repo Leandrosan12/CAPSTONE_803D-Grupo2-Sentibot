@@ -236,7 +236,17 @@ def agenda(request):
 def modulo(request):
     return render(request, 'modulo/modulo.html')
 def alumnos(request):
-    return render(request, 'modulo/alumnos.html')
+    # Obtener parámetro de búsqueda
+    email = request.GET.get('email')
+
+    # Si se escribe un email, filtra
+    if email:
+        usuarios = Usuario.objects.filter(email__icontains=email)
+    else:
+        usuarios = Usuario.objects.all()
+
+    return render(request, 'modulo/alumnos.html', {"usuarios": usuarios})
+
 
 
 from django.shortcuts import render, get_object_or_404
