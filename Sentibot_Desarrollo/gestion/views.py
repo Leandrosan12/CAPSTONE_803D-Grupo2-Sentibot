@@ -539,9 +539,6 @@ def mantenimiento(request):
 # ------------------------------
 # ALUMNOS / ESCUELAS / DETALLES
 # ------------------------------
-def alumnos(request):
-    usuarios = Usuario.objects.all()
-    return render(request, 'modulo/alumnos.html', {'usuarios': usuarios})
 
 def lista_usuarios(request):
     with connection.cursor() as cursor:
