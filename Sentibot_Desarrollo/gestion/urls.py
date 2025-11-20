@@ -32,7 +32,6 @@ urlpatterns = [
     path('grafico_profesor/', views.grafico_profesor, name='grafico_profesor'),  # Dashboard emocional del profesor
 
     # --- 🏫 Escuelas y Alumnos ---
-    path('modulo/escuelas/', views.escuelas, name='escuelas'),
     path('modulo/alumnos/', views.alumnos, name='alumnos'),
     path('modulo/detalle_alumno/<int:alumno_id>/', views.detalle_alumno, name='detalle_alumno'),
 

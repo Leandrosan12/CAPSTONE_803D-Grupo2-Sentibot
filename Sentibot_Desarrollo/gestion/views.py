@@ -235,14 +235,9 @@ def agenda(request):
 # ============================================================
 def modulo(request):
     return render(request, 'modulo/modulo.html')
+def alumnos(request):
+    return render(request, 'modulo/alumnos.html')
 
-
-def modulo_profesor(request):
-    profesores = [
-        {'id': 1, 'nombre': 'Juan Torres', 'rut': '18.234.567-9', 'correo': 'juan.torres@duocuc.cl', 'telefono': '+569 87654321', 'sede': 'Santiago'},
-        {'id': 2, 'nombre': 'María Rojas', 'rut': '17.123.456-0', 'correo': 'maria.rojas@duocuc.cl', 'telefono': '+569 91234567', 'sede': 'Melipilla'},
-    ]
-    return render(request, 'modulo_profesor.html', {'profesores': profesores})
 
 from django.shortcuts import render, get_object_or_404
 from .models import Usuario, EmotionSession, EncuestaSatisfaccion, Escuela, Rol
@@ -262,10 +257,6 @@ def detalle_alumno(request, id):
         "Enojado": emociones.filter(emocion="Enojado").count(),
         "Sorprendido": emociones.filter(emocion="Sorprendido").count(),
     }
-
-    # ENCUESTA
-    encuesta = EncuestaSatisfaccion.objects.filter(alumno_id=id).first()
-
     if sesion:
         emociones_contadas = (
             EmocionCamara.objects.filter(sesion=sesion)
@@ -303,18 +294,6 @@ def detalle_alumno(request, id):
     })
 
 
-
-
-
-
-
-def escuelas(request):
-    escuelas = [
-        {'id': 1, 'nombre': 'Escuela de Ingeniería', 'carreras': ['Informática', 'Civil', 'Industrial'], 'sede': 'Santiago'},
-        {'id': 2, 'nombre': 'Escuela de Construcción', 'carreras': ['Construcción', 'Arquitectura'], 'sede': 'Quilpué'},
-        {'id': 3, 'nombre': 'Escuela de Medicina', 'carreras': ['Medicina', 'Enfermería'], 'sede': 'Concepción'},
-    ]
-    return render(request, 'escuelas.html', {'escuelas': escuelas})
 
 
 # ============================================================
@@ -662,21 +641,6 @@ def detalle_alumno(request, alumno_id):
     }
 
     return render(request, "modulo/detalle_alumno.html", context)
-
-
-
-
-
-
-
-def escuelas(request):
-    escuelas_sim = [
-        {'id': 1, 'nombre': 'Informática y Telecomunicación', 'carreras': ['Programación', 'Redes'], 'sede': 'Melipilla'},
-        {'id': 2, 'nombre': 'Construcción', 'carreras': ['Edificación', 'Arquitectura'], 'sede': 'Melipilla'},
-        {'id': 3, 'nombre': 'Gastronomía', 'carreras': ['Cocina Profesional', 'Pastelería'], 'sede': 'Melipilla'},
-        {'id': 4, 'nombre': 'Otra Escuela', 'carreras': ['Diseño', 'Administración'], 'sede': 'Melipilla'},
-    ]
-    return render(request, 'modulo/escuela.html', {'escuelas': escuelas_sim})
 
 # ------------------------------
 # SEGUIMIENTO / DASHBOARD
