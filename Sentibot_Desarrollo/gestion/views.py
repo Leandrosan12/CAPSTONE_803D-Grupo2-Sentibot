@@ -517,8 +517,6 @@ def camara(request):
 def agenda_view(request):
     return render(request, 'agenda.html')
 
-def actividades(request):
-    return render(request, 'actividades.html')
 
 def mantenimiento(request):
     return render(request, 'mantenimiento.html')
@@ -590,34 +588,138 @@ def dashboard_emociones(request, escuela_id):
 def opciones(request):
     return render(request, 'opciones.html')
 
-
-
 from django.shortcuts import render, get_object_or_404
-from django.db.models import Count
-from .models import Escuela, EmocionReal
+from django.db.models import Count, Avg, F, ExpressionWrapper, DurationField
+from collections import Counter
+from .models import Escuela, Sesion, EmocionReal, EncuestaSatisfaccion
+from django.contrib.auth.decorators import login_required
 
+
+@login_required
 def grafico_profesor(request, escuela_id):
-
     escuela = get_object_or_404(Escuela, id=escuela_id)
 
-    emociones_raw = (
-        EmocionReal.objects
-        .filter(sesion__usuario__escuela=escuela)
-        .values('tipo_emocion')
-        .annotate(total=Count('id'))
-    )
+    # --- Emociones por escuela ---
+    emociones_raw = EmocionReal.objects.filter(
+        sesion__usuario__escuela=escuela
+    ).values('tipo_emocion').annotate(total=Count('id'))
+    emociones_por_escuela = {e['tipo_emocion']: e['total'] for e in emociones_raw}
 
-    print("🔍 EMOCIONES ENVIADAS AL TEMPLATE:", list(emociones_raw))
+    # --- Emociones global ---
+    emociones_global_raw = EmocionReal.objects.values('tipo_emocion').annotate(total=Count('id'))
+    emociones_global = {e['tipo_emocion']: e['total'] for e in emociones_global_raw}
 
-    emociones_por_escuela = {
-        item["tipo_emocion"]: item["total"]
-        for item in emociones_raw
+    # --- Duración de sesiones ---
+    duracion = ExpressionWrapper(F('fecha_fin') - F('fecha_inicio'), output_field=DurationField())
+
+    # --- Tiempo promedio por escuela seleccionada ---
+    sesiones_escuela = Sesion.objects.filter(usuario__escuela=escuela).annotate(duracion=duracion)
+    promedio_min_escuela = sesiones_escuela.aggregate(promedio=Avg('duracion'))['promedio']
+    tiempo_promedio_escuela = promedio_min_escuela.total_seconds()/60 if promedio_min_escuela else 0
+
+    # --- Tiempo promedio global ---
+    sesiones_global = Sesion.objects.all().annotate(duracion=duracion)
+    promedio_min_global = sesiones_global.aggregate(promedio=Avg('duracion'))['promedio']
+    tiempo_promedio_global = promedio_min_global.total_seconds()/60 if promedio_min_global else 0
+
+    # --- Promedios por todas las escuelas ---
+    promedios_escuelas = {}
+    for e in Escuela.objects.all():
+        sesiones_e = Sesion.objects.filter(usuario__escuela=e).annotate(duracion=duracion)
+        promedio = sesiones_e.aggregate(promedio=Avg('duracion'))['promedio']
+        promedios_escuelas[e.nombre] = promedio.total_seconds()/60 if promedio else 0
+
+    # --- Sesiones totales ---
+    sesiones_totales_escuela = sesiones_escuela.count()
+    sesiones_totales_global = sesiones_global.count()
+
+    # --- Emociones positivas vs negativas ---
+    positivas = ['Alegría', 'Neutral']
+    negativas = ['Enojo', 'Tristeza', 'Miedo']
+
+    emoc_positivas_escuela = EmocionReal.objects.filter(
+        sesion__usuario__escuela=escuela, tipo_emocion__in=positivas
+    ).count()
+    emoc_negativas_escuela = EmocionReal.objects.filter(
+        sesion__usuario__escuela=escuela, tipo_emocion__in=negativas
+    ).count()
+
+    emoc_positivas_global = EmocionReal.objects.filter(tipo_emocion__in=positivas).count()
+    emoc_negativas_global = EmocionReal.objects.filter(tipo_emocion__in=negativas).count()
+
+    # --- Encuesta de satisfacción ---
+    encuestas_escuela = EncuestaSatisfaccion.objects.filter(sesion__usuario__escuela=escuela)
+
+    # --- Gráfico barras: Recomendación 1-5 ---
+    recomendaciones = [e.recomendacion for e in encuestas_escuela if e.recomendacion]
+    recomendaciones_count = Counter(recomendaciones)
+    satisfaccion_barras = {i: recomendaciones_count.get(i, 0) for i in range(1, 6)}
+
+    # --- Gráfico torta: Utilidad Sí/No (solo escuela actual) ---
+    utilidad_escuela_list = [
+        'Sí' if str(e.utilidad) == "1" else 'No'
+        for e in encuestas_escuela
+    ]
+    utilidad_count_escuela = Counter(utilidad_escuela_list)
+
+    utilidad_escuela = {
+        'Sí': utilidad_count_escuela.get('Sí', 0),
+        'No': utilidad_count_escuela.get('No', 0),
     }
 
-    return render(request, "grafico_profesor.html", {
+    # --- Encuestas globales ---
+    encuestas_global = EncuestaSatisfaccion.objects.filter(sesion__usuario__escuela__isnull=False)
+    recomendaciones_global = {}
+    satisfaccion_torta_global = {}
+    utilidad_global = {}
+
+    for e in Escuela.objects.all():
+        enc = encuestas_global.filter(sesion__usuario__escuela=e)
+
+        # Recomendaciones 1 a 5
+        count_rec = Counter([i.recomendacion for i in enc if i.recomendacion])
+        recomendaciones_global[e.nombre] = {i: count_rec.get(i, 0) for i in range(1, 6)}
+
+        # Utilidad sí/no
+        count_utilidad = Counter([
+            'Sí' if str(i.utilidad) == "1" else 'No'
+            for i in enc
+        ])
+        utilidad_global[e.nombre] = {
+            'Sí': count_utilidad.get('Sí', 0),
+            'No': count_utilidad.get('No', 0),
+        }
+
+        # Para compatibilidad con tu template previo
+        satisfaccion_torta_global[e.nombre] = utilidad_global[e.nombre]
+
+    context = {
         "escuela": escuela,
         "emociones_por_escuela": emociones_por_escuela,
-    })
+        "emociones_global": emociones_global,
+        "tiempo_promedio": round(tiempo_promedio_escuela, 2),
+        "tiempo_promedio_global": round(tiempo_promedio_global, 2),
+        "sesiones_totales_escuela": sesiones_totales_escuela,
+        "sesiones_totales_global": sesiones_totales_global,
+        "emoc_positivas_escuela": emoc_positivas_escuela,
+        "emoc_negativas_escuela": emoc_negativas_escuela,
+        "emoc_positivas_global": emoc_positivas_global,
+        "emoc_negativas_global": emoc_negativas_global,
+        "promedios_escuelas": promedios_escuelas,
+
+        # Satisfacción escuela actual
+        "satisfaccion_barras": satisfaccion_barras,
+        "satisfaccion_torta": utilidad_escuela,
+        "utilidad_escuela": utilidad_escuela,
+
+        # Satisfacción global por escuela
+        "satisfaccion_barras_global": recomendaciones_global,
+        "satisfaccion_torta_global": satisfaccion_torta_global,
+        "utilidad_global": utilidad_global,
+    }
+
+    return render(request, "grafico_profesor.html", context)
+
 
 
 # ------------------------------
@@ -884,4 +986,41 @@ def emociones_por_escuela(request):
         result[escuela][emocion] = total
 
     return JsonResponse(result)
+
+
+from django.db.models import Avg, ExpressionWrapper, F, DurationField
+from django.shortcuts import render, get_object_or_404
+from .models import Sesion, Escuela
+
+def tiempo_promedio_sesion_por_escuela(request, escuela_id):
+    escuela = get_object_or_404(Escuela, id=escuela_id)
+
+    # Cálculo correcto de duración usando fecha_inicio y fecha_fin
+    duracion = ExpressionWrapper(
+        F('fecha_fin') - F('fecha_inicio'),
+        output_field=DurationField()
+    )
+
+    # Filtrar sesiones por escuela REAL del usuario
+    sesiones = (
+        Sesion.objects
+        .filter(usuario__escuela_id=escuela_id)
+        .annotate(duracion=duracion)
+    )
+
+    # Promedio
+    promedio = sesiones.aggregate(promedio=Avg('duracion'))['promedio']
+
+    # Convertimos a minutos
+    promedio_min = promedio.total_seconds() / 60 if promedio else 0
+
+    context = {
+        "escuela": escuela,
+        "promedio_min": round(promedio_min, 2)
+    }
+
+    return render(request, "dashboard/tiempo_promedio_sesion.html", context)
+
+
+
 

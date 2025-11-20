@@ -1,28 +1,47 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Módulo Profesor{% endblock %}
+{% block title %}Módulo del Profesor{% endblock %}
 
 {% block content %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-<link rel="stylesheet" href="{% static 'css/modulo_profesor.css' %}">
 
-<section class="text-center py-5 bg-light">
-  <h2 class="fw-bold display-6">👨‍🏫 Módulo del Profesor</h2>
-  <p class="text-secondary fs-5">Selecciona una escuela para acceder a su análisis emocional</p>
+<!-- ---------- ENCABEZADO ---------- -->
+<section class="py-5 text-center" style="background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); color: white;">
+  <div class="container">
+    <h2 class="fw-bold display-5">🚀 Panel del Profesor</h2>
+    <p class="fs-5 mt-2 opacity-75">
+      Selecciona una escuela para acceder a su análisis emocional
+    </p>
+  </div>
 </section>
 
+<!-- ---------- TARJETAS ---------- -->
 <div class="container my-5">
   <div class="row g-4 justify-content-center">
 
     {% for escuela in escuelas %}
       <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-        <div class="card shadow-lg border-0 rounded-4 h-100 hover-scale text-center p-4">
-          <h5 class="fw-bold mb-2">{{ escuela.nombre }}</h5>
-          <p class="text-muted">{{ escuela.direccion|default:"Melipilla" }}</p>
-          <a href="{% url 'dashboard_emocional' escuela.id %}">Ver Dashboard</a>
-            📊 Ver Gráficos
-          </a>
+        <div class="card h-100 border-0 shadow rounded-4">
+
+          <!-- TÍTULO TARJETA -->
+          <div class="card-header bg-light border-0 text-center py-3 rounded-top-4">
+            <h5 class="fw-semibold text-dark mb-0" style="min-height: 2.5rem;">
+              {{ escuela.nombre }}
+            </h5>
+          </div>
+
+          <!-- CUERPO TARJETA -->
+          <div class="card-body text-center d-flex flex-column justify-content-between">
+            <p class="text-secondary mb-4">
+              {{ escuela.direccion|default:"Dirección no registrada" }}
+            </p>
+            <a href="{% url 'dashboard_emocional' escuela.id %}" 
+               class="btn btn-primary rounded-pill px-4 py-2 shadow-sm mt-auto">
+              📊 Ver Dashboard
+            </a>
+          </div>
+
         </div>
       </div>
     {% empty %}
@@ -33,4 +52,5 @@
 
   </div>
 </div>
+
 {% endblock %}
