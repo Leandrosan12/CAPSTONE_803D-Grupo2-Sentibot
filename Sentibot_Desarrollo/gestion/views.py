@@ -235,14 +235,19 @@ def agenda(request):
 # ============================================================
 def modulo(request):
     return render(request, 'modulo/modulo.html')
+def alumnos(request):
+    # Obtener parámetro de búsqueda
+    email = request.GET.get('email')
+
+    # Si se escribe un email, filtra
+    if email:
+        usuarios = Usuario.objects.filter(email__icontains=email)
+    else:
+        usuarios = Usuario.objects.all()
+
+    return render(request, 'modulo/alumnos.html', {"usuarios": usuarios})
 
 
-def modulo_profesor(request):
-    profesores = [
-        {'id': 1, 'nombre': 'Juan Torres', 'rut': '18.234.567-9', 'correo': 'juan.torres@duocuc.cl', 'telefono': '+569 87654321', 'sede': 'Santiago'},
-        {'id': 2, 'nombre': 'María Rojas', 'rut': '17.123.456-0', 'correo': 'maria.rojas@duocuc.cl', 'telefono': '+569 91234567', 'sede': 'Melipilla'},
-    ]
-    return render(request, 'modulo_profesor.html', {'profesores': profesores})
 
 from django.shortcuts import render, get_object_or_404
 from .models import Usuario, EmotionSession, EncuestaSatisfaccion, Escuela, Rol
@@ -278,17 +283,6 @@ def detalle_alumno(request, id):
 
 
 
-
-
-
-
-def escuelas(request):
-    escuelas = [
-        {'id': 1, 'nombre': 'Escuela de Ingeniería', 'carreras': ['Informática', 'Civil', 'Industrial'], 'sede': 'Santiago'},
-        {'id': 2, 'nombre': 'Escuela de Construcción', 'carreras': ['Construcción', 'Arquitectura'], 'sede': 'Quilpué'},
-        {'id': 3, 'nombre': 'Escuela de Medicina', 'carreras': ['Medicina', 'Enfermería'], 'sede': 'Concepción'},
-    ]
-    return render(request, 'escuelas.html', {'escuelas': escuelas})
 
 
 # ============================================================
