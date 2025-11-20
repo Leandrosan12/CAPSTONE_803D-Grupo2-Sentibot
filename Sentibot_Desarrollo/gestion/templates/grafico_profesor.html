@@ -361,7 +361,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- PDF ---
     document.getElementById("descargarPDF").addEventListener("click", async () => {
         await new Promise(r => setTimeout(r, 300));
-        html2canvas(document.getElementById("pdfContenido"), { scale: 3 }).then(canvas => {
+        html2canvas(document.getElementById("pdfContenido"), { scale: 1.5 }).then(canvas => {
             const imgData = canvas.toDataURL("image/png");
             const { jsPDF } = window.jspdf;
             const pdf = new jsPDF("p", "mm", "a4");
