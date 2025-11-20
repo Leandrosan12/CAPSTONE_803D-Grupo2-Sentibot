@@ -8,9 +8,7 @@
     </h2>
 
     {% if user.is_authenticated %}
-    <a href="{% url 'perfil' %}">
-            <img src="{% static 'Icon/user.png' %}" alt="Perfil"> Perfil
-    </a>
+
     {% if user.is_staff %}
         {# ---- MÓDULOS PARA ADMINISTRADORES ---- #}
 
@@ -31,13 +29,19 @@
             <img src="{% static 'Icon/ejercicio.png' %}" alt="Actividades Config">
             Configurar Actividades
         </a>
-
+          <!-- Nuevo módulo: Administrar Actividades -->
+        <a href="{% url 'alumnos' %}">
+            <img src="{% static 'Icon/user.png' %}" alt="Actividades Config">
+             Alumnos
+        </a>
 
 
     {% else %}
         {# ---- MÓDULOS PARA USUARIOS NORMALES ---- #}
 
-        
+        <a href="{% url 'perfil' %}">
+            <img src="{% static 'Icon/user.png' %}" alt="Perfil"> Perfil
+        </a>
 
         <a href="{% url 'opciones' %}">
             <img src="{% static 'Icon/ejercicio.png' %}" alt="Actividades"> Actividades

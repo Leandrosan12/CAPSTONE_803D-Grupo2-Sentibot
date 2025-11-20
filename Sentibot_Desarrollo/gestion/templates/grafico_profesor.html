@@ -18,7 +18,9 @@
   <div id="pdfContenido" class="bg-white p-4 rounded shadow-sm">
 
     <div class="text-center mb-4">
-      <h2 class="fw-bold">📊 Dashboard Emocional – {{ escuela.nombre }}</h2>
+      <h2 class="fw-bold">📊 Dashboard Emocional – {{ datosEscuelas.0.escuela|default:"Escuela" }}</h2>
+
+      <!-- Fecha y hora SOLO para PDF -->
       <p id="infoPDF" class="fw-bold"></p>
     </div>
 
@@ -185,12 +187,17 @@
     </div>
 
   </div>
+
 </div>
 
-<!-- LIBRERÍAS -->
+<!-- ====================== -->
+<!-- SCRIPT: ChartJS       -->
+<!-- ====================== -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 {{ emociones_por_escuela|json_script:"emociones-escuela" }}
@@ -373,6 +380,57 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+  new Chart(document.getElementById("graficoDuracion"), {
+    type: "bar",
+    data: {
+      labels: datosDuracion.map(e => e.escuela),
+      datasets: [{ label: "Duración (s)", data: datosDuracion.map(e => e.promedio) }]
+    },
+    options: { responsive: true, maintainAspectRatio: false }
+  });
+
+  new Chart(document.getElementById("graficoSatisfaccion"), {
+    type: "bar",
+    data: {
+      labels: datosSatisfaccion.map(e => e.escuela),
+      datasets: [
+        { label: "Sí le gustó", data: datosSatisfaccion.map(e => e.si) },
+        { label: "No le gustó", data: datosSatisfaccion.map(e => e.no) }
+      ]
+    },
+    options: { responsive: true, maintainAspectRatio: false }
+  });
+
+  new Chart(document.getElementById("graficoTelecom"), {
+    type: "pie",
+    data: {
+      labels: Object.keys(datosTelecom),
+      datasets: [{ data: Object.values(datosTelecom) }]
+    },
+    options: { responsive: true, maintainAspectRatio: false }
+  });
+
+});
+
+// ===================================
+// GENERAR PDF SIN BOTONES
+// ===================================
+document.getElementById("descargarPDF").addEventListener("click", async () => {
+
+  const elemento = document.getElementById("pdfContenido");
+
+  const canvas = await html2canvas(elemento, { scale: 2 });
+  const imgData = canvas.toDataURL("image/png");
+
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF("p", "mm", "a4");
+
+  const pdfWidth = pdf.internal.pageSize.getWidth();
+  const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+  pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+
+  pdf.save("dashboard_emocional.pdf");
 });
 </script>
 

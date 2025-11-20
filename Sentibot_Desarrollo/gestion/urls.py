@@ -1,4 +1,3 @@
-# gestion/urls.py
 from django.urls import path
 from . import views
 from .views import emociones_por_escuela, tiempo_promedio_sesion_por_escuela
@@ -31,8 +30,7 @@ urlpatterns = [
 
     # --- 👨‍🏫 Módulo del profesor ---
     path('modulo_profesor/', views.modulo_profesor, name='modulo_profesor'),  # Vista principal del módulo profesor
-    # RUTA MODIFICADA: Ahora requiere el ID de la escuela
-    path('grafico_profesor/<int:escuela_id>/', views.grafico_profesor, name='grafico_profesor'),  # Dashboard emocional filtrado
+    path('grafico_profesor/', views.grafico_profesor, name='grafico_profesor'),  # Dashboard emocional del profesor
 
     # --- 🏫 Escuelas y Alumnos ---
     path('modulo/escuelas/', views.escuelas, name='escuelas'),
@@ -50,7 +48,6 @@ urlpatterns = [
     path("predict_emotion/", views.predict_emotion_view, name="predict_emotion"),
     path("procesar_emocion_camara/<int:sesion_id>/", views.procesar_emocion_camara, name="procesar_emocion_camara"),
     path("seleccionar_emocion/<str:emocion_nombre>/", views.seleccionar_emocion, name="seleccionar_emocion"),
-    path('descargar-reporte/<int:escuela_id>/', views.descargar_reporte, name='descargar_reporte'),
 
 
     path('dashboard_emociones/', views.dashboard_emociones, name='dashboard_emociones'),
@@ -71,4 +68,7 @@ urlpatterns = [
     path("emociones/por-escuela/", emociones_por_escuela, name="emociones_por_escuela"),
     path('dashboard-emocional/<int:escuela_id>/',views.grafico_profesor, name='dashboard_emocional'),
     path('dashboard/tiempo-promedio-sesion/<int:escuela_id>/',tiempo_promedio_sesion_por_escuela,name="tiempo_promedio_sesion_por_escuela")
+
+
+
 ]

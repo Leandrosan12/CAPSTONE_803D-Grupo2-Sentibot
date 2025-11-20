@@ -9,6 +9,7 @@ import base64
 from io import BytesIO
 from datetime import timedelta
 from random import randint, sample
+from .models import EncuestaSatisfaccion
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
@@ -50,7 +51,7 @@ def login(request):
         user = authenticate(request, email=email, password=password)
         if user is not None and user.is_active:
             auth_login(request, user)
-            return redirect('perfil')
+            return redirect('camara')
         return render(request, 'login.html', {'error': 'Correo o contraseña incorrectos'})
     return render(request, 'login.html')
 
@@ -236,26 +237,84 @@ def modulo(request):
     return render(request, 'modulo/modulo.html')
 
 
-from django.shortcuts import render
-from .models import Escuela
-@login_required(login_url='login')
 def modulo_profesor(request):
-    """Muestra la lista de escuelas en el módulo del profesor."""
-    escuelas = Escuela.objects.all().order_by('nombre')
-    return render(request, 'modulo_profesor.html', {'escuelas': escuelas})
+    profesores = [
+        {'id': 1, 'nombre': 'Juan Torres', 'rut': '18.234.567-9', 'correo': 'juan.torres@duocuc.cl', 'telefono': '+569 87654321', 'sede': 'Santiago'},
+        {'id': 2, 'nombre': 'María Rojas', 'rut': '17.123.456-0', 'correo': 'maria.rojas@duocuc.cl', 'telefono': '+569 91234567', 'sede': 'Melipilla'},
+    ]
+    return render(request, 'modulo_profesor.html', {'profesores': profesores})
+
+from django.shortcuts import render, get_object_or_404
+from .models import Usuario, EmotionSession, EncuestaSatisfaccion, Escuela, Rol
+
+def detalle_alumno(request, id):
+    alumno = get_object_or_404(Usuario, id=id)
+
+    # EMOCIONES
+    emociones = EmotionSession.objects.filter(alumno_id=id)
+
+    # 📌 EMOCIONES DEL ALUMNO
+    sesion = Sesion.objects.filter(usuario=alumno).order_by('-fecha_inicio').first()
+    emociones_data = {
+        "Feliz": emociones.filter(emocion="Feliz").count(),
+        "Triste": emociones.filter(emocion="Triste").count(),
+        "Neutral": emociones.filter(emocion="Neutral").count(),
+        "Enojado": emociones.filter(emocion="Enojado").count(),
+        "Sorprendido": emociones.filter(emocion="Sorprendido").count(),
+    }
+
+    # ENCUESTA
+    encuesta = EncuestaSatisfaccion.objects.filter(alumno_id=id).first()
+
+    if sesion:
+        emociones_contadas = (
+            EmocionCamara.objects.filter(sesion=sesion)
+            .values('nombre_emocion')
+            .annotate(total=Count('nombre_emocion'))
+        )
+        for item in emociones_contadas:
+            emo = item['nombre_emocion'].lower().strip()
+            if emo in ["surprised", "sorpresa", "sorprendida"]:
+                emo = "sorprendido"
+            elif emo in ["happy", "feliz"]:
+                emo = "feliz"
+            elif emo in ["sad", "triste"]:
+                emo = "triste"
+            elif emo in ["neutral", "neutral"]:
+                emo = "neutral"
+            elif emo in ["angry", "enojado"]:
+                emo = "enojado"
+            emo = emo.capitalize()
+            if emo in emociones_data:
+                emociones_data[emo] = item['total']
+
+    # 📌 ENCUESTA DE SATISFACCIÓN
+    encuesta = EncuestaSatisfaccion.objects.filter(sesion=sesion).first()
+    encuesta_data = {
+        "recomendacion": encuesta.puntaje if encuesta else 0
+    }
+
+    return render(request, "detalle_alumno.html", {
+        "alumno": alumno,
+        "emociones_data": emociones_data,
+        "encuesta_data": encuesta_data,
+        "escuelas": Escuela.objects.all(),
+        "roles": Rol.objects.all()
+    })
 
 
-def alumnos(request):
-    usuarios = Usuario.objects.all()
-    return render(request, 'modulo/alumnos.html', {'usuarios': usuarios})
-
-
-def detalle_alumno(request, alumno_id):
-    alumno = get_object_or_404(Usuario, id=alumno_id)
-    return render(request, 'modulo/detalle_alumno.html', {'alumno': alumno})
 
 
 
+
+
+def escuelas(request):
+    escuelas = [
+        {'id': 1, 'nombre': 'Escuela de Ingeniería', 'carreras': ['Informática', 'Civil', 'Industrial'], 'sede': 'Santiago'},
+        {'id': 2, 'nombre': 'Escuela de Construcción', 'carreras': ['Construcción', 'Arquitectura'], 'sede': 'Quilpué'},
+        {'id': 3, 'nombre': 'Escuela de Medicina', 'carreras': ['Medicina', 'Enfermería'], 'sede': 'Concepción'},
+    ]
+    return render(request, 'escuelas.html', {'escuelas': escuelas})
 
 
 # ============================================================
@@ -324,30 +383,11 @@ def seguimiento(request):
     return render(request, 'seguimiento.html', {'emociones_labels': etiquetas, 'emociones_counts': valores})
 
 
-from django.db.models import Count
-from django.http import JsonResponse
-import json
-
-def dashboard_emociones(request, escuela_id):
-    escuela = Escuela.objects.get(id=escuela_id)
-
-    emociones = (
-        EmocionReal.objects
-        .filter(sesion__usuario__escuela=escuela)
-        .values("tipo_emocion")
-        .annotate(total=Count("id"))
-    )
-
-    emociones_por_escuela = {
-        e["tipo_emocion"]: e["total"] for e in emociones
-    }
-
-    print("🔍 EMOCIONES ENVIADAS AL TEMPLATE:", emociones_por_escuela)
-
-    return render(request, "dashboard_emociones.html", {
-        "escuela": escuela,
-        "emociones_por_escuela": json.dumps(emociones_por_escuela)
-    })
+def dashboard_emociones(request):
+    datos = EmocionReal.objects.values('emocion__nombre_emocion').annotate(total=Count('emocion'))
+    etiquetas = [d['emocion__nombre_emocion'] for d in datos]
+    valores = [d['total'] for d in datos]
+    return render(request, 'dashboard_emociones.html', {'emociones_labels': etiquetas, 'emociones_counts': valores})
 
 
 # ============================================================
@@ -470,7 +510,6 @@ def predict_emotion_view(request):
 # ENCUESTA DE SATISFACCIÓN
 # ============================================================
 from django.contrib import messages
-from .models import EncuestaSatisfaccion
 
 @login_required
 def encuesta_satisfaccion(request):
@@ -524,9 +563,6 @@ def mantenimiento(request):
 # ------------------------------
 # ALUMNOS / ESCUELAS / DETALLES
 # ------------------------------
-def alumnos(request):
-    usuarios = Usuario.objects.all()
-    return render(request, 'modulo/alumnos.html', {'usuarios': usuarios})
 
 def lista_usuarios(request):
     with connection.cursor() as cursor:
@@ -535,10 +571,110 @@ def lista_usuarios(request):
         datos = [dict(zip(columnas, row)) for row in cursor.fetchall()]
     return render(request, 'lista_usuarios.html', {'usuarios': datos})
 
+from django.shortcuts import render, get_object_or_404
+from .models import Usuario, Sesion, EmocionCamara, EmocionReal, EncuestaSatisfaccion, Escuela, Rol
+from django.db.models import Avg
+
+from django.shortcuts import render, get_object_or_404
+from django.db.models import Avg
+from .models import Usuario, Sesion, EmocionCamara, EmocionReal, EncuestaSatisfaccion, Escuela, Rol
+from django.shortcuts import render, get_object_or_404
+from django.db.models import Avg
+from .models import *
+    
+from django.shortcuts import render, get_object_or_404
+from django.db.models import Avg
+from .models import Usuario, Sesion, EmocionCamara, EmocionReal, EncuestaSatisfaccion, Escuela, Rol
+
 def detalle_alumno(request, alumno_id):
     alumno = get_object_or_404(Usuario, id=alumno_id)
-    return render(request, 'modulo/detalle_alumno.html', {'alumno': alumno})
 
+    # Última sesión finalizada del alumno
+    ultima_sesion = (
+        Sesion.objects
+        .filter(usuario=alumno, fecha_fin__isnull=False)
+        .order_by("-fecha_fin")
+        .first()
+    )
+
+    # valores por defecto (minúsculas)
+    vacio = {"feliz": 0, "triste": 0, "neutral": 0, "enojado": 0, "sorprendido": 0}
+
+    if not ultima_sesion:
+        context = {
+            "alumno": alumno,
+            "camara": vacio,
+            "real": vacio,
+            "emociones_data": vacio,
+            "encuesta_data": {"recomendacion": 0, "utilidad": "", "comentario": ""},
+            "escuelas": Escuela.objects.all(),
+            "roles": Rol.objects.all(),
+        }
+        return render(request, "modulo/detalle_alumno.html", context)
+
+    # 1) EMOCIONES CÁMARA (promedio por nombre_emocion) -> normalizo a minúsculas
+    emociones_camara = (
+        EmocionCamara.objects
+        .filter(sesion=ultima_sesion)
+        .values("nombre_emocion")
+        .annotate(prom=Avg("probabilidad"))
+    )
+    camara_dict = vacio.copy()
+    for e in emociones_camara:
+        nombre = (e["nombre_emocion"] or "").strip().lower()
+        if nombre:
+            camara_dict[nombre] = round(e["prom"] or 0.0, 2)
+
+    # 2) EMOCIONES REALES (promedio por tipo_emocion) -> normalizo a minúsculas
+    emociones_reales = (
+        EmocionReal.objects
+        .filter(sesion=ultima_sesion)
+        .values("tipo_emocion")
+        .annotate(prom=Avg("porcentaje"))
+    )
+    real_dict = vacio.copy()
+    for e in emociones_reales:
+        nombre = (e["tipo_emocion"] or "").strip().lower()
+        if nombre:
+            real_dict[nombre] = round(e["prom"] or 0.0, 2)
+
+    # 3) TOTALES (suma camara + real)
+    emociones_final = {k: camara_dict.get(k, 0) + real_dict.get(k, 0) for k in vacio.keys()}
+
+    # 4) ENCUESTA -> sólo la asociada a la sesión
+    encuesta = getattr(ultima_sesion, "encuesta", None)
+    encuesta_data = {
+        "utilidad": encuesta.utilidad if encuesta else "",
+        "recomendacion": encuesta.recomendacion if encuesta else 0,
+        "comentario": encuesta.comentario if encuesta else "",
+    }
+
+    context = {
+        "alumno": alumno,
+        "escuelas": Escuela.objects.all(),
+        "roles": Rol.objects.all(),
+        "camara": camara_dict,
+        "real": real_dict,
+        "emociones_data": emociones_final,
+        "encuesta_data": encuesta_data,
+    }
+
+    return render(request, "modulo/detalle_alumno.html", context)
+
+
+
+
+
+
+
+def escuelas(request):
+    escuelas_sim = [
+        {'id': 1, 'nombre': 'Informática y Telecomunicación', 'carreras': ['Programación', 'Redes'], 'sede': 'Melipilla'},
+        {'id': 2, 'nombre': 'Construcción', 'carreras': ['Edificación', 'Arquitectura'], 'sede': 'Melipilla'},
+        {'id': 3, 'nombre': 'Gastronomía', 'carreras': ['Cocina Profesional', 'Pastelería'], 'sede': 'Melipilla'},
+        {'id': 4, 'nombre': 'Otra Escuela', 'carreras': ['Diseño', 'Administración'], 'sede': 'Melipilla'},
+    ]
+    return render(request, 'modulo/escuela.html', {'escuelas': escuelas_sim})
 
 # ------------------------------
 # SEGUIMIENTO / DASHBOARD
@@ -556,31 +692,11 @@ def seguimiento(request):
 
     return render(request, 'seguimiento.html', {'emociones': emociones, 'datos_usuarios': datos_usuarios})
 
-from django.db.models import Count
-from django.http import JsonResponse
-import json
-
-def dashboard_emociones(request, escuela_id):
-    escuela = Escuela.objects.get(id=escuela_id)
-
-    emociones = (
-        EmocionReal.objects
-        .filter(sesion__usuario__escuela=escuela)
-        .values("tipo_emocion")
-        .annotate(total=Count("id"))
-    )
-
-    emociones_por_escuela = {
-        e["tipo_emocion"]: e["total"] for e in emociones
-    }
-
-    print("🔍 EMOCIONES ENVIADAS AL TEMPLATE:", emociones_por_escuela)
-
-    return render(request, "dashboard_emociones.html", {
-        "escuela": escuela,
-        "emociones_por_escuela": json.dumps(emociones_por_escuela)
-    })
-
+def dashboard_emociones(request):
+    datos = EmocionReal.objects.values('tipo_emocion').annotate(total=Count('id'))
+    etiquetas = [d['tipo_emocion'] for d in datos]
+    valores = [d['total'] for d in datos]
+    return render(request, 'dashboard_emociones.html', {'emociones_labels': etiquetas, 'emociones_counts': valores})
 
 # ------------------------------
 # MÓDULO PROFESOR (Dashboard)
