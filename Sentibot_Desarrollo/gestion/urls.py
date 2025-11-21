@@ -70,6 +70,16 @@ urlpatterns = [
     path('actividadesconf/crear/', views.crear_actividad, name='crear_actividad'),
     path("emociones/por-escuela/", emociones_por_escuela, name="emociones_por_escuela"),
     path('dashboard-emocional/<int:escuela_id>/',views.grafico_profesor, name='dashboard_emocional'),
+    path('dashboard/tiempo-promedio-sesion/<int:escuela_id>/', tiempo_promedio_sesion_por_escuela, name="tiempo_promedio_sesion_por_escuela"),
+    path('actualizar_alumno/<int:alumno_id>/', views.actualizar_alumno, name='actualizar_alumno'),
+    path('eliminar_alumno/<int:alumno_id>/', views.eliminar_alumno, name='eliminar_alumno'),
+
+    #recuperar correo
+    path("recuperar-contrasena/", views.recuperar_contrasena, name="recuperar_contrasena"),
+    path("confirmar-contrasena/", views.confirmar_contrasena, name="confirmar_contrasena"),
+
+
+
     path('dashboard/tiempo-promedio-sesion/<int:escuela_id>/',tiempo_promedio_sesion_por_escuela,name="tiempo_promedio_sesion_por_escuela"),
     path('escuelas/agregar/', views.agregar_escuela, name='agregar_escuela'),
     path("eliminar_escuela/", views.eliminar_escuela, name="eliminar_escuela"),

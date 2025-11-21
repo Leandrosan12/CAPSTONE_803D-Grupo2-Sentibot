@@ -1177,6 +1177,85 @@ def tiempo_promedio_sesion_por_escuela(request, escuela_id):
 
     return render(request, "dashboard/tiempo_promedio_sesion.html", context)
 
+# Recuperar correo
+
+from gestion.models import Usuario
+import random
+from django.shortcuts import render, redirect
+from django.core.mail import send_mail
+
+codigos_reset = {}  # temporal
+
+def recuperar_contrasena(request):
+    if request.method == 'POST':
+        correo = request.POST.get("correo")
+
+        try:
+            user = Usuario.objects.get(email=correo)
+        except Usuario.DoesNotExist:
+            return render(request, "recuperar_contrasena.html", {
+                "mensaje": "El correo no está registrado."
+            })
+
+        # Generar código
+        codigo = str(random.randint(100000, 999999))
+        codigos_reset[correo] = codigo
+
+        # Enviar correo
+        send_mail(
+            "Recuperación de contraseña",
+            f"Tu código de recuperación es: {codigo}",
+            "no-reply@miapp.com",
+            [correo],
+        )
+
+        # Guardamos correo en la sesión para no recorrer dict más tarde
+        request.session["correo_reset"] = correo
+
+        return redirect("confirmar_contrasena")
+
+    return render(request, "recuperar_contrasena.html")
+
+
+
+def confirmar_contrasena(request):
+    if request.method == 'POST':
+        codigo = request.POST.get("codigo")
+        nueva = request.POST.get("nueva_contrasena")
+
+        correo = request.session.get("correo_reset")
+
+        if not correo:
+            return render(request, "confirmar_contrasena.html", {
+                "mensaje": "El proceso expiró. Intenta nuevamente."
+            })
+
+        codigo_guardado = codigos_reset.get(correo)
+
+        if codigo == codigo_guardado:
+            try:
+                user = Usuario.objects.get(email=correo)
+                user.set_password(nueva)
+                user.save()
+
+                # Limpiar datos
+                codigos_reset.pop(correo, None)
+                del request.session["correo_reset"]
+
+                # Redirigir al login después de cambiar la contraseña
+                return redirect("login")   # <--- 🔥 AQUÍ VA AL LOGIN
+
+            except Usuario.DoesNotExist:
+                return render(request, "confirmar_contrasena.html", {
+                    "mensaje": "No se encontró el usuario."
+                })
+
+        return render(request, "confirmar_contrasena.html", {
+            "mensaje": "El código ingresado no es válido."
+        })
+
+    return render(request, "confirmar_contrasena.html")
+
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Usuario, Escuela
 from django.contrib import messages
