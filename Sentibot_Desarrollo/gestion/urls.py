@@ -34,7 +34,8 @@ urlpatterns = [
 
     # --- 🏫 Escuelas y Alumnos ---
     path('modulo/alumnos/', views.alumnos, name='alumnos'),
-    path('modulo/detalle_alumno/<int:alumno_id>/', views.detalle_alumno, name='detalle_alumno'),
+    path('modulo/detalle_alumno/<int:id>/', views.detalle_alumno, name='detalle_alumno'),
+
 
     # --- 📧 Verificación de correo ---
     path('enviar-codigo/', views.enviar_codigo, name='enviar_codigo'),
@@ -59,7 +60,10 @@ urlpatterns = [
 
     #panel admin
     # PANEL ADMIN PERSONALIZADO
-
+    path('alumnos/<int:alumno_id>/', views.detalle_alumno, name='detalle_alumno'),
+    path('alumnos/editar/<int:alumno_id>/', views.editar_alumno, name='editar_alumno'),
+    path('alumnos/eliminar/<int:alumno_id>/', views.eliminar_alumno, name='eliminar_alumno'),
+    path('alumnos/añadir/', views.añadir_alumno, name='añadir_alumno'),  
     path('actividadesconf/', views.admin_actividades, name='actividadesconf'),
     path('actividadesconf/editar/<int:id>/', views.editar_actividad, name='editar_actividad'),
     path('actividadesconf/eliminar/<int:id>/', views.eliminar_actividad, name='eliminar_actividad'),
@@ -70,10 +74,14 @@ urlpatterns = [
     path('actualizar_alumno/<int:alumno_id>/', views.actualizar_alumno, name='actualizar_alumno'),
     path('eliminar_alumno/<int:alumno_id>/', views.eliminar_alumno, name='eliminar_alumno'),
 
-    
+    #recuperar correo
     path("recuperar-contrasena/", views.recuperar_contrasena, name="recuperar_contrasena"),
     path("confirmar-contrasena/", views.confirmar_contrasena, name="confirmar_contrasena"),
 
 
 
+    path('dashboard/tiempo-promedio-sesion/<int:escuela_id>/',tiempo_promedio_sesion_por_escuela,name="tiempo_promedio_sesion_por_escuela"),
+    path('escuelas/agregar/', views.agregar_escuela, name='agregar_escuela'),
+    path("eliminar_escuela/", views.eliminar_escuela, name="eliminar_escuela"),
+    path('escuelas/editar/', views.editar_escuela, name='editar_escuela')
 ]

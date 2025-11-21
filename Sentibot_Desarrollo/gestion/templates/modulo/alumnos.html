@@ -12,13 +12,27 @@
 </div>
 
 <div class="container table-container">
-  <h3 class="mb-4">Listado de Usuarios</h3>
 
-  <form class="search-bar mb-3" method="get">
-    <input type="text" name="email" placeholder="Buscar por email" />
-    <button type="submit">Buscar</button>
-  </form>
+  <!-- Header con listado y botón Añadir -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">Listado de Usuarios</h3>
+    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalAñadirUsuario">
+      ➕ Añadir Usuario
+    </button>
+  </div>
 
+  <!-- BUSCADOR -->
+  <form class="d-flex justify-content-end mb-3" method="get">
+    <input type="text"
+           name="q"
+           class="form-control"
+           style="max-width: 260px; border: 1px solid #bfbfbf;"
+           placeholder="Buscar"
+           value="{{ q|default:'' }}">
+    <button type="submit" class="btn btn-primary ms-2">Buscar</button>
+</form>
+
+  <!-- TABLA -->
   <table class="table table-hover">
     <thead>
       <tr>
@@ -26,36 +40,175 @@
         <th>Nombre</th>
         <th>Apellido</th>
         <th>Email</th>
-        {% comment %} Si tienes campo sede en Usuario, descomenta la siguiente línea {% endcomment %}
-        <!-- <th>Sede</th> -->
-        <th>Acción</th>
+        <th>Escuela</th>
+        <th class="text-center">Acción</th>
       </tr>
     </thead>
+
     <tbody>
       {% for z in usuarios %}
       <tr>
-        <td>{{ z.id }}</td>
+        <td>{{ forloop.counter0|add:usuarios.start_index|add:"0" }}</td>
         <td>{{ z.first_name }}</td>
         <td>{{ z.last_name }}</td>
         <td>{{ z.email }}</td>
-        {% comment %} Si tienes sede {% endcomment %}
-        <!-- <td>{{ z.sede }}</td> -->
-        <td>
-          <a href="{% url 'detalle_alumno' z.id %}" class="btn btn-success btn-sm">Ver</a>
+        <td>{{ z.escuela.nombre|default:"Sin escuela" }}</td>
+        <td class="text-center">
+          <div class="btn-group">
+            <a href="{% url 'detalle_alumno' z.id %}" class="btn btn-success btn-sm">Ver</a>
+            <a href="{% url 'editar_alumno' z.id %}" class="btn btn-warning btn-sm">Editar</a>
+            <form method="POST" action="{% url 'eliminar_alumno' z.id %}" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de eliminar este usuario?');">🗑️</button>
+          </form>
+
+          </div>
         </td>
       </tr>
       {% empty %}
       <tr>
-        <td colspan="5" class="text-center text-muted">No hay usuarios registrados.</td>
+        <td colspan="6" class="text-center text-muted">
+          No hay usuarios registrados.
+        </td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
 
-  <div class="text-end mt-3">
-    <a href="{% url 'modulo' %}" class="btn btn-volver">Volver</a>
+  <!-- PAGINADOR -->
+  {% if usuarios.has_other_pages %}
+  <nav aria-label="Paginación de usuarios">
+    <ul class="pagination justify-content-center mt-4">
+      {% if usuarios.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ usuarios.previous_page_number }}&id={{ id }}">&laquo;</a>
+        </li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+      {% endif %}
+
+      {% for num in usuarios.paginator.page_range %}
+        {% if usuarios.number == num %}
+          <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+        {% elif num >= usuarios.number|add:'-2' and num <= usuarios.number|add:'2' %}
+          <li class="page-item"><a class="page-link" href="?page={{ num }}&id={{ id }}">{{ num }}</a></li>
+        {% endif %}
+      {% endfor %}
+
+      {% if usuarios.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ usuarios.next_page_number }}&id={{ id }}">&raquo;</a>
+        </li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+
+<!-- =======================================
+     MODAL AÑADIR USUARIO
+======================================= -->
+<div class="modal fade" id="modalAñadirUsuario" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title">Añadir Usuario</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <form method="POST" action="{% url 'añadir_alumno' %}">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Nombre</label>
+            <input type="text" name="first_name" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Apellido</label>
+            <input type="text" name="last_name" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" name="email" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Escuela</label>
+            <div class="position-relative">
+              <input type="text" id="filtroEscuela" class="form-control" placeholder="Buscar escuela...">
+              <select name="escuela_id" id="selectEscuela" class="form-select mt-2" size="5" required>
+                {% for esc in escuelas %}
+                <option value="{{ esc.id }}">{{ esc.nombre }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Contraseña</label>
+            <input type="password" name="password" class="form-control" required>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-success">Guardar</button>
+        </div>
+      </form>
+
+    </div>
   </div>
 </div>
+<script>
+  const filtro = document.getElementById('filtroEscuela');
+  const select = document.getElementById('selectEscuela');
 
-<footer>© 2025 Sistema de Usuarios</footer>
+  filtro.addEventListener('input', function() {
+    const filterText = this.value.toLowerCase();
+    for (let i = 0; i < select.options.length; i++) {
+      const option = select.options[i];
+      option.style.display = option.text.toLowerCase().includes(filterText) ? '' : 'none';
+    }
+  });
+
+  // Opcional: cuando seleccionas algo, copia al input
+  select.addEventListener('change', function() {
+    const selected = select.options[select.selectedIndex];
+    if(selected.value) {
+      filtro.value = selected.text;
+    }
+  });
+</script>
+<script>
+  const csrftoken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+document.querySelectorAll('.btn-eliminar').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const usuarioId = this.dataset.id;
+
+        if(confirm("¿Estás seguro de eliminar este usuario?")) {
+            fetch(`/alumnos/eliminar/${usuarioId}/`, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": csrftoken,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({})  // cuerpo necesario para POST
+            })
+            .then(resp => resp.json())
+            .then(data => {
+                if(data.ok){
+                    // Elimina fila de tabla
+                    this.closest('tr').remove();
+                } else {
+                    alert(data.error || "No se pudo eliminar el usuario");
+                }
+            });
+        }
+    });
+});
+
+</script>
+
 {% endblock %}

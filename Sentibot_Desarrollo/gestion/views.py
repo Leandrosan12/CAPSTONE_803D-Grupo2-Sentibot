@@ -30,7 +30,7 @@ import requests
 # Modelos
 from .models import (
     Usuario, Emocion, EmocionReal, EmocionCamara,
-    Sesion, Escuela, RespuestaEncuesta
+    Sesion, Escuela
 )
 
 logger = logging.getLogger(__name__)
@@ -241,73 +241,180 @@ def agenda(request):
 # ============================================================
 def modulo(request):
     return render(request, 'modulo/modulo.html')
+from django.core.paginator import Paginator
+from django.shortcuts import render
+from django.db.models import Q
+from .models import Usuario, Escuela
+
 def alumnos(request):
     # Obtener parámetro de búsqueda
-    email = request.GET.get('email')
+    q = request.GET.get('q', '')  # Buscador general
 
-    # Si se escribe un email, filtra
-    if email:
-        usuarios = Usuario.objects.filter(email__icontains=email)
-    else:
-        usuarios = Usuario.objects.all()
+    # Filtrado multicampo
+    usuarios_lista = Usuario.objects.all().order_by('id')
+    if q:
+        usuarios_lista = usuarios_lista.filter(
+            Q(id__icontains=q) |
+            Q(first_name__icontains=q) |
+            Q(last_name__icontains=q) |
+            Q(email__icontains=q) |
+            Q(escuela__nombre__icontains=q)
+        )
 
-    return render(request, 'modulo/alumnos.html', {"usuarios": usuarios})
+    # PAGINACIÓN
+    paginator = Paginator(usuarios_lista, 10)  # 10 usuarios por página
+    page_number = request.GET.get("page")
+    usuarios = paginator.get_page(page_number)
+
+    # Listar escuelas para el modal de añadir usuario
+    escuelas = Escuela.objects.all()
+
+    return render(request, 'modulo/alumnos.html', {
+        "usuarios": usuarios,
+        "q": q,
+        "escuelas": escuelas,
+    })
 
 
+
+from django.shortcuts import redirect
+from gestion.models import Usuario, Escuela
+
+def añadir_alumno(request):
+    if request.method == "POST":
+        first_name = request.POST.get("first_name")
+        last_name = request.POST.get("last_name")
+        email = request.POST.get("email")
+        password = request.POST.get("password")
+        escuela_id = request.POST.get("escuela_id")
+
+        escuela = Escuela.objects.get(id=escuela_id) if escuela_id else None
+
+        # Crear usuario con username único (ej: igual al email)
+        usuario = Usuario(
+            username=email,
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            escuela=escuela
+        )
+        usuario.set_password(password)
+        usuario.save()
+
+        return redirect('alumnos')
+
+
+
+# from django.shortcuts import render, get_object_or_404
+# from django.db.models import Count, Avg, F, ExpressionWrapper, DurationField
+# from .models import Usuario, Sesion, EmocionReal, EncuestaSatisfaccion
+# import json
+
+# def detalle_alumno(request, alumno_id):
+#     alumno = get_object_or_404(Usuario, id=alumno_id)
+
+#     # --- EMOCIONES TOTALES ---
+#     emociones_qs = EmocionReal.objects.filter(sesion__usuario=alumno)
+#     emociones_data = {
+#         "Feliz": emociones_qs.filter(tipo_emocion__iexact="Alegría").count(),
+#         "Triste": emociones_qs.filter(tipo_emocion__iexact="Tristeza").count(),
+#         "Miedo": emociones_qs.filter(tipo_emocion__iexact="Miedo").count(),
+#         "Enojado": emociones_qs.filter(tipo_emocion__iexact="Enojo").count(),
+#         "Neutral": emociones_qs.filter(tipo_emocion__iexact="Neutral").count(),
+#     }
+
+#     # --- TIEMPO PROMEDIO ---
+#     duracion_expr = ExpressionWrapper(F('fecha_fin') - F('fecha_inicio'), output_field=DurationField())
+#     sesiones = Sesion.objects.filter(usuario=alumno).annotate(duracion=duracion_expr)
+#     promedio = sesiones.aggregate(promedio=Avg('duracion'))['promedio']
+#     tiempo_promedio = promedio.total_seconds()/60 if promedio else 0
+
+#     # --- ENCUESTAS DE TODAS LAS SESIONES ---
+#     encuestas = EncuestaSatisfaccion.objects.filter(sesion__usuario=alumno)
+
+#     # --- UTILIDAD ---
+#     utilidad_count = {"Sí": 0, "No": 0}
+#     for encuesta in encuestas:
+#         if encuesta.utilidad == "1":  # <-- comparar como string
+#             utilidad_count["Sí"] += 1
+#         else:
+#             utilidad_count["No"] += 1
+
+#     # --- RECOMENDACIÓN ---
+#     recomend_count = {str(i): 0 for i in range(1, 6)}
+#     for encuesta in encuestas:
+#         if encuesta.recomendacion:
+#             key = str(encuesta.recomendacion)
+#             if key in recomend_count:
+#                 recomend_count[key] += 1
+
+#     context = {
+#         "alumno": alumno,
+#         "emociones_json": json.dumps(emociones_data),
+#         "tiempo_promedio": tiempo_promedio,
+#         "utilidad_json": json.dumps(utilidad_count),
+#         "recomend_json": json.dumps(recomend_count),
+#     }
+
+#     return render(request, "modulo/detalle_alumno.html", context)
 
 from django.shortcuts import render, get_object_or_404
-from .models import Usuario, EmotionSession, EncuestaSatisfaccion, Escuela, Rol
+from django.db.models import Count, Avg, F, ExpressionWrapper, DurationField, Q
+from .models import Usuario, Sesion, EmocionReal, EncuestaSatisfaccion
+import json
 
-def detalle_alumno(request, id):
-    alumno = get_object_or_404(Usuario, id=id)
+def detalle_alumno(request, alumno_id):
+    alumno = get_object_or_404(Usuario, id=alumno_id)
 
-    # EMOCIONES
-    emociones = EmotionSession.objects.filter(alumno_id=id)
-
-    # 📌 EMOCIONES DEL ALUMNO
-    sesion = Sesion.objects.filter(usuario=alumno).order_by('-fecha_inicio').first()
+    # --- EMOCIONES TOTALES ---
+    emociones_qs = EmocionReal.objects.filter(sesion__usuario=alumno)
     emociones_data = {
-        "Feliz": emociones.filter(emocion="Feliz").count(),
-        "Triste": emociones.filter(emocion="Triste").count(),
-        "Neutral": emociones.filter(emocion="Neutral").count(),
-        "Enojado": emociones.filter(emocion="Enojado").count(),
-        "Sorprendido": emociones.filter(emocion="Sorprendido").count(),
-    }
-    if sesion:
-        emociones_contadas = (
-            EmocionCamara.objects.filter(sesion=sesion)
-            .values('nombre_emocion')
-            .annotate(total=Count('nombre_emocion'))
-        )
-        for item in emociones_contadas:
-            emo = item['nombre_emocion'].lower().strip()
-            if emo in ["surprised", "sorpresa", "sorprendida"]:
-                emo = "sorprendido"
-            elif emo in ["happy", "feliz"]:
-                emo = "feliz"
-            elif emo in ["sad", "triste"]:
-                emo = "triste"
-            elif emo in ["neutral", "neutral"]:
-                emo = "neutral"
-            elif emo in ["angry", "enojado"]:
-                emo = "enojado"
-            emo = emo.capitalize()
-            if emo in emociones_data:
-                emociones_data[emo] = item['total']
-
-    # 📌 ENCUESTA DE SATISFACCIÓN
-    encuesta = EncuestaSatisfaccion.objects.filter(sesion=sesion).first()
-    encuesta_data = {
-        "recomendacion": encuesta.puntaje if encuesta else 0
+        "Feliz": emociones_qs.filter(tipo_emocion__iexact="Alegría").count(),
+        "Triste": emociones_qs.filter(tipo_emocion__iexact="Tristeza").count(),
+        "Miedo": emociones_qs.filter(tipo_emocion__iexact="Miedo").count(),
+        "Enojado": emociones_qs.filter(tipo_emocion__iexact="Enojo").count(),
+        "Neutral": emociones_qs.filter(tipo_emocion__iexact="Neutral").count(),
     }
 
-    return render(request, "detalle_alumno.html", {
+    # --- TIEMPO PROMEDIO ---
+    duracion_expr = ExpressionWrapper(F('fecha_fin') - F('fecha_inicio'), output_field=DurationField())
+    sesiones = Sesion.objects.filter(usuario=alumno).annotate(duracion=duracion_expr)
+    promedio = sesiones.aggregate(promedio=Avg('duracion'))['promedio']
+    tiempo_promedio = promedio.total_seconds()/60 if promedio else 0
+
+    # --- UTILIDAD TOTAL ---
+    utilidad_agg = EncuestaSatisfaccion.objects.filter(
+        sesion__usuario=alumno
+    ).aggregate(
+        si=Count('id', filter=Q(utilidad='1')),
+        no=Count('id', filter=Q(utilidad='0'))
+    )
+    utilidad_count = {
+        "Sí": utilidad_agg.get('si', 0),
+        "No": utilidad_agg.get('no', 0)
+    }
+
+    # --- RECOMENDACIÓN TOTAL ---
+    recomend_agg = EncuestaSatisfaccion.objects.filter(
+        sesion__usuario=alumno
+    ).values('recomendacion').annotate(cantidad=Count('id'))
+
+    recomend_count = {str(i): 0 for i in range(1, 6)}
+    for r in recomend_agg:
+        key = str(r['recomendacion'])
+        if key in recomend_count:
+            recomend_count[key] = r['cantidad']
+
+    context = {
         "alumno": alumno,
-        "emociones_data": emociones_data,
-        "encuesta_data": encuesta_data,
-        "escuelas": Escuela.objects.all(),
-        "roles": Rol.objects.all()
-    })
+        "emociones_json": json.dumps(emociones_data),
+        "tiempo_promedio": tiempo_promedio,
+        "utilidad_json": json.dumps(utilidad_count),
+        "recomend_json": json.dumps(recomend_count),
+    }
+
+    return render(request, "modulo/detalle_alumno.html", context)
+
 
 
 
@@ -598,95 +705,7 @@ def lista_usuarios(request):
         datos = [dict(zip(columnas, row)) for row in cursor.fetchall()]
     return render(request, 'lista_usuarios.html', {'usuarios': datos})
 
-from django.shortcuts import render, get_object_or_404
-from .models import Usuario, Sesion, EmocionCamara, EmocionReal, EncuestaSatisfaccion, Escuela, Rol
-from django.db.models import Avg
 
-from django.shortcuts import render, get_object_or_404
-from django.db.models import Avg
-from .models import Usuario, Sesion, EmocionCamara, EmocionReal, EncuestaSatisfaccion, Escuela, Rol
-from django.shortcuts import render, get_object_or_404
-from django.db.models import Avg
-from .models import *
-    
-from django.shortcuts import render, get_object_or_404
-from django.db.models import Avg
-from .models import Usuario, Sesion, EmocionCamara, EmocionReal, EncuestaSatisfaccion, Escuela, Rol
-
-def detalle_alumno(request, alumno_id):
-    alumno = get_object_or_404(Usuario, id=alumno_id)
-
-    # Última sesión finalizada del alumno
-    ultima_sesion = (
-        Sesion.objects
-        .filter(usuario=alumno, fecha_fin__isnull=False)
-        .order_by("-fecha_fin")
-        .first()
-    )
-
-    # valores por defecto (minúsculas)
-    vacio = {"feliz": 0, "triste": 0, "neutral": 0, "enojado": 0, "sorprendido": 0}
-
-    if not ultima_sesion:
-        context = {
-            "alumno": alumno,
-            "camara": vacio,
-            "real": vacio,
-            "emociones_data": vacio,
-            "encuesta_data": {"recomendacion": 0, "utilidad": "", "comentario": ""},
-            "escuelas": Escuela.objects.all(),
-            "roles": Rol.objects.all(),
-        }
-        return render(request, "modulo/detalle_alumno.html", context)
-
-    # 1) EMOCIONES CÁMARA (promedio por nombre_emocion) -> normalizo a minúsculas
-    emociones_camara = (
-        EmocionCamara.objects
-        .filter(sesion=ultima_sesion)
-        .values("nombre_emocion")
-        .annotate(prom=Avg("probabilidad"))
-    )
-    camara_dict = vacio.copy()
-    for e in emociones_camara:
-        nombre = (e["nombre_emocion"] or "").strip().lower()
-        if nombre:
-            camara_dict[nombre] = round(e["prom"] or 0.0, 2)
-
-    # 2) EMOCIONES REALES (promedio por tipo_emocion) -> normalizo a minúsculas
-    emociones_reales = (
-        EmocionReal.objects
-        .filter(sesion=ultima_sesion)
-        .values("tipo_emocion")
-        .annotate(prom=Avg("porcentaje"))
-    )
-    real_dict = vacio.copy()
-    for e in emociones_reales:
-        nombre = (e["tipo_emocion"] or "").strip().lower()
-        if nombre:
-            real_dict[nombre] = round(e["prom"] or 0.0, 2)
-
-    # 3) TOTALES (suma camara + real)
-    emociones_final = {k: camara_dict.get(k, 0) + real_dict.get(k, 0) for k in vacio.keys()}
-
-    # 4) ENCUESTA -> sólo la asociada a la sesión
-    encuesta = getattr(ultima_sesion, "encuesta", None)
-    encuesta_data = {
-        "utilidad": encuesta.utilidad if encuesta else "",
-        "recomendacion": encuesta.recomendacion if encuesta else 0,
-        "comentario": encuesta.comentario if encuesta else "",
-    }
-
-    context = {
-        "alumno": alumno,
-        "escuelas": Escuela.objects.all(),
-        "roles": Rol.objects.all(),
-        "camara": camara_dict,
-        "real": real_dict,
-        "emociones_data": emociones_final,
-        "encuesta_data": encuesta_data,
-    }
-
-    return render(request, "modulo/detalle_alumno.html", context)
 
 # ------------------------------
 # SEGUIMIENTO / DASHBOARD
@@ -1228,5 +1247,140 @@ def confirmar_contrasena(request):
 
     return render(request, "confirmar_contrasena.html")
 
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import Usuario, Escuela
+from django.contrib import messages
+
+def editar_alumno(request, alumno_id):
+    usuario = get_object_or_404(Usuario, id=alumno_id)
+    escuelas = Escuela.objects.all()
+
+    if request.method == 'POST':
+        usuario.first_name = request.POST.get('first_name')
+        usuario.last_name = request.POST.get('last_name')
+        usuario.email = request.POST.get('email')
+        usuario.escuela_id = request.POST.get('escuela')
+        usuario.is_staff = 1 if request.POST.get('is_staff') == '1' else 0
+        usuario.save()
+
+        messages.success(request, "Los cambios se guardaron correctamente.")
+        return redirect('alumnos')
+
+    return render(request, 'modulo/editar_alumno.html', {
+        'usuario': usuario,
+        'escuelas': escuelas
+    })
 
 
+
+
+
+
+from django.core.paginator import Paginator
+from django.shortcuts import render
+from .models import Usuario
+
+def listar_alumnos(request):
+    id_query = request.GET.get('id', '')
+
+    if id_query:
+        usuarios_lista = Usuario.objects.filter(id=id_query)
+    else:
+        usuarios_lista = Usuario.objects.all().order_by('id')
+
+    # Paginar 10 por página
+    paginator = Paginator(usuarios_lista, 10)
+    page_number = request.GET.get('page')
+    usuarios = paginator.get_page(page_number)  # Esto es clave
+
+    return render(request, 'modulo/alumnos.html', {
+        'usuarios': usuarios,
+        'id': id_query
+    })
+from django.shortcuts import redirect, get_object_or_404
+from gestion.models import Usuario
+
+def eliminar_alumno(request, alumno_id):
+    if request.method == "POST":
+        usuario = get_object_or_404(Usuario, id=alumno_id)
+        usuario.delete()
+        return redirect('alumnos')  # redirige al listado
+
+
+
+from django.shortcuts import redirect
+from django.contrib import messages
+from .models import Escuela
+
+@login_required
+def agregar_escuela(request):
+    if request.method != "POST":
+        messages.error(request, "Método no permitido.")
+        return redirect(request.META.get("HTTP_REFERER", "modulo"))
+
+    nombre = (request.POST.get("nombre") or "").strip()
+    direccion = (request.POST.get("direccion") or "").strip()
+
+    if not nombre:
+        messages.error(request, "El nombre de la escuela es requerido.")
+        return redirect(request.META.get("HTTP_REFERER", "modulo"))
+
+    # Intenta crear con el campo direccion si existe; fallback si no existe
+    try:
+        # Si el modelo tiene el campo 'direccion', lo usamos.
+        Escuela.objects.create(nombre=nombre, direccion=direccion)
+    except TypeError:
+        # Si el constructor no acepta 'direccion' (modelo antiguo), creamos solo con nombre
+        Escuela.objects.create(nombre=nombre)
+
+    messages.success(request, "Escuela creada correctamente.")
+    return redirect(request.META.get("HTTP_REFERER", "modulo"))
+
+from django.contrib.auth import authenticate
+from django.contrib import messages
+from django.shortcuts import redirect
+from .models import Escuela
+
+def eliminar_escuela(request):
+    if request.method == "POST":
+        escuela_id = request.POST.get("escuela_id")
+        correo = request.POST.get("correo")
+        password = request.POST.get("password")
+
+        # Validar credenciales
+        user = authenticate(request, username=correo, password=password)
+
+        if user is None:
+            messages.error(request, "Credenciales incorrectas")
+            return redirect("modulo_profesor")
+
+        # Buscar escuela y eliminarla
+        try:
+            escuela = Escuela.objects.get(id=escuela_id)
+            escuela.delete()
+            messages.success(request, "Escuela eliminada correctamente")
+        except Escuela.DoesNotExist:
+            messages.error(request, "La escuela no existe")
+
+    return redirect("modulo_profesor")
+from django.shortcuts import redirect, get_object_or_404
+from django.contrib import messages
+from .models import Escuela
+
+def editar_escuela(request):
+    if request.method == "POST":
+
+        escuela_id = request.POST.get("escuela_id")
+        nuevo_nombre = request.POST.get("nuevo_nombre")
+        nueva_direccion = request.POST.get("nueva_direccion")
+
+        escuela = get_object_or_404(Escuela, id=escuela_id)
+
+        escuela.nombre = nuevo_nombre
+        escuela.direccion = nueva_direccion
+        escuela.save()
+
+        messages.success(request, "✔️ La escuela ha sido actualizada correctamente.")
+        return redirect("modulo_profesor")
+
+    return redirect("modulo_profesor")
