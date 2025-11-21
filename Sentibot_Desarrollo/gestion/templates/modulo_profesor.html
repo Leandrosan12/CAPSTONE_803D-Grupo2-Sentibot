@@ -5,14 +5,35 @@
 
 {% block content %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.14.0-beta3/css/bootstrap-select.min.css">
 
 <!-- ---------- ENCABEZADO ---------- -->
 <section class="py-5 text-center" style="background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); color: white;">
   <div class="container">
-    <h2 class="fw-bold display-5">🚀 Panel del Profesor</h2>
+    <h2 class="fw-bold display-5">Escuelas</h2>
     <p class="fs-5 mt-2 opacity-75">
       Selecciona una escuela para acceder a su análisis emocional
     </p>
+
+    <!-- 🔵 BOTÓN AGREGAR ESCUELA -->
+    <button class="btn btn-light mt-3 fw-bold px-4"
+            data-bs-toggle="modal"
+            data-bs-target="#modalAgregarEscuela">
+      ➕ Agregar Escuela
+    </button>
+
+    <!-- 🔴 BOTÓN ELIMINAR ESCUELA GLOBAL -->
+    <button class="btn btn-danger mt-3 fw-bold px-4"
+            data-bs-toggle="modal"
+            data-bs-target="#modalEliminarEscuela">
+      🗑️ Eliminar Escuela
+    </button>
+    <button class="btn btn-warning mt-3 fw-bold px-4"
+        data-bs-toggle="modal"
+        data-bs-target="#modalEditarEscuela">
+      ✏️ Editar Escuela
+    </button>
+
   </div>
 </section>
 
@@ -24,18 +45,17 @@
       <div class="col-12 col-sm-6 col-md-4 col-lg-3">
         <div class="card h-100 border-0 shadow rounded-4">
 
-          <!-- TÍTULO TARJETA -->
           <div class="card-header bg-light border-0 text-center py-3 rounded-top-4">
             <h5 class="fw-semibold text-dark mb-0" style="min-height: 2.5rem;">
               {{ escuela.nombre }}
             </h5>
           </div>
 
-          <!-- CUERPO TARJETA -->
           <div class="card-body text-center d-flex flex-column justify-content-between">
             <p class="text-secondary mb-4">
               {{ escuela.direccion|default:"Dirección no registrada" }}
             </p>
+
             <a href="{% url 'dashboard_emocional' escuela.id %}" 
                class="btn btn-primary rounded-pill px-4 py-2 shadow-sm mt-auto">
               📊 Ver Dashboard
@@ -52,5 +72,171 @@
 
   </div>
 </div>
+
+<!-- =======================================
+     MODAL AGREGAR ESCUELA
+======================================= -->
+<div class="modal fade" id="modalAgregarEscuela" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">Agregar Escuela</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <form method="POST" action="{% url 'agregar_escuela' %}">
+        {% csrf_token %}
+
+        <div class="modal-body">
+
+          <label class="form-label">Nombre de la Escuela</label>
+          <input type="text" class="form-control mb-3" name="nombre" required>
+
+          <label class="form-label">Dirección</label>
+          <input type="text" class="form-control" name="direccion">
+
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar</button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+<!-- =======================================
+     MODAL EDITAR ESCUELA
+======================================= -->
+<div class="modal fade" id="modalEditarEscuela" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <div class="modal-header bg-warning text-dark">
+        <h5 class="modal-title">Editar Escuela</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <form method="POST" action="{% url 'editar_escuela' %}">
+        {% csrf_token %}
+
+        <div class="modal-body">
+
+          <label class="form-label fw-bold">Seleccionar Escuela</label>
+
+          <select class="selectpicker form-control"
+                  data-live-search="true"
+                  title="Buscar escuela..."
+                  id="selectEscuelaEditar"
+                  name="escuela_id"
+                  required>
+              {% for escuela in escuelas %}
+                <option value="{{ escuela.id }}"
+                        data-nombre="{{ escuela.nombre }}"
+                        data-direccion="{{ escuela.direccion }}">
+                    {{ escuela.nombre }}
+                </option>
+              {% endfor %}
+          </select>
+
+          <hr>
+
+          <label class="form-label fw-bold">Nuevo nombre</label>
+          <input type="text" class="form-control mb-3" name="nuevo_nombre" id="editarNombre" required>
+
+          <label class="form-label fw-bold">Nueva dirección</label>
+          <input type="text" class="form-control" name="nueva_direccion" id="editarDireccion">
+
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-warning">Guardar Cambios</button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<!-- =======================================
+     MODAL ELIMINAR ESCUELA (con buscador)
+======================================= -->
+<div class="modal fade" id="modalEliminarEscuela" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">Eliminar Escuela</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <form method="POST" action="{% url 'eliminar_escuela' %}">
+        {% csrf_token %}
+
+        <div class="modal-body">
+
+          <label class="form-label fw-bold">Seleccionar Escuela</label>
+
+          <!-- 🔻 SELECT CON BUSCADOR -->
+          <select class="selectpicker form-control"
+                  data-live-search="true"
+                  title="Buscar escuela..."
+                  name="escuela_id"
+                  required>
+              {% for escuela in escuelas %}
+                <option value="{{ escuela.id }}">{{ escuela.nombre }}</option>
+              {% endfor %}
+          </select>
+
+          <hr>
+
+          <p class="fw-bold text-danger">Ingrese sus credenciales para confirmar:</p>
+
+          <div class="mb-3">
+            <label class="form-label">Correo</label>
+            <input type="email" class="form-control" name="correo" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Contraseña</label>
+            <input type="password" class="form-control" name="password" required>
+          </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-danger">Eliminar</button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<!-- =======================================
+     SCRIPTS REQUERIDOS
+======================================= -->
+
+<!-- jQuery requerido por bootstrap-select -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Bootstrap Select -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.14.0-beta3/js/bootstrap-select.min.js"></script>
+
+<!-- Inicializar selectpicker -->
+<script>
+  $(document).ready(function () {
+      $('.selectpicker').selectpicker();
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 {% endblock %}

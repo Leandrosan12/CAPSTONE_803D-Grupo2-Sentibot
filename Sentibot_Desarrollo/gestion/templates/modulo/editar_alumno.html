@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Editar Usuario{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <h2 class="text-center mb-4">✏️ Editar Usuario</h2>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+
+      <form method="POST">
+        {% csrf_token %}
+
+        <!-- NOMBRE -->
+        <div class="mb-3">
+          <label class="form-label">Nombre</label>
+          <input type="text" name="first_name" class="form-control" value="{{ usuario.first_name }}" required>
+        </div>
+
+        <!-- APELLIDO -->
+        <div class="mb-3">
+          <label class="form-label">Apellido</label>
+          <input type="text" name="last_name" class="form-control" value="{{ usuario.last_name }}" required>
+        </div>
+
+        <!-- EMAIL -->
+        <div class="mb-3">
+          <label class="form-label">Email</label>
+          <input type="email" name="email" class="form-control" value="{{ usuario.email }}" required>
+        </div>
+
+        <!-- ESCUELA + BOTÓN AGREGAR -->
+        <div class="mb-3">
+          <label class="form-label">Escuela</label>
+
+          <div class="input-group">
+            <select name="escuela" class="form-select" required>
+              <option value="">Seleccione una escuela</option>
+
+              {% for e in escuelas %}
+                <option value="{{ e.id }}"
+                  {% if usuario.escuela.id == e.id %}selected{% endif %}>
+                  {{ e.nombre }}
+                </option>
+              {% endfor %}
+            </select>
+
+            <!-- BOTÓN ABRIR MODAL -->
+            <button type="button"
+                    class="btn btn-success"
+                    data-bs-toggle="modal"
+                    data-bs-target="#modalAgregarEscuela">
+              + Escuela
+            </button>
+          </div>
+        </div>
+
+        <!-- BOTONES -->
+        <div class="d-flex justify-content-between mt-3">
+          <a href="{% url 'alumnos' %}" class="btn btn-secondary">Cancelar</a>
+          <button type="submit" class="btn btn-primary">Guardar cambios</button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ===========================
+     MODAL AGREGAR ESCUELA
+=========================== -->
+<div class="modal fade" id="modalAgregarEscuela" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <form method="POST" action="{% url 'agregar_escuela' %}">
+        {% csrf_token %}
+
+        <div class="modal-header">
+          <h5 class="modal-title">Agregar nueva escuela</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+
+          <!-- NOMBRE -->
+          <div class="mb-3">
+            <label class="form-label">Nombre de la escuela</label>
+            <input type="text" name="nombre" class="form-control" required>
+          </div>
+
+          <!-- DIRECCIÓN -->
+          <div class="mb-3">
+            <label class="form-label">Dirección</label>
+            <input type="text" name="direccion" class="form-control">
+          </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar</button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}

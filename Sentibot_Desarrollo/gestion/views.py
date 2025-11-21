@@ -30,7 +30,7 @@ import requests
 # Modelos
 from .models import (
     Usuario, Emocion, EmocionReal, EmocionCamara,
-    Sesion, Escuela, RespuestaEncuesta
+    Sesion, Escuela
 )
 
 logger = logging.getLogger(__name__)
@@ -241,17 +241,68 @@ def agenda(request):
 # ============================================================
 def modulo(request):
     return render(request, 'modulo/modulo.html')
+from django.core.paginator import Paginator
+from django.shortcuts import render
+from django.db.models import Q
+from .models import Usuario, Escuela
+
 def alumnos(request):
     # Obtener parámetro de búsqueda
-    email = request.GET.get('email')
+    q = request.GET.get('q', '')  # Buscador general
 
-    # Si se escribe un email, filtra
-    if email:
-        usuarios = Usuario.objects.filter(email__icontains=email)
-    else:
-        usuarios = Usuario.objects.all()
+    # Filtrado multicampo
+    usuarios_lista = Usuario.objects.all().order_by('id')
+    if q:
+        usuarios_lista = usuarios_lista.filter(
+            Q(id__icontains=q) |
+            Q(first_name__icontains=q) |
+            Q(last_name__icontains=q) |
+            Q(email__icontains=q) |
+            Q(escuela__nombre__icontains=q)
+        )
 
-    return render(request, 'modulo/alumnos.html', {"usuarios": usuarios})
+    # PAGINACIÓN
+    paginator = Paginator(usuarios_lista, 10)  # 10 usuarios por página
+    page_number = request.GET.get("page")
+    usuarios = paginator.get_page(page_number)
+
+    # Listar escuelas para el modal de añadir usuario
+    escuelas = Escuela.objects.all()
+
+    return render(request, 'modulo/alumnos.html', {
+        "usuarios": usuarios,
+        "q": q,
+        "escuelas": escuelas,
+    })
+
+
+
+from django.shortcuts import redirect
+from gestion.models import Usuario, Escuela
+
+def añadir_alumno(request):
+    if request.method == "POST":
+        first_name = request.POST.get("first_name")
+        last_name = request.POST.get("last_name")
+        email = request.POST.get("email")
+        password = request.POST.get("password")
+        escuela_id = request.POST.get("escuela_id")
+
+        escuela = Escuela.objects.get(id=escuela_id) if escuela_id else None
+
+        # Crear usuario con username único (ej: igual al email)
+        usuario = Usuario(
+            username=email,
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            escuela=escuela
+        )
+        usuario.set_password(password)
+        usuario.save()
+
+        return redirect('alumnos')
+
 
 
 
@@ -1117,5 +1168,148 @@ def tiempo_promedio_sesion_por_escuela(request, escuela_id):
 
     return render(request, "dashboard/tiempo_promedio_sesion.html", context)
 
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from .models import Usuario
+
+from .models import Usuario, Escuela
+
+def editar_alumno(request, alumno_id):
+    usuario = get_object_or_404(Usuario, id=alumno_id)
+    escuelas = Escuela.objects.all()  # 👈 Cargar escuelas
+
+    if request.method == 'POST':
+        usuario.first_name = request.POST.get('first_name')
+        usuario.last_name = request.POST.get('last_name')
+        usuario.email = request.POST.get('email')
+
+        # Guardar escuela seleccionada
+        escuela_id = request.POST.get('escuela')
+        if escuela_id:
+            usuario.escuela_id = escuela_id
+
+        usuario.save()
+
+        messages.success(request, "Los cambios se guardaron correctamente.")
+        return redirect('alumnos')
+
+    return render(
+        request,
+        'modulo/editar_alumno.html',
+        {
+            "usuario": usuario,
+            "escuelas": escuelas  # 👈 Enviar al template
+        }
+    )
 
 
+
+
+from django.core.paginator import Paginator
+from django.shortcuts import render
+from .models import Usuario
+
+def listar_alumnos(request):
+    id_query = request.GET.get('id', '')
+
+    if id_query:
+        usuarios_lista = Usuario.objects.filter(id=id_query)
+    else:
+        usuarios_lista = Usuario.objects.all().order_by('id')
+
+    # Paginar 10 por página
+    paginator = Paginator(usuarios_lista, 10)
+    page_number = request.GET.get('page')
+    usuarios = paginator.get_page(page_number)  # Esto es clave
+
+    return render(request, 'modulo/alumnos.html', {
+        'usuarios': usuarios,
+        'id': id_query
+    })
+from django.shortcuts import redirect, get_object_or_404
+from gestion.models import Usuario
+
+def eliminar_alumno(request, alumno_id):
+    if request.method == "POST":
+        usuario = get_object_or_404(Usuario, id=alumno_id)
+        usuario.delete()
+        return redirect('alumnos')  # redirige al listado
+
+
+
+from django.shortcuts import redirect
+from django.contrib import messages
+from .models import Escuela
+
+@login_required
+def agregar_escuela(request):
+    if request.method != "POST":
+        messages.error(request, "Método no permitido.")
+        return redirect(request.META.get("HTTP_REFERER", "modulo"))
+
+    nombre = (request.POST.get("nombre") or "").strip()
+    direccion = (request.POST.get("direccion") or "").strip()
+
+    if not nombre:
+        messages.error(request, "El nombre de la escuela es requerido.")
+        return redirect(request.META.get("HTTP_REFERER", "modulo"))
+
+    # Intenta crear con el campo direccion si existe; fallback si no existe
+    try:
+        # Si el modelo tiene el campo 'direccion', lo usamos.
+        Escuela.objects.create(nombre=nombre, direccion=direccion)
+    except TypeError:
+        # Si el constructor no acepta 'direccion' (modelo antiguo), creamos solo con nombre
+        Escuela.objects.create(nombre=nombre)
+
+    messages.success(request, "Escuela creada correctamente.")
+    return redirect(request.META.get("HTTP_REFERER", "modulo"))
+
+from django.contrib.auth import authenticate
+from django.contrib import messages
+from django.shortcuts import redirect
+from .models import Escuela
+
+def eliminar_escuela(request):
+    if request.method == "POST":
+        escuela_id = request.POST.get("escuela_id")
+        correo = request.POST.get("correo")
+        password = request.POST.get("password")
+
+        # Validar credenciales
+        user = authenticate(request, username=correo, password=password)
+
+        if user is None:
+            messages.error(request, "Credenciales incorrectas")
+            return redirect("modulo_profesor")
+
+        # Buscar escuela y eliminarla
+        try:
+            escuela = Escuela.objects.get(id=escuela_id)
+            escuela.delete()
+            messages.success(request, "Escuela eliminada correctamente")
+        except Escuela.DoesNotExist:
+            messages.error(request, "La escuela no existe")
+
+    return redirect("modulo_profesor")
+from django.shortcuts import redirect, get_object_or_404
+from django.contrib import messages
+from .models import Escuela
+
+def editar_escuela(request):
+    if request.method == "POST":
+
+        escuela_id = request.POST.get("escuela_id")
+        nuevo_nombre = request.POST.get("nuevo_nombre")
+        nueva_direccion = request.POST.get("nueva_direccion")
+
+        escuela = get_object_or_404(Escuela, id=escuela_id)
+
+        escuela.nombre = nuevo_nombre
+        escuela.direccion = nueva_direccion
+        escuela.save()
+
+        messages.success(request, "✔️ La escuela ha sido actualizada correctamente.")
+        return redirect("modulo_profesor")
+
+    return redirect("modulo_profesor")

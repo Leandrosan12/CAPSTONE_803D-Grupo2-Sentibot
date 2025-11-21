@@ -135,17 +135,6 @@ class Pregunta(models.Model):
         return self.texto[:50]
 
 
-class RespuestaEncuesta(models.Model):
-    encuesta = models.ForeignKey(Encuesta, on_delete=models.CASCADE, related_name="respuestas")
-    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="respuestas_encuesta")
-    respuesta = models.TextField()
-
-
-class RespuestaPregunta(models.Model):
-    pregunta = models.ForeignKey(Pregunta, on_delete=models.CASCADE, related_name="respuestas")
-    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="respuestas_preguntas")
-    respuesta = models.TextField()
-
 
 # ------------------------------
 # REPORTES

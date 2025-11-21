@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Eliminar Usuario{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <h2 class="text-center text-danger mb-4">🗑️ Eliminar Usuario</h2>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+
+      <p class="text-center">
+        ¿Estás seguro que deseas eliminar al usuario:<br>
+        <strong>{{ usuario.first_name }} {{ usuario.last_name }}</strong>?
+      </p>
+
+      <form method="POST" class="text-center mt-4">
+        {% csrf_token %}
+        <a href="{% url 'alumnos' %}" class="btn btn-secondary">Cancelar</a>
+        <button type="submit" class="btn btn-danger">Eliminar</button>
+      </form>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}
