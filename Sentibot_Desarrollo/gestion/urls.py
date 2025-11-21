@@ -34,7 +34,8 @@ urlpatterns = [
 
     # --- 🏫 Escuelas y Alumnos ---
     path('modulo/alumnos/', views.alumnos, name='alumnos'),
-    path('modulo/detalle_alumno/<int:alumno_id>/', views.detalle_alumno, name='detalle_alumno'),
+    path('modulo/detalle_alumno/<int:id>/', views.detalle_alumno, name='detalle_alumno'),
+
 
     # --- 📧 Verificación de correo ---
     path('enviar-codigo/', views.enviar_codigo, name='enviar_codigo'),

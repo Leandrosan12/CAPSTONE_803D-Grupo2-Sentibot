@@ -35,14 +35,11 @@
         <!-- ESCUELA + BOTÓN AGREGAR -->
         <div class="mb-3">
           <label class="form-label">Escuela</label>
-
           <div class="input-group">
             <select name="escuela" class="form-select" required>
               <option value="">Seleccione una escuela</option>
-
               {% for e in escuelas %}
-                <option value="{{ e.id }}"
-                  {% if usuario.escuela.id == e.id %}selected{% endif %}>
+                <option value="{{ e.id }}" {% if usuario.escuela.id == e.id %}selected{% endif %}>
                   {{ e.nombre }}
                 </option>
               {% endfor %}
@@ -58,6 +55,13 @@
           </div>
         </div>
 
+        <!-- IS STAFF (Administrador) -->
+        <div class="mb-3 form-check">
+          <input type="checkbox" class="form-check-input" name="is_staff" value="1" id="isStaffCheckbox"
+            {% if usuario.is_staff %}checked{% endif %}>
+          <label class="form-check-label" for="isStaffCheckbox">Es Administrador</label>
+        </div>
+
         <!-- BOTONES -->
         <div class="d-flex justify-content-between mt-3">
           <a href="{% url 'alumnos' %}" class="btn btn-secondary">Cancelar</a>
@@ -69,7 +73,6 @@
     </div>
   </div>
 </div>
-
 
 <!-- ===========================
      MODAL AGREGAR ESCUELA
@@ -87,7 +90,6 @@
         </div>
 
         <div class="modal-body">
-
           <!-- NOMBRE -->
           <div class="mb-3">
             <label class="form-label">Nombre de la escuela</label>
@@ -99,7 +101,6 @@
             <label class="form-label">Dirección</label>
             <input type="text" name="direccion" class="form-control">
           </div>
-
         </div>
 
         <div class="modal-footer">
