@@ -68,6 +68,7 @@ urlpatterns = [
     path('dashboard-emocional/<int:escuela_id>/',views.grafico_profesor, name='dashboard_emocional'),
     path('dashboard/tiempo-promedio-sesion/<int:escuela_id>/', tiempo_promedio_sesion_por_escuela, name="tiempo_promedio_sesion_por_escuela"),
     path('actualizar_alumno/<int:alumno_id>/', views.actualizar_alumno, name='actualizar_alumno'),
+    path('eliminar_alumno/<int:alumno_id>/', views.eliminar_alumno, name='eliminar_alumno'),
 
 
 

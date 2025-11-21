@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const btnEditar = document.getElementById("btnEditar");
     const btnGuardar = document.getElementById("btnGuardar");
     const btnCancelar = document.getElementById("btnCancelar");
+    const btnEliminar = document.getElementById("btnEliminar"); // NUEVO BOTÓN
 
     const id = alumnoCard.dataset.id;
 
@@ -71,6 +72,35 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         } catch (err) {
             alert("Error en la petición: " + err);
+        }
+    });
+
+    // ==========================
+    //      ELIMINAR ALUMNO
+    // ==========================
+    btnEliminar.addEventListener("click", async () => {
+        const confirmacion = confirm("⚠️ ¿Estás seguro que deseas eliminar este alumno? Esta acción no se puede deshacer.");
+        if (!confirmacion) return;
+
+        try {
+            const response = await fetch(`/eliminar_alumno/${id}/`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCookie("csrftoken")
+                }
+            });
+
+            if (response.ok) {
+                alert("✅ Alumno eliminado correctamente.");
+                alumnoCard.remove();
+                editarForm.style.display = "none";
+            } else {
+                const errorData = await response.json();
+                alert("❌ Error al eliminar el alumno: " + (errorData.error || "Error desconocido"));
+            }
+        } catch (err) {
+            alert("❌ Error en la petición: " + err);
         }
     });
 
