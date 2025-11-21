@@ -70,6 +70,10 @@ urlpatterns = [
     path('actualizar_alumno/<int:alumno_id>/', views.actualizar_alumno, name='actualizar_alumno'),
     path('eliminar_alumno/<int:alumno_id>/', views.eliminar_alumno, name='eliminar_alumno'),
 
+    
+    path("recuperar-contrasena/", views.recuperar_contrasena, name="recuperar_contrasena"),
+    path("confirmar-contrasena/", views.confirmar_contrasena, name="confirmar_contrasena"),
+
 
 
 ]

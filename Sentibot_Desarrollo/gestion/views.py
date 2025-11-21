@@ -1149,5 +1149,57 @@ def tiempo_promedio_sesion_por_escuela(request, escuela_id):
 
     return render(request, "dashboard/tiempo_promedio_sesion.html", context)
 
+# Recuperar correo
+
+from gestion.models import Usuario
+import random
+
+codigos_reset = {}  # temporal
+
+def recuperar_contrasena(request):
+    if request.method == 'POST':
+        correo = request.POST.get("correo")
+
+        try:
+            user = Usuario.objects.get(email=correo)
+        except Usuario.DoesNotExist:
+            return render(request, "recuperar_contrasena.html", {
+                "mensaje": "El correo no está registrado."
+            })
+
+        codigo = str(random.randint(100000, 999999))
+        codigos_reset[correo] = codigo
+
+        send_mail(
+            "Recuperación de contraseña",
+            f"Tu código de recuperación es: {codigo}",
+            "no-reply@miapp.com",
+            [correo],
+        )
+
+        return redirect("confirmar_contrasena")
+
+    return render(request, "recuperar_contrasena.html")
+def confirmar_contrasena(request):
+    if request.method == 'POST':
+        codigo = request.POST.get("codigo")
+        nueva = request.POST.get("nueva_contrasena")
+
+        for correo, codigo_guardado in codigos_reset.items():
+            if codigo == codigo_guardado:
+                user = Usuario.objects.get(email=correo)
+                user.set_password(nueva)
+                user.save()
+                codigos_reset.pop(correo)
+                return render(request, "confirmar_contrasena.html", {
+                    "mensaje": "Contraseña actualizada correctamente. Ya puedes iniciar sesión."
+                })
+
+        return render(request, "confirmar_contrasena.html", {
+            "mensaje": "El código ingresado no es válido."
+        })
+
+    return render(request, "confirmar_contrasena.html")
+
 
 
