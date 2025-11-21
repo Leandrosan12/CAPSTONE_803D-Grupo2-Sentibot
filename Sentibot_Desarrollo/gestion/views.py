@@ -44,6 +44,9 @@ def home(request):
         return redirect("login")
     return render(request, "home.html", {"user": request.user})
 
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login as auth_login
+
 def login(request):
     if request.method == "POST":
         email = request.POST.get('correo')
