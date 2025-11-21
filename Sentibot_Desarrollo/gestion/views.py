@@ -49,10 +49,19 @@ def login(request):
         email = request.POST.get('correo')
         password = request.POST.get('contrasena')
         user = authenticate(request, email=email, password=password)
+
         if user is not None and user.is_active:
             auth_login(request, user)
-            return redirect('camara')
+            
+            # Redirigir según si es staff o no
+            if user.is_staff:
+                return redirect('modulo_profesor')  # staff
+            else:
+                return redirect('opciones')  # no staff
+
+        # Si falla autenticación
         return render(request, 'login.html', {'error': 'Correo o contraseña incorrectos'})
+
     return render(request, 'login.html')
 
 def logout_view(request):
