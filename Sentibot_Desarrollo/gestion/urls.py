@@ -74,8 +74,4 @@ urlpatterns = [
     path('escuelas/agregar/', views.agregar_escuela, name='agregar_escuela'),
     path("eliminar_escuela/", views.eliminar_escuela, name="eliminar_escuela"),
     path('escuelas/editar/', views.editar_escuela, name='editar_escuela')
-
-
-
-
 ]

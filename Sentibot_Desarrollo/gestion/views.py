@@ -637,6 +637,38 @@ def encuesta_satisfaccion(request):
             return redirect('opciones')
 
     return render(request, 'encuesta_satisfaccion.html', {'sesion': sesion})
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt
+def eliminar_alumno(request, alumno_id):
+    if request.method == "POST":
+        alumno = get_object_or_404(Usuario, id=alumno_id)
+        alumno.delete()
+        return JsonResponse({"status": "ok"})
+    return JsonResponse({"status": "error"}, status=400)
+
+@csrf_exempt
+def actualizar_alumno(request, alumno_id):
+    if request.method == "POST":
+        alumno = get_object_or_404(Usuario, id=alumno_id)
+        data = json.loads(request.body)
+
+        alumno.first_name = data.get('nombre', alumno.first_name)
+        alumno.last_name = data.get('apellido', alumno.last_name)
+        alumno.email = data.get('email', alumno.email)
+
+        escuela_id = data.get('escuela')
+        rol_id = data.get('rol')
+
+        if escuela_id:
+            alumno.escuela_id = escuela_id
+        if rol_id:
+            alumno.rol_id = rol_id
+
+        alumno.save()
+        return JsonResponse({"status": "ok"})
+    return JsonResponse({"status": "error"}, status=400)
+
 
 
 
