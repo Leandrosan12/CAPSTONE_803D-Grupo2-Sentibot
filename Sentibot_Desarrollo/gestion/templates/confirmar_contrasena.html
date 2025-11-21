@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Cambiar contraseña{% endblock %}
+
+{% block content %}
+<div class="container mt-5" style="max-width: 450px;">
+    <h3 class="text-center">Cambiar contraseña</h3>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <label class="form-label mt-3">Código recibido</label>
+        <input type="text" class="form-control" name="codigo" required>
+
+        <label class="form-label mt-3">Nueva contraseña</label>
+        <input type="password" class="form-control" name="nueva_contrasena" required>
+
+        <button type="submit" class="btn btn-success w-100 mt-3">
+            Guardar nueva contraseña
+        </button>
+    </form>
+
+    {% if mensaje %}
+      <div class="alert alert-info text-center mt-3">{{ mensaje }}</div>
+    {% endif %}
+</div>
+{% endblock %}
