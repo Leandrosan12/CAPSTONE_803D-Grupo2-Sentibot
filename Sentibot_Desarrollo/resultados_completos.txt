@@ -1,0 +1,784 @@
+
+=====================
+1) TOTALES POR AUTOR (HTML + CSS + PY)
+=====================
+
+---- TOTALES POR EXTENSI�N ----
+
+HTML
+  leandro favio                  5182
+  ProSebast                      3711
+  sebastian loayza aguilar       5330
+
+CSS
+  leandro favio                  2414
+  ProSebast                      837
+  sebastian loayza aguilar       12190
+
+PY
+  leandro favio                  3373
+  ProSebast                      3452
+  sebastian loayza aguilar       3647
+
+---- FIN TOTALES POR EXTENSI�N ----
+
+
+Author                            Added  Deleted
+------------------------------    -----   ------
+sebastian loayza aguilar          18510     2902
+leandro favio                      6842     4127
+ProSebast                          4096     3904
+
+=====================
+2) ARCHIVOS Y AUTORES INVOLUCRADOS
+=====================
+Archivo: gestion/__init__.py
+  Autores: sebastian loayza aguilar
+
+Archivo: gestion/admin.py
+  Autores: ProSebast, sebastian loayza aguilar
+
+Archivo: gestion/apps.py
+  Autores: ProSebast, sebastian loayza aguilar
+
+Archivo: gestion/migrations/0001_initial.py
+  Autores: leandro favio, ProSebast, sebastian loayza aguilar
+
+Archivo: gestion/models.py
+  Autores: leandro favio, ProSebast, sebastian loayza aguilar
+
+Archivo: gestion/scripts/__init__.py
+  Autores: leandro favio
+
+Archivo: gestion/scripts/cargar_datos_dashboard.py
+  Autores: leandro favio
+
+Archivo: gestion/signals.py
+  Autores: sebastian loayza aguilar
+
+Archivo: gestion/static/css/actividades.css
+  Autores: leandro favio
+
+Archivo: gestion/static/css/base.css
+  Autores: ProSebast
+
+Archivo: gestion/static/css/bootstrap.css
+  Autores: sebastian loayza aguilar
+
+Archivo: gestion/static/css/bootstrap.min.css
+  Autores: sebastian loayza aguilar
+
+Archivo: gestion/static/css/camara.css
+  Autores: ProSebast
+
+Archivo: gestion/static/css/emociones_extras.css
+  Autores: leandro favio, ProSebast
+
+Archivo: gestion/static/css/emociones_interactivas.css
+  Autores: leandro favio
+
+Archivo: gestion/static/css/estilos_modulo.css
+  Autores: leandro favio
+
+Archivo: gestion/static/css/grafico_profesor.css
+  Autores: leandro favio
+
+Archivo: gestion/static/css/Inicio.css
+  Autores: sebastian loayza aguilar
+
+Archivo: gestion/static/css/modulo_profesor.css
+  Autores: leandro favio, sebastian loayza aguilar
+
+Archivo: gestion/static/css/perfil.css
+  Autores: leandro favio, ProSebast
+
+Archivo: gestion/static/css/portal_psicologia.css
+  Autores: leandro favio
+
+Archivo: gestion/static/css/seguimiento.css
+  Autores: leandro favio, ProSebast
+
+Archivo: gestion/static/css/siderbar.css
+  Autores: leandro favio, ProSebast
+
+Archivo: gestion/static/css/topbar.css
+  Autores: ProSebast
+
+Archivo: gestion/templates/actividades.html
+  Autores: leandro favio, ProSebast, sebastian loayza aguilar
+
+Archivo: gestion/templates/actividades/crear_actividad.html
+  Autores: sebastian loayza aguilar
+
+Archivo: gestion/templates/actividades/editar_actividad.html
+  Autores: sebastian loayza aguilar
+
+Archivo: gestion/templates/admin_actividades.html
+  Autores: sebastian loayza aguilar
+
+Archivo: gestion/templates/agenda.html
+  Autores: leandro favio
+
+Archivo: gestion/templates/camara.html
+  Autores: leandro favio, ProSebast, sebastian loayza aguilar
+
+Archivo: gestion/templates/confirmar_contrasena.html
+  Autores: ProSebast
+
+Archivo: gestion/templates/dashboard_emociones.html
+  Autores: ProSebast, sebastian loayza aguilar
+
+Archivo: gestion/templates/encuesta_satisfaccion.html
+  Autores: leandro favio, sebastian loayza aguilar
+
+Archivo: gestion/templates/extra.html
+  Autores: leandro favio, ProSebast, sebastian loayza aguilar
+
+Archivo: gestion/templates/grafico_profesor.html
+  Autores: leandro favio, sebastian loayza aguilar
+
+Archivo: gestion/templates/login.html
+  Autores: ProSebast, sebastian loayza aguilar
+
+Archivo: gestion/templates/mantenimiento.html
+  Autores: ProSebast
+
+Archivo: gestion/templates/modulo/alumnos.html
+  Autores: leandro favio, ProSebast, sebastian loayza aguilar
+
+Archivo: gestion/templates/modulo/detalle_alumno.html
+  Autores: leandro favio, ProSebast, sebastian loayza aguilar
+
+Archivo: gestion/templates/modulo/editar_alumno.html
+  Autores: sebastian loayza aguilar
+
+Archivo: gestion/templates/modulo/eliminar_alumno.html
+  Autores: sebastian loayza aguilar
+
+Archivo: gestion/templates/modulo/escuela.html
+  Autores: leandro favio
+
+Archivo: gestion/templates/modulo/modulo.html
+  Autores: leandro favio
+
+Archivo: gestion/templates/modulo_profesor.html
+  Autores: leandro favio, sebastian loayza aguilar
+
+Archivo: gestion/templates/opciones.html
+  Autores: leandro favio, sebastian loayza aguilar
+
+Archivo: gestion/templates/perfil.html
+  Autores: leandro favio, ProSebast, sebastian loayza aguilar
+
+Archivo: gestion/templates/preguntas.html
+  Autores: ProSebast
+
+Archivo: gestion/templates/recuperar_contrasena.html
+  Autores: ProSebast
+
+Archivo: gestion/templates/registro.html
+  Autores: ProSebast, sebastian loayza aguilar
+
+Archivo: gestion/templates/resultado.html
+  Autores: ProSebast
+
+Archivo: gestion/templates/seguimiento.html
+  Autores: leandro favio, ProSebast
+
+Archivo: gestion/tests.py
+  Autores: sebastian loayza aguilar
+
+Archivo: gestion/urls.py
+  Autores: leandro favio, ProSebast, sebastian loayza aguilar
+
+Archivo: gestion/views.py
+  Autores: leandro favio, ProSebast, sebastian loayza aguilar
+
+Archivo: manage.py
+  Autores: sebastian loayza aguilar
+
+Archivo: ProhectoTitulo/__init__.py
+  Autores: sebastian loayza aguilar
+
+Archivo: ProhectoTitulo/asgi.py
+  Autores: sebastian loayza aguilar
+
+Archivo: ProhectoTitulo/codigoprueba.py
+  Autores: leandro favio
+
+Archivo: ProhectoTitulo/settings.py
+  Autores: leandro favio, ProSebast, sebastian loayza aguilar
+
+Archivo: ProhectoTitulo/urls.py
+  Autores: sebastian loayza aguilar
+
+Archivo: ProhectoTitulo/wsgi.py
+  Autores: ProSebast, sebastian loayza aguilar
+
+Archivo: script.py
+  Autores: sebastian loayza aguilar
+
+Archivo: templatesglobal/bars/sidebar.html
+  Autores: leandro favio, ProSebast, sebastian loayza aguilar
+
+Archivo: templatesglobal/bars/topbar.html
+  Autores: leandro favio, ProSebast, sebastian loayza aguilar
+
+Archivo: templatesglobal/base.html
+  Autores: ProSebast, sebastian loayza aguilar
+
+
+---------------------
+POR AUTOR ? ARCHIVOS TOCADOS
+---------------------
+Autor: leandro favio
+  - gestion/migrations/0001_initial.py
+  - gestion/models.py
+  - gestion/scripts/__init__.py
+  - gestion/scripts/cargar_datos_dashboard.py
+  - gestion/static/css/actividades.css
+  - gestion/static/css/emociones_extras.css
+  - gestion/static/css/emociones_interactivas.css
+  - gestion/static/css/estilos_modulo.css
+  - gestion/static/css/grafico_profesor.css
+  - gestion/static/css/modulo_profesor.css
+  - gestion/static/css/perfil.css
+  - gestion/static/css/portal_psicologia.css
+  - gestion/static/css/seguimiento.css
+  - gestion/static/css/siderbar.css
+  - gestion/templates/actividades.html
+  - gestion/templates/agenda.html
+  - gestion/templates/camara.html
+  - gestion/templates/encuesta_satisfaccion.html
+  - gestion/templates/extra.html
+  - gestion/templates/grafico_profesor.html
+  - gestion/templates/modulo/alumnos.html
+  - gestion/templates/modulo/detalle_alumno.html
+  - gestion/templates/modulo/escuela.html
+  - gestion/templates/modulo/modulo.html
+  - gestion/templates/modulo_profesor.html
+  - gestion/templates/opciones.html
+  - gestion/templates/perfil.html
+  - gestion/templates/seguimiento.html
+  - gestion/urls.py
+  - gestion/views.py
+  - ProhectoTitulo/codigoprueba.py
+  - ProhectoTitulo/settings.py
+  - templatesglobal/bars/sidebar.html
+  - templatesglobal/bars/topbar.html
+
+Autor: ProSebast
+  - gestion/admin.py
+  - gestion/apps.py
+  - gestion/migrations/0001_initial.py
+  - gestion/models.py
+  - gestion/static/css/base.css
+  - gestion/static/css/camara.css
+  - gestion/static/css/emociones_extras.css
+  - gestion/static/css/perfil.css
+  - gestion/static/css/seguimiento.css
+  - gestion/static/css/siderbar.css
+  - gestion/static/css/topbar.css
+  - gestion/templates/actividades.html
+  - gestion/templates/camara.html
+  - gestion/templates/confirmar_contrasena.html
+  - gestion/templates/dashboard_emociones.html
+  - gestion/templates/extra.html
+  - gestion/templates/login.html
+  - gestion/templates/mantenimiento.html
+  - gestion/templates/modulo/alumnos.html
+  - gestion/templates/modulo/detalle_alumno.html
+  - gestion/templates/perfil.html
+  - gestion/templates/preguntas.html
+  - gestion/templates/recuperar_contrasena.html
+  - gestion/templates/registro.html
+  - gestion/templates/resultado.html
+  - gestion/templates/seguimiento.html
+  - gestion/urls.py
+  - gestion/views.py
+  - ProhectoTitulo/settings.py
+  - ProhectoTitulo/wsgi.py
+  - templatesglobal/bars/sidebar.html
+  - templatesglobal/bars/topbar.html
+  - templatesglobal/base.html
+
+Autor: sebastian loayza aguilar
+  - gestion/__init__.py
+  - gestion/admin.py
+  - gestion/apps.py
+  - gestion/migrations/0001_initial.py
+  - gestion/models.py
+  - gestion/signals.py
+  - gestion/static/css/bootstrap.css
+  - gestion/static/css/bootstrap.min.css
+  - gestion/static/css/Inicio.css
+  - gestion/static/css/modulo_profesor.css
+  - gestion/templates/actividades.html
+  - gestion/templates/actividades/crear_actividad.html
+  - gestion/templates/actividades/editar_actividad.html
+  - gestion/templates/admin_actividades.html
+  - gestion/templates/camara.html
+  - gestion/templates/dashboard_emociones.html
+  - gestion/templates/encuesta_satisfaccion.html
+  - gestion/templates/extra.html
+  - gestion/templates/grafico_profesor.html
+  - gestion/templates/login.html
+  - gestion/templates/modulo/alumnos.html
+  - gestion/templates/modulo/detalle_alumno.html
+  - gestion/templates/modulo/editar_alumno.html
+  - gestion/templates/modulo/eliminar_alumno.html
+  - gestion/templates/modulo_profesor.html
+  - gestion/templates/opciones.html
+  - gestion/templates/perfil.html
+  - gestion/templates/registro.html
+  - gestion/tests.py
+  - gestion/urls.py
+  - gestion/views.py
+  - manage.py
+  - ProhectoTitulo/__init__.py
+  - ProhectoTitulo/asgi.py
+  - ProhectoTitulo/settings.py
+  - ProhectoTitulo/urls.py
+  - ProhectoTitulo/wsgi.py
+  - script.py
+  - templatesglobal/bars/sidebar.html
+  - templatesglobal/bars/topbar.html
+  - templatesglobal/base.html
+
+
+=====================
+3) DETALLE POR ARCHIVO (l�neas modificadas total y por autor)
+=====================
+Archivo: gestion/__init__.py
+----------------------------------------------------
+TOTAL archivo ? Added: 0 | Deleted: 0 | Modificado total: 0
+Por autor:
+  sebastian loayza aguilar       Added:      0  Deleted:      0  Total: 0
+
+Archivo: gestion/admin.py
+----------------------------------------------------
+TOTAL archivo ? Added: 42 | Deleted: 41 | Modificado total: 83
+Por autor:
+  ProSebast                      Added:      0  Deleted:     40  Total: 40
+  sebastian loayza aguilar       Added:     42  Deleted:      1  Total: 43
+
+Archivo: gestion/apps.py
+----------------------------------------------------
+TOTAL archivo ? Added: 11 | Deleted: 5 | Modificado total: 16
+Por autor:
+  ProSebast                      Added:      1  Deleted:      3  Total: 4
+  sebastian loayza aguilar       Added:     10  Deleted:      2  Total: 12
+
+Archivo: gestion/migrations/0001_initial.py
+----------------------------------------------------
+TOTAL archivo ? Added: 619 | Deleted: 405 | Modificado total: 1024
+Por autor:
+  leandro favio                  Added:    163  Deleted:    171  Total: 334
+  sebastian loayza aguilar       Added:    272  Deleted:    109  Total: 381
+  ProSebast                      Added:    184  Deleted:    125  Total: 309
+
+Archivo: gestion/models.py
+----------------------------------------------------
+TOTAL archivo ? Added: 748 | Deleted: 746 | Modificado total: 1494
+Por autor:
+  leandro favio                  Added:    101  Deleted:     99  Total: 200
+  sebastian loayza aguilar       Added:    311  Deleted:    331  Total: 642
+  ProSebast                      Added:    336  Deleted:    316  Total: 652
+
+Archivo: gestion/scripts/__init__.py
+----------------------------------------------------
+TOTAL archivo ? Added: 0 | Deleted: 0 | Modificado total: 0
+Por autor:
+  leandro favio                  Added:      0  Deleted:      0  Total: 0
+
+Archivo: gestion/scripts/cargar_datos_dashboard.py
+----------------------------------------------------
+TOTAL archivo ? Added: 163 | Deleted: 29 | Modificado total: 192
+Por autor:
+  leandro favio                  Added:    163  Deleted:     29  Total: 192
+
+Archivo: gestion/signals.py
+----------------------------------------------------
+TOTAL archivo ? Added: 93 | Deleted: 3 | Modificado total: 96
+Por autor:
+  sebastian loayza aguilar       Added:     93  Deleted:      3  Total: 96
+
+Archivo: gestion/static/css/actividades.css
+----------------------------------------------------
+TOTAL archivo ? Added: 58 | Deleted: 0 | Modificado total: 58
+Por autor:
+  leandro favio                  Added:     58  Deleted:      0  Total: 58
+
+Archivo: gestion/static/css/base.css
+----------------------------------------------------
+TOTAL archivo ? Added: 31 | Deleted: 0 | Modificado total: 31
+Por autor:
+  ProSebast                      Added:     31  Deleted:      0  Total: 31
+
+Archivo: gestion/static/css/bootstrap.css
+----------------------------------------------------
+TOTAL archivo ? Added: 12129 | Deleted: 0 | Modificado total: 12129
+Por autor:
+  sebastian loayza aguilar       Added:  12129  Deleted:      0  Total: 12129
+
+Archivo: gestion/static/css/bootstrap.min.css
+----------------------------------------------------
+TOTAL archivo ? Added: 12 | Deleted: 0 | Modificado total: 12
+Por autor:
+  sebastian loayza aguilar       Added:     12  Deleted:      0  Total: 12
+
+Archivo: gestion/static/css/camara.css
+----------------------------------------------------
+TOTAL archivo ? Added: 143 | Deleted: 3 | Modificado total: 146
+Por autor:
+  ProSebast                      Added:    143  Deleted:      3  Total: 146
+
+Archivo: gestion/static/css/emociones_extras.css
+----------------------------------------------------
+TOTAL archivo ? Added: 80 | Deleted: 2 | Modificado total: 82
+Por autor:
+  ProSebast                      Added:      1  Deleted:      1  Total: 2
+  leandro favio                  Added:     79  Deleted:      1  Total: 80
+
+Archivo: gestion/static/css/emociones_interactivas.css
+----------------------------------------------------
+TOTAL archivo ? Added: 107 | Deleted: 0 | Modificado total: 107
+Por autor:
+  leandro favio                  Added:    107  Deleted:      0  Total: 107
+
+Archivo: gestion/static/css/estilos_modulo.css
+----------------------------------------------------
+TOTAL archivo ? Added: 154 | Deleted: 0 | Modificado total: 154
+Por autor:
+  leandro favio                  Added:    154  Deleted:      0  Total: 154
+
+Archivo: gestion/static/css/grafico_profesor.css
+----------------------------------------------------
+TOTAL archivo ? Added: 181 | Deleted: 0 | Modificado total: 181
+Por autor:
+  leandro favio                  Added:    181  Deleted:      0  Total: 181
+
+Archivo: gestion/static/css/Inicio.css
+----------------------------------------------------
+TOTAL archivo ? Added: 45 | Deleted: 0 | Modificado total: 45
+Por autor:
+  sebastian loayza aguilar       Added:     45  Deleted:      0  Total: 45
+
+Archivo: gestion/static/css/modulo_profesor.css
+----------------------------------------------------
+TOTAL archivo ? Added: 195 | Deleted: 43 | Modificado total: 238
+Por autor:
+  leandro favio                  Added:    117  Deleted:     43  Total: 160
+  sebastian loayza aguilar       Added:     78  Deleted:      0  Total: 78
+
+Archivo: gestion/static/css/perfil.css
+----------------------------------------------------
+TOTAL archivo ? Added: 336 | Deleted: 165 | Modificado total: 501
+Por autor:
+  ProSebast                      Added:    108  Deleted:    108  Total: 216
+  leandro favio                  Added:    228  Deleted:     57  Total: 285
+
+Archivo: gestion/static/css/portal_psicologia.css
+----------------------------------------------------
+TOTAL archivo ? Added: 49 | Deleted: 0 | Modificado total: 49
+Por autor:
+  leandro favio                  Added:     49  Deleted:      0  Total: 49
+
+Archivo: gestion/static/css/seguimiento.css
+----------------------------------------------------
+TOTAL archivo ? Added: 139 | Deleted: 68 | Modificado total: 207
+Por autor:
+  ProSebast                      Added:     60  Deleted:     60  Total: 120
+  leandro favio                  Added:     79  Deleted:      8  Total: 87
+
+Archivo: gestion/static/css/siderbar.css
+----------------------------------------------------
+TOTAL archivo ? Added: 200 | Deleted: 164 | Modificado total: 364
+Por autor:
+  ProSebast                      Added:     90  Deleted:     90  Total: 180
+  leandro favio                  Added:    110  Deleted:     74  Total: 184
+
+Archivo: gestion/static/css/topbar.css
+----------------------------------------------------
+TOTAL archivo ? Added: 97 | Deleted: 0 | Modificado total: 97
+Por autor:
+  ProSebast                      Added:     97  Deleted:      0  Total: 97
+
+Archivo: gestion/templates/actividades.html
+----------------------------------------------------
+TOTAL archivo ? Added: 598 | Deleted: 428 | Modificado total: 1026
+Por autor:
+  leandro favio                  Added:    236  Deleted:     94  Total: 330
+  sebastian loayza aguilar       Added:    167  Deleted:    147  Total: 314
+  ProSebast                      Added:    195  Deleted:    187  Total: 382
+
+Archivo: gestion/templates/actividades/crear_actividad.html
+----------------------------------------------------
+TOTAL archivo ? Added: 73 | Deleted: 0 | Modificado total: 73
+Por autor:
+  sebastian loayza aguilar       Added:     73  Deleted:      0  Total: 73
+
+Archivo: gestion/templates/actividades/editar_actividad.html
+----------------------------------------------------
+TOTAL archivo ? Added: 78 | Deleted: 0 | Modificado total: 78
+Por autor:
+  sebastian loayza aguilar       Added:     78  Deleted:      0  Total: 78
+
+Archivo: gestion/templates/admin_actividades.html
+----------------------------------------------------
+TOTAL archivo ? Added: 178 | Deleted: 0 | Modificado total: 178
+Por autor:
+  sebastian loayza aguilar       Added:    178  Deleted:      0  Total: 178
+
+Archivo: gestion/templates/agenda.html
+----------------------------------------------------
+TOTAL archivo ? Added: 27 | Deleted: 0 | Modificado total: 27
+Por autor:
+  leandro favio                  Added:     27  Deleted:      0  Total: 27
+
+Archivo: gestion/templates/camara.html
+----------------------------------------------------
+TOTAL archivo ? Added: 944 | Deleted: 715 | Modificado total: 1659
+Por autor:
+  leandro favio                  Added:    127  Deleted:    316  Total: 443
+  sebastian loayza aguilar       Added:    574  Deleted:    399  Total: 973
+  ProSebast                      Added:    243  Deleted:      0  Total: 243
+
+Archivo: gestion/templates/confirmar_contrasena.html
+----------------------------------------------------
+TOTAL archivo ? Added: 40 | Deleted: 6 | Modificado total: 46
+Por autor:
+  ProSebast                      Added:     40  Deleted:      6  Total: 46
+
+Archivo: gestion/templates/dashboard_emociones.html
+----------------------------------------------------
+TOTAL archivo ? Added: 75 | Deleted: 42 | Modificado total: 117
+Por autor:
+  sebastian loayza aguilar       Added:      2  Deleted:      0  Total: 2
+  ProSebast                      Added:     73  Deleted:     42  Total: 115
+
+Archivo: gestion/templates/encuesta_satisfaccion.html
+----------------------------------------------------
+TOTAL archivo ? Added: 66 | Deleted: 1 | Modificado total: 67
+Por autor:
+  sebastian loayza aguilar       Added:      1  Deleted:      1  Total: 2
+  leandro favio                  Added:     65  Deleted:      0  Total: 65
+
+Archivo: gestion/templates/extra.html
+----------------------------------------------------
+TOTAL archivo ? Added: 520 | Deleted: 327 | Modificado total: 847
+Por autor:
+  leandro favio                  Added:    291  Deleted:    222  Total: 513
+  sebastian loayza aguilar       Added:    227  Deleted:    103  Total: 330
+  ProSebast                      Added:      2  Deleted:      2  Total: 4
+
+Archivo: gestion/templates/grafico_profesor.html
+----------------------------------------------------
+TOTAL archivo ? Added: 623 | Deleted: 261 | Modificado total: 884
+Por autor:
+  sebastian loayza aguilar       Added:    391  Deleted:    240  Total: 631
+  leandro favio                  Added:    232  Deleted:     21  Total: 253
+
+Archivo: gestion/templates/login.html
+----------------------------------------------------
+TOTAL archivo ? Added: 64 | Deleted: 28 | Modificado total: 92
+Por autor:
+  ProSebast                      Added:     27  Deleted:     28  Total: 55
+  sebastian loayza aguilar       Added:     37  Deleted:      0  Total: 37
+
+Archivo: gestion/templates/mantenimiento.html
+----------------------------------------------------
+TOTAL archivo ? Added: 37 | Deleted: 0 | Modificado total: 37
+Por autor:
+  ProSebast                      Added:     37  Deleted:      0  Total: 37
+
+Archivo: gestion/templates/modulo/alumnos.html
+----------------------------------------------------
+TOTAL archivo ? Added: 246 | Deleted: 32 | Modificado total: 278
+Por autor:
+  leandro favio                  Added:     59  Deleted:      0  Total: 59
+  sebastian loayza aguilar       Added:    170  Deleted:     17  Total: 187
+  ProSebast                      Added:     17  Deleted:     15  Total: 32
+
+Archivo: gestion/templates/modulo/detalle_alumno.html
+----------------------------------------------------
+TOTAL archivo ? Added: 490 | Deleted: 302 | Modificado total: 792
+Por autor:
+  leandro favio                  Added:    249  Deleted:    126  Total: 375
+  sebastian loayza aguilar       Added:     96  Deleted:    114  Total: 210
+  ProSebast                      Added:    145  Deleted:     62  Total: 207
+
+Archivo: gestion/templates/modulo/editar_alumno.html
+----------------------------------------------------
+TOTAL archivo ? Added: 124 | Deleted: 7 | Modificado total: 131
+Por autor:
+  sebastian loayza aguilar       Added:    124  Deleted:      7  Total: 131
+
+Archivo: gestion/templates/modulo/eliminar_alumno.html
+----------------------------------------------------
+TOTAL archivo ? Added: 28 | Deleted: 0 | Modificado total: 28
+Por autor:
+  sebastian loayza aguilar       Added:     28  Deleted:      0  Total: 28
+
+Archivo: gestion/templates/modulo/escuela.html
+----------------------------------------------------
+TOTAL archivo ? Added: 40 | Deleted: 0 | Modificado total: 40
+Por autor:
+  leandro favio                  Added:     40  Deleted:      0  Total: 40
+
+Archivo: gestion/templates/modulo/modulo.html
+----------------------------------------------------
+TOTAL archivo ? Added: 38 | Deleted: 0 | Modificado total: 38
+Por autor:
+  leandro favio                  Added:     38  Deleted:      0  Total: 38
+
+Archivo: gestion/templates/modulo_profesor.html
+----------------------------------------------------
+TOTAL archivo ? Added: 355 | Deleted: 229 | Modificado total: 584
+Por autor:
+  sebastian loayza aguilar       Added:    244  Deleted:    208  Total: 452
+  leandro favio                  Added:    111  Deleted:     21  Total: 132
+
+Archivo: gestion/templates/opciones.html
+----------------------------------------------------
+TOTAL archivo ? Added: 59 | Deleted: 0 | Modificado total: 59
+Por autor:
+  leandro favio                  Added:      0  Deleted:      0  Total: 0
+  sebastian loayza aguilar       Added:     59  Deleted:      0  Total: 59
+
+Archivo: gestion/templates/perfil.html
+----------------------------------------------------
+TOTAL archivo ? Added: 242 | Deleted: 306 | Modificado total: 548
+Por autor:
+  leandro favio                  Added:    122  Deleted:    128  Total: 250
+  sebastian loayza aguilar       Added:      1  Deleted:      6  Total: 7
+  ProSebast                      Added:    119  Deleted:    172  Total: 291
+
+Archivo: gestion/templates/preguntas.html
+----------------------------------------------------
+TOTAL archivo ? Added: 48 | Deleted: 1 | Modificado total: 49
+Por autor:
+  ProSebast                      Added:     48  Deleted:      1  Total: 49
+
+Archivo: gestion/templates/recuperar_contrasena.html
+----------------------------------------------------
+TOTAL archivo ? Added: 69 | Deleted: 18 | Modificado total: 87
+Por autor:
+  ProSebast                      Added:     69  Deleted:     18  Total: 87
+
+Archivo: gestion/templates/registro.html
+----------------------------------------------------
+TOTAL archivo ? Added: 119 | Deleted: 41 | Modificado total: 160
+Por autor:
+  ProSebast                      Added:     92  Deleted:     41  Total: 133
+  sebastian loayza aguilar       Added:     27  Deleted:      0  Total: 27
+
+Archivo: gestion/templates/resultado.html
+----------------------------------------------------
+TOTAL archivo ? Added: 48 | Deleted: 0 | Modificado total: 48
+Por autor:
+  ProSebast                      Added:     48  Deleted:      0  Total: 48
+
+Archivo: gestion/templates/seguimiento.html
+----------------------------------------------------
+TOTAL archivo ? Added: 239 | Deleted: 343 | Modificado total: 582
+Por autor:
+  ProSebast                      Added:     57  Deleted:    133  Total: 190
+  leandro favio                  Added:    182  Deleted:    210  Total: 392
+
+Archivo: gestion/tests.py
+----------------------------------------------------
+TOTAL archivo ? Added: 3 | Deleted: 0 | Modificado total: 3
+Por autor:
+  sebastian loayza aguilar       Added:      3  Deleted:      0  Total: 3
+
+Archivo: gestion/urls.py
+----------------------------------------------------
+TOTAL archivo ? Added: 210 | Deleted: 156 | Modificado total: 366
+Por autor:
+  leandro favio                  Added:     94  Deleted:     87  Total: 181
+  sebastian loayza aguilar       Added:     63  Deleted:     28  Total: 91
+  ProSebast                      Added:     53  Deleted:     41  Total: 94
+
+Archivo: gestion/views.py
+----------------------------------------------------
+TOTAL archivo ? Added: 3168 | Deleted: 2301 | Modificado total: 5469
+Por autor:
+  leandro favio                  Added:    886  Deleted:   1074  Total: 1960
+  sebastian loayza aguilar       Added:   1146  Deleted:    492  Total: 1638
+  ProSebast                      Added:   1136  Deleted:    735  Total: 1871
+
+Archivo: manage.py
+----------------------------------------------------
+TOTAL archivo ? Added: 22 | Deleted: 0 | Modificado total: 22
+Por autor:
+  sebastian loayza aguilar       Added:     22  Deleted:      0  Total: 22
+
+Archivo: ProhectoTitulo/__init__.py
+----------------------------------------------------
+TOTAL archivo ? Added: 0 | Deleted: 0 | Modificado total: 0
+Por autor:
+  sebastian loayza aguilar       Added:      0  Deleted:      0  Total: 0
+
+Archivo: ProhectoTitulo/asgi.py
+----------------------------------------------------
+TOTAL archivo ? Added: 16 | Deleted: 0 | Modificado total: 16
+Por autor:
+  sebastian loayza aguilar       Added:     16  Deleted:      0  Total: 16
+
+Archivo: ProhectoTitulo/codigoprueba.py
+----------------------------------------------------
+TOTAL archivo ? Added: 49 | Deleted: 0 | Modificado total: 49
+Por autor:
+  leandro favio                  Added:     49  Deleted:      0  Total: 49
+
+Archivo: ProhectoTitulo/settings.py
+----------------------------------------------------
+TOTAL archivo ? Added: 315 | Deleted: 351 | Modificado total: 666
+Por autor:
+  leandro favio                  Added:     79  Deleted:    185  Total: 264
+  sebastian loayza aguilar       Added:    181  Deleted:     71  Total: 252
+  ProSebast                      Added:     55  Deleted:     95  Total: 150
+
+Archivo: ProhectoTitulo/urls.py
+----------------------------------------------------
+TOTAL archivo ? Added: 7 | Deleted: 0 | Modificado total: 7
+Por autor:
+  sebastian loayza aguilar       Added:      7  Deleted:      0  Total: 7
+
+Archivo: ProhectoTitulo/wsgi.py
+----------------------------------------------------
+TOTAL archivo ? Added: 17 | Deleted: 11 | Modificado total: 28
+Por autor:
+  ProSebast                      Added:      1  Deleted:     11  Total: 12
+  sebastian loayza aguilar       Added:     16  Deleted:      0  Total: 16
+
+Archivo: script.py
+----------------------------------------------------
+TOTAL archivo ? Added: 56 | Deleted: 0 | Modificado total: 56
+Por autor:
+  sebastian loayza aguilar       Added:     56  Deleted:      0  Total: 56
+
+Archivo: templatesglobal/bars/sidebar.html
+----------------------------------------------------
+TOTAL archivo ? Added: 340 | Deleted: 371 | Modificado total: 711
+Por autor:
+  leandro favio                  Added:    119  Deleted:    117  Total: 236
+  sebastian loayza aguilar       Added:    215  Deleted:    156  Total: 371
+  ProSebast                      Added:      6  Deleted:     98  Total: 104
+
+Archivo: templatesglobal/bars/topbar.html
+----------------------------------------------------
+TOTAL archivo ? Added: 286 | Deleted: 327 | Modificado total: 613
+Por autor:
+  leandro favio                  Added:     16  Deleted:    135  Total: 151
+  sebastian loayza aguilar       Added:    256  Deleted:     60  Total: 316
+  ProSebast                      Added:     14  Deleted:    132  Total: 146
+
+Archivo: templatesglobal/base.html
+----------------------------------------------------
+TOTAL archivo ? Added: 188 | Deleted: 152 | Modificado total: 340
+Por autor:
+  ProSebast                      Added:     10  Deleted:    111  Total: 121
+  sebastian loayza aguilar       Added:    178  Deleted:     41  Total: 219
+

@@ -1,0 +1,206 @@
+# ====================================
+# GENERADOR DE REPORTES GIT – COMPLETO
+# ====================================
+# 1) Totales por autor (HTML + CSS + PY)
+# 1.A) Totales por extensión por autor
+# 2) Archivos y autores involucrados
+# 3) Por archivo: líneas modificadas + desglose por autor
+# Salida final: resultados_completos.txt
+# ====================================
+
+$extensions = @(".html", ".css", ".py")
+$outFile = "resultados_completos.txt"
+
+# Reiniciar archivo de salida
+"" | Set-Content $outFile
+
+# -------------------------
+# 1) Totales por autor
+# -------------------------
+
+Add-Content $outFile "====================="
+Add-Content $outFile "1) TOTALES POR AUTOR (HTML + CSS + PY)"
+Add-Content $outFile "====================="
+
+# -------------------------
+# 1.A) NUEVO: Totales por extensión
+# -------------------------
+
+Add-Content $outFile ""
+Add-Content $outFile "---- TOTALES POR EXTENSIÓN ----"
+
+$extStats = @{
+    ".html" = @{}
+    ".css"  = @{}
+    ".py"   = @{}
+}
+
+foreach ($ext in $extensions) {
+
+    $log = git log --pretty="AUTHOR:%an" --numstat -- "*$ext"
+    $curAuthor = ""
+
+    foreach ($line in $log) {
+        if ($line -like "AUTHOR:*") {
+            $curAuthor = $line.Substring(7).Trim()
+            if (-not $extStats[$ext].ContainsKey($curAuthor)) {
+                $extStats[$ext][$curAuthor] = 0
+            }
+        }
+        elseif ($line -match "^\d+\s+\d+") {
+            $parts = $line -split "\s+"
+            $add = [int]$parts[0]
+            $del = [int]$parts[1]
+
+            $extStats[$ext][$curAuthor] += ($add + $del)
+        }
+    }
+
+    # Imprimir sección
+    Add-Content $outFile ""
+    Add-Content $outFile ($ext.ToUpper().Replace(".", ""))
+    foreach ($author in $extStats[$ext].Keys | Sort-Object) {
+        Add-Content $outFile ("  {0,-30} {1}" -f $author, $extStats[$ext][$author])
+    }
+}
+
+Add-Content $outFile ""
+Add-Content $outFile "---- FIN TOTALES POR EXTENSIÓN ----"
+Add-Content $outFile ""
+
+# -------------------------
+# Totales globales por autor
+# -------------------------
+
+$authorTotals = @{}
+
+$logLines = git log --pretty="AUTHOR:%an" --numstat -- '*.html' '*.css' '*.py'
+
+$currentAuthor = ""
+foreach ($line in $logLines) {
+    if ($line -like "AUTHOR:*") {
+        $currentAuthor = $line.Substring(7).Trim()
+        if (-not $authorTotals.ContainsKey($currentAuthor)) {
+            $authorTotals[$currentAuthor] = @{Added=0; Deleted=0}
+        }
+    }
+    elseif ($line -match "^\d+\s+\d+") {
+        $parts = $line -split "\s+"
+        $add = [int]$parts[0]
+        $del = [int]$parts[1]
+        $authorTotals[$currentAuthor].Added += $add
+        $authorTotals[$currentAuthor].Deleted += $del
+    }
+}
+
+Add-Content $outFile ""
+Add-Content $outFile ("{0,-30} {1,8} {2,8}" -f "Author", "Added", "Deleted")
+Add-Content $outFile ("{0,-30} {1,8} {2,8}" -f "------------------------------", "-----", "------")
+
+$authorTotals.GetEnumerator() |
+    Where-Object { $_.Key -ne "" } |
+    Sort-Object { $_.Value.Added } -Descending |
+    ForEach-Object {
+        Add-Content $outFile ("{0,-30} {1,8} {2,8}" -f $_.Key, $_.Value.Added, $_.Value.Deleted)
+    }
+
+
+# -------------------------
+# 2) ARCHIVOS y AUTORES
+# -------------------------
+
+Add-Content $outFile ""
+Add-Content $outFile "====================="
+Add-Content $outFile "2) ARCHIVOS Y AUTORES INVOLUCRADOS"
+Add-Content $outFile "====================="
+
+$allFiles = git ls-files | Where-Object {
+    $extensions -contains ([System.IO.Path]::GetExtension($_))
+} | Sort-Object
+
+$authorFiles = @{}
+
+
+foreach ($f in $allFiles) {
+    $authors = git log --pretty="%an" -- $f | Sort-Object | Get-Unique
+    $authorsJoined = if ($authors) { $authors -join ", " } else { "(sin historial)" }
+
+    Add-Content $outFile "Archivo: $f"
+    Add-Content $outFile "  Autores: $authorsJoined"
+    Add-Content $outFile ""
+
+    foreach ($a in $authors) {
+        if (-not $authorFiles.ContainsKey($a)) { $authorFiles[$a] = @() }
+        $authorFiles[$a] += $f
+    }
+}
+
+Add-Content $outFile ""
+Add-Content $outFile "---------------------"
+Add-Content $outFile "POR AUTOR → ARCHIVOS TOCADOS"
+Add-Content $outFile "---------------------"
+
+foreach ($author in $authorFiles.Keys | Sort-Object) {
+    Add-Content $outFile "Autor: $author"
+    foreach ($f in $authorFiles[$author]) {
+        Add-Content $outFile "  - $f"
+    }
+    Add-Content $outFile ""
+}
+
+
+# -------------------------
+# 3) DETALLE POR ARCHIVO
+# -------------------------
+
+Add-Content $outFile ""
+Add-Content $outFile "====================="
+Add-Content $outFile "3) DETALLE POR ARCHIVO (líneas modificadas total y por autor)"
+Add-Content $outFile "====================="
+
+foreach ($f in $allFiles) {
+
+    Add-Content $outFile ("Archivo: {0}" -f $f)
+    Add-Content $outFile "----------------------------------------------------"
+
+    $log = git log --pretty="AUTHOR:%an" --numstat -- $f
+
+    $curAuthor = ""
+    $perAuthorStats = @{}
+    $totalAdded = 0
+    $totalDeleted = 0
+
+    foreach ($line in $log) {
+        if ($line -like "AUTHOR:*") {
+            $curAuthor = $line.Substring(7).Trim()
+            if (-not $perAuthorStats.ContainsKey($curAuthor)) {
+                $perAuthorStats[$curAuthor] = @{Added=0; Deleted=0}
+            }
+        }
+        elseif ($line -match "^\d+\s+\d+") {
+            $parts = $line -split "\s+"
+            $add = [int]$parts[0]
+            $del = [int]$parts[1]
+
+            $perAuthorStats[$curAuthor].Added += $add
+            $perAuthorStats[$curAuthor].Deleted += $del
+            $totalAdded += $add
+            $totalDeleted += $del
+        }
+    }
+
+    Add-Content $outFile ("TOTAL archivo → Added: {0} | Deleted: {1} | Modificado total: {2}" -f $totalAdded, $totalDeleted, ($totalAdded + $totalDeleted))
+    Add-Content $outFile "Por autor:"
+
+    foreach ($a in $perAuthorStats.Keys) {
+        $added = $perAuthorStats[$a].Added
+        $deleted = $perAuthorStats[$a].Deleted
+        $total = $added + $deleted
+
+        Add-Content $outFile ("  {0,-30} Added: {1,6}  Deleted: {2,6}  Total: {3}" -f $a, $added, $deleted, $total)
+    }
+
+    Add-Content $outFile ""
+}
+
+Write-Host "✔ Reporte generado: resultados_completos.txt"
