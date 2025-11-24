@@ -5,32 +5,40 @@
 
 <div class="container py-3 text-center">
 
-  <!-- Cámara -->
-  <div class="card bg-dark border-0 shadow mx-auto mb-3" style="width: 460px; border-radius: 1rem;">
-    <div class="card-body p-0 position-relative">
+  <!-- ⭐ Envolvemos la cámara en row + col responsivo -->
+  <div class="row justify-content-center">
+    <div class="col-12 col-sm-10 col-md-8 col-lg-4">
 
-      <!-- Video -->
-      <div class="bg-black position-relative overflow-hidden rounded-top" style="height: 320px;">
-        <video id="videoCamara" autoplay playsinline class="w-100 h-100" style="object-fit: cover;"></video>
+      <!-- Cámara -->
+      <div class="card bg-dark border-0 shadow mb-3" style="border-radius: 1rem;">
+        <div class="card-body p-0 position-relative">
 
-        <!-- Cuadro azul -->
-        <div id="overlay-deteccion" 
-             class="position-absolute top-50 start-50 translate-middle border border-3 rounded" 
-             style="width: 170px; height: 170px; border-image: linear-gradient(135deg, #48c6ef, #6f86d6) 1; box-shadow: 0 0 20px rgba(111,134,214,0.6);">
+          <!-- Video -->
+          <div class="bg-black position-relative overflow-hidden rounded-top" style="height: 320px;">
+            <video id="videoCamara" autoplay playsinline class="w-100 h-100" style="object-fit: cover;"></video>
+
+            <!-- Cuadro azul -->
+            <div id="overlay-deteccion"
+                class="position-absolute top-50 start-50 translate-middle border border-3 rounded"
+                style="width: 170px; height: 170px; border-image: linear-gradient(135deg, #48c6ef, #6f86d6) 1; box-shadow: 0 0 20px rgba(111,134,214,0.6);">
+            </div>
+          </div>
+
+          <!-- Indicador emoción -->
+          <div id="emocionEnCamara"
+              class="position-absolute top-0 start-50 translate-middle-x mt-3 px-3 py-1 rounded-pill fw-semibold text-white shadow"
+              style="background: linear-gradient(90deg, #48c6ef, #6f86d6); font-size: 0.9rem;">
+            Sin reconocer — 0%
+          </div>
+
+          <!-- Estado -->
+          <div id="estadoCamara" class="bg-secondary text-white py-1 fw-bold rounded-bottom small">
+            Apagado
+          </div>
+
         </div>
       </div>
 
-      <!-- Indicador emoción -->
-      <div id="emocionEnCamara"
-           class="position-absolute top-0 start-50 translate-middle-x mt-3 px-3 py-1 rounded-pill fw-semibold text-white shadow"
-           style="background: linear-gradient(90deg, #48c6ef, #6f86d6); font-size: 0.9rem;">
-        Sin reconocer — 0%
-      </div>
-
-      <!-- Estado -->
-      <div id="estadoCamara" class="bg-secondary text-white py-1 fw-bold rounded-bottom small">
-        Apagado
-      </div>
     </div>
   </div>
 
@@ -50,6 +58,7 @@
       </h5>
 
       <div class="d-flex justify-content-center flex-wrap gap-3">
+
         <div class="p-3 bg-light rounded shadow-sm d-flex flex-column align-items-center" style="min-width: 130px;">
           <span class="fw-semibold text-warning">😊 Alegría</span>
           <span id="alegria" class="fw-bold text-secondary">0 seg</span>
@@ -79,6 +88,7 @@
           <span class="fw-semibold text-muted">❔ Sin reconocer</span>
           <span id="sinreconocer" class="fw-bold text-secondary">0 seg</span>
         </div>
+
       </div>
     </div>
   </div>
@@ -91,7 +101,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const emocionEnCamara = document.getElementById("emocionEnCamara");
   const estadoCamara = document.getElementById("estadoCamara");
 
-  const DURACION_TOTAL = 10; // segundos
+  const DURACION_TOTAL = 10;
   const emociones = { alegria: 0, enojo: 0, miedo: 0, neutral: 0, tristeza: 0, sinreconocer: 0 };
   const probabilidades = { alegria: [], enojo: [], miedo: [], neutral: [], tristeza: [], sinreconocer: [] };
 
@@ -101,9 +111,8 @@ document.addEventListener("DOMContentLoaded", () => {
   let tiempoTranscurrido = 0;
 
   const API_URL = "https://negational-kerry-untoward.ngrok-free.dev/predict_emotion/";
-  const SESION_ID = "{{ sesion_id }}"; // pasado desde la vista
+  const SESION_ID = "{{ sesion_id }}";
 
-  // Función para obtener CSRF
   function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== "") {
@@ -125,9 +134,11 @@ document.addEventListener("DOMContentLoaded", () => {
         stream = await navigator.mediaDevices.getUserMedia({ video: true });
         videoCamara.srcObject = stream;
         camaraEncendida = true;
+
         startBtn.textContent = "Apagar Cámara";
         startBtn.classList.replace("btn-primary", "btn-danger");
         estadoCamara.textContent = "Cámara activa";
+
         tiempoTranscurrido = 0;
 
         intervaloEnvio = setInterval(() => {
@@ -155,8 +166,10 @@ document.addEventListener("DOMContentLoaded", () => {
     camaraEncendida = false;
     clearInterval(intervaloEnvio);
     intervaloEnvio = null;
+
     startBtn.textContent = "Iniciar Cámara";
     startBtn.classList.replace("btn-danger", "btn-primary");
+
     estadoCamara.textContent = "Apagado";
     emocionEnCamara.textContent = "Sin reconocer — 0%";
   }
@@ -165,11 +178,13 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!camaraEncendida || !videoCamara.videoWidth) return;
 
     const canvas = document.createElement("canvas");
-    canvas.width = 224; canvas.height = 224;
+    canvas.width = 224;
+    canvas.height = 224;
     const ctx = canvas.getContext("2d");
 
     const sx = (videoCamara.videoWidth - 224) / 2;
     const sy = (videoCamara.videoHeight - 224) / 2;
+
     ctx.drawImage(videoCamara, sx, sy, 224, 224, 0, 0, 224, 224);
 
     const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg"));
@@ -185,8 +200,8 @@ document.addEventListener("DOMContentLoaded", () => {
         emocionEnCamara.textContent = `${emocion.charAt(0).toUpperCase()+emocion.slice(1)} — ${confianza.toFixed(1)}%`;
 
         if (emocion in emociones) {
-          emociones[emocion] += 1.5;              // acumulamos segundos
-          probabilidades[emocion].push(confianza); // acumulamos % de confianza
+          emociones[emocion] += 1.5;
+          probabilidades[emocion].push(confianza);
           actualizarReporte();
         }
       })
@@ -204,18 +219,15 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function enviarEmocionDominante() {
-    // Determinar la emoción con más tiempo
-    const dominante = Object.keys(emociones).reduce((a,b)=> emociones[a]>emociones[b]?a:b);
-
-    // Calcular promedio de confianza
+    const dominante = Object.keys(emociones).reduce((a, b) => emociones[a] > emociones[b] ? a : b);
     const probs = probabilidades[dominante];
-    const promedio = probs.length ? probs.reduce((sum,p)=>sum+p,0)/probs.length : 0;
+    const promedio = probs.length ? probs.reduce((sum, p) => sum + p, 0) / probs.length : 0;
 
-    const csrftoken = getCookie('csrftoken');
+    const csrftoken = getCookie("csrftoken");
 
     await fetch(`/procesar_emocion_camara/${SESION_ID}/`, {
-      method: 'POST',
-      headers: { 'X-CSRFToken': csrftoken, 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "X-CSRFToken": csrftoken, "Content-Type": "application/json" },
       body: JSON.stringify({ emocion: dominante, porcentaje: promedio })
     });
 
@@ -224,6 +236,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 </script>
-
 
 {% endblock %}
