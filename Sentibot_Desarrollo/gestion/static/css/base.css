@@ -29,3 +29,85 @@
         .contenedor{
             margin-left: 1%;
         }
+.sidebar {
+    margin-top: 1%;
+    margin-left: 2%;
+    margin-bottom: 100%;
+    border-radius: 1.8vh;
+    width: 18.5%;
+    background-color: #ffffff;
+    color: rgb(3, 3, 3);
+    padding: 20px;
+    box-sizing: border-box;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 96vh;
+    z-index: 21;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* Sidebar colapsado */
+.sidebar.collapsed {
+    transform: translateX(-120%);
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Títulos */
+.sidebar h2 {
+    margin-top: 0;
+    margin-bottom: 30px;
+    font-weight: normal;
+    color: #757880;
+}
+
+/* Enlaces */
+.sidebar a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: rgb(1, 1, 1);
+    text-decoration: none;
+    margin-bottom: 15px;
+    padding: 10px 15px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.sidebar a:hover {
+    background-color: #34495e;
+    color: #fff;
+}
+
+/* Íconos */
+.sidebar a img {
+    width: 43px;
+    height: 43px;
+}
+
+/* Título con ícono */
+.titulo-sidebar {
+    display: flex;
+    align-items: center;
+    font-size: 24px;
+    color: #333;
+}
+
+.titulo-sidebar .icono {
+    width: 60px;
+    height: 60px;
+    margin-right: 10px;
+    border-radius: 6px;
+}
+
+/* 📱 ---- MODO TELÉFONO ---- */
+/* Cuando el ancho sea menor a 768px */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100% !important;  /* ahora ocupa TODA la pantalla */
+        margin: 0 !important;    /* se alinea completamente */
+        height: 100vh !important; 
+        border-radius: 0;        /* sin bordes en móvil */
+    }
+}
