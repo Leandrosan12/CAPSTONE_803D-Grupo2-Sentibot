@@ -188,13 +188,23 @@ def registro(request):
             email=email, password=password, first_name=first_name, last_name=last_name, username=email
         )
 
-        if escuela_id:
+        # Asignar escuela
+        if email.lower().endswith('@duoc.cl') or email.lower().endswith('@profesor.duoc.cl'):
             try:
-                escuela = Escuela.objects.get(id=escuela_id)
-                user.escuela = escuela
-                user.save()
+                colaboradores = Escuela.objects.get(nombre='Colaboradores')
+                user.escuela = colaboradores
             except Escuela.DoesNotExist:
+                # Si no existe, no asignar o manejar error
                 pass
+        else:
+            if escuela_id:
+                try:
+                    escuela = Escuela.objects.get(id=escuela_id)
+                    user.escuela = escuela
+                except Escuela.DoesNotExist:
+                    pass
+
+        user.save()
 
         for key in ['codigo_verificacion', 'correo_verificacion', 'codigo_expira']:
             request.session.pop(key, None)
@@ -214,7 +224,11 @@ from .models import Escuela
 @login_required(login_url='login')
 def modulo_profesor(request):
     """Muestra la lista de escuelas en el módulo del profesor."""
-    escuelas = Escuela.objects.all().order_by('nombre')
+    user_email = request.user.email.lower()
+    if user_email.endswith('@duoc.cl') or user_email.endswith('@profesor.duoc.cl'):
+        escuelas = Escuela.objects.filter(nombre='Colaboradores').order_by('nombre')
+    else:
+        escuelas = Escuela.objects.exclude(nombre='Colaboradores').order_by('nombre')
     return render(request, 'modulo_profesor.html', {'escuelas': escuelas})
 
 
@@ -267,7 +281,10 @@ def alumnos(request):
     usuarios = paginator.get_page(page_number)
 
     # Listar escuelas para el modal de añadir usuario
-    escuelas = Escuela.objects.all()
+    if request.user.is_authenticated and (request.user.email.lower().endswith('@duoc.cl') or request.user.email.lower().endswith('@profesor.duoc.cl')):
+        escuelas = Escuela.objects.filter(nombre='Colaboradores')
+    else:
+        escuelas = Escuela.objects.exclude(nombre='Colaboradores')
 
     return render(request, 'modulo/alumnos.html', {
         "usuarios": usuarios,
@@ -1086,7 +1103,10 @@ from django.shortcuts import render
 from .models import Escuela
 
 def escuelas(request):
-    lista = Escuela.objects.all()
+    if request.user.is_authenticated and (request.user.email.lower().endswith('@duoc.cl') or request.user.email.lower().endswith('@profesor.duoc.cl')):
+        lista = Escuela.objects.filter(nombre='Colaboradores')
+    else:
+        lista = Escuela.objects.exclude(nombre='Colaboradores')
     return render(request, "escuelas.html", {"escuelas": lista})
 
 from django.http import HttpResponse
@@ -1253,7 +1273,10 @@ from django.contrib import messages
 
 def editar_alumno(request, alumno_id):
     usuario = get_object_or_404(Usuario, id=alumno_id)
-    escuelas = Escuela.objects.all()
+    if request.user.is_authenticated and (request.user.email.lower().endswith('@duoc.cl') or request.user.email.lower().endswith('@profesor.duoc.cl')):
+        escuelas = Escuela.objects.filter(nombre='Colaboradores')
+    else:
+        escuelas = Escuela.objects.exclude(nombre='Colaboradores')
 
     if request.method == 'POST':
         usuario.first_name = request.POST.get('first_name')
